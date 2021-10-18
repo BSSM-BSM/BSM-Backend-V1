@@ -1,8 +1,3 @@
-const express = require('express')
-const router = express.Router()
-
-router.use(express.json());
-router.use(express.urlencoded({extended:false}));
 
 var result={
     status:2,
@@ -10,8 +5,9 @@ var result={
 var dbResult={
     bool:false,
 }
-router.post('/login', async (req ,res) => {
-    let model = require('../models/login')
+
+let login = async (req, res) =>{
+    let model = require('../../models/login')
     dbResult = await model.login(req.body.member_id, req.body.member_pw)
     if(dbResult.bool){
         req.session.islogin=true
@@ -22,17 +18,30 @@ router.post('/login', async (req ,res) => {
         result={
             status:1,
             returnUrl:'/',
-        };
+        }
     }else{
         result={
             status:4,
-        };
+        }
     }
     res.send(JSON.stringify(result))
-})
-router.post('/islogin', (req ,res) => {
-    let model = require('../models/login')
+}
+let islogin = (req, res) =>{
+    if(req.session.islogin){
+        result={
+            status:1,
+            is_login:true
+        }
+    }else{
+        result={
+            status:1,
+            is_login:false
+        }
+    }
     res.send(model.islogin())
-})
+}
 
-module.exports = router
+module.exports = {
+    login:login,
+    islogin:islogin,
+}

@@ -39,9 +39,7 @@ const login = (member_id, member_pw) => {
         })
     })
 }
-const islogin = () => {
-    return 'false'
-}
 
-module.exports.login = login
-module.exports.islogin = islogin
+module.exports = {
+    login:login,
+}
