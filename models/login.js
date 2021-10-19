@@ -6,30 +6,31 @@ let result={
 };
 
 const login = (member_id, member_pw) => {
-    let loginQuery="SELECT * FROM `members` WHERE `member_id`='"+member_id+"';"
+    let loginQuery="SELECT * FROM `members` WHERE `member_id`='"+member_id+"'"
     return new Promise(resolve => {
         conn.query(loginQuery, (error, results) => {
             if(error) resolve(error)
             if(Object.keys(results).length){
-                if(results[0].member_salt===''){
-                    if(results[0].member_pw===crypto.createHash('sha3-256').update(member_pw).digest('hex')){
+                results=results[0]
+                if(results.member_salt===''){
+                    if(results.member_pw===crypto.createHash('sha3-256').update(member_pw).digest('hex')){
                         result={
                             bool:true,
-                            member_code:results[0].member_code,
-                            member_id:results[0].member_id,
-                            member_nickname:results[0].member_nickname,
-                            member_level:results[0].member_level,
+                            member_code:results.member_code,
+                            member_id:results.member_id,
+                            member_nickname:results.member_nickname,
+                            member_level:results.member_level,
                         };
                         resolve(result)
                     }
                 }else{
-                    if(results[0].member_pw===crypto.createHash('sha3-256').update(results[0].member_salt+member_pw).digest('hex')){
+                    if(results.member_pw===crypto.createHash('sha3-256').update(results.member_salt+member_pw).digest('hex')){
                         result={
                             bool:true,
-                            member_code:results[0].member_code,
-                            member_id:results[0].member_id,
-                            member_nickname:results[0].member_nickname,
-                            member_level:results[0].member_level,
+                            member_code:results.member_code,
+                            member_id:results.member_id,
+                            member_nickname:results.member_nickname,
+                            member_level:results.member_level,
                         };
                         resolve(result)
                     }

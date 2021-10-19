@@ -15,7 +15,6 @@ let login = async (req, res) =>{
         req.session.memberLevel=dbResult.member_level
         result={
             status:1,
-            returnUrl:'/',
         }
     }else{
         result={

@@ -10,7 +10,7 @@ app.use(
         secret:process.env.SESSION_SECRET,
         resave:false,
         saveUninitialized:false,
-        store:new FileStore(),
+        store:new FileStore({logFn: function(){}}),
     })
 );
 
