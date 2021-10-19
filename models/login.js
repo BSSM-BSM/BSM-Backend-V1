@@ -1,12 +1,12 @@
 const conn = require('../db')
 const crypto = require('crypto')
 
-var result={
+let result={
     bool:false,
 };
 
 const login = (member_id, member_pw) => {
-    loginQuery="SELECT * FROM `members` WHERE `member_id`='"+member_id+"';"
+    let loginQuery="SELECT * FROM `members` WHERE `member_id`='"+member_id+"';"
     return new Promise(resolve => {
         conn.query(loginQuery, (error, results) => {
             if(error) resolve(error)

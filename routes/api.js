@@ -4,14 +4,12 @@ const router = express.Router()
 router.use(express.json())
 router.use(express.urlencoded({extended:false}))
 
-const controller = require('../controllers/api/login')
+const loginController = require('../controllers/api/login')
+const boardController = require('../controllers/api/board')
 
-router.post('/login', controller.login)
+router.post('/login', loginController.login)
 
-router.post('/islogin', controller.islogin)
-// router.post('/board/:action', (req ,res) => {
-//     let model = require('../models/board')
-//     res.send(model.islogin())
-// })
+router.post('/islogin', loginController.islogin)
+router.post('/board', boardController.view)
 
 module.exports = router
