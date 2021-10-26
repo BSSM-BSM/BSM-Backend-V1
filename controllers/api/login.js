@@ -4,7 +4,7 @@ let result={
 let dbResult={
     bool:false,
 }
-let login = async (req, res) =>{
+const login = async (req, res) =>{
     let model = require('../../models/login')
     dbResult = await model.login(req.body.member_id, req.body.member_pw)
     if(dbResult.bool){
@@ -23,7 +23,7 @@ let login = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
-let islogin = (req, res) =>{
+const islogin = (req, res) =>{
     if(req.session.islogin){
         result={
             status:1,

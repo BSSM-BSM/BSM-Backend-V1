@@ -4,10 +4,10 @@ let result={
 let dbResult={
     bool:false,
 }
-let view = async (req, res) =>{
+const view = async (req, res) =>{
     let model = require('../../models/board')
     let boardType;
-    switch(req.body.boardType){
+    switch(req.params.boardType){
         case 'board':
             boardType='board'
             break;
@@ -15,7 +15,7 @@ let view = async (req, res) =>{
             boardType='anonymous'
             break
     }
-    dbResult = await model.view(req.body.boardType)
+    dbResult = await model.view(boardType)
     result={
         status:1,
         arrBoard:dbResult,

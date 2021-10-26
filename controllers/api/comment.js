@@ -5,22 +5,22 @@ let dbResult={
     bool:false,
 }
 const view = async (req, res) =>{
-    let model = require('../../models/post')
-    let boardType;
+    let model = require('../../models/comment')
+    let commentBoardType;
     switch(req.params.boardType){
         case 'board':
-            boardType='board'
+            commentBoardType='board_comment'
             break;
         case 'anonymous':
-            boardType='anonymous'
+            commentBoardType='anonymous_comment'
             break
     }
-    dbResult = await model.view(boardType, req.params.postNo)
+    dbResult = await model.view(commentBoardType, req.params.postNo)
     result={
         status:1,
-        arrBoard:dbResult,
+        arrComment:dbResult,
     }
-    res.send(JSON.stringify(dbResult))
+    res.send(JSON.stringify(result))
 }
 const write = (req, res) =>{
     res.send()
