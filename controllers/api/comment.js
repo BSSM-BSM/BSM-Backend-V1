@@ -41,8 +41,24 @@ const write = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
-const del = (req, res) =>{
-    res.send()
+const del = async (req, res) =>{
+    let model = require('../../models/comment')
+    let boardType, commentBoardType;
+    switch(req.params.boardType){
+        case 'board':
+            boardType='board'
+            commentBoardType='board_comment'
+            break;
+        case 'anonymous':
+            boardType='anonymous'
+            commentBoardType='anonymous_comment'
+            break
+    }
+    dbResult = await model.del(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.body.commentIndex)
+    result={
+        status:dbResult
+    }
+    res.send(JSON.stringify(result))
 }
 
 module.exports = {
