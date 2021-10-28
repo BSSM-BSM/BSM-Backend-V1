@@ -4,9 +4,9 @@ let result=new Array()
 
 const view = (commentBoardType, postNo) => {
     result=new Array()
-    let viewCommentQuery="SELECT * FROM `"+commentBoardType+"` WHERE `post_no`="+postNo+" AND `comment_deleted`=0 ORDER BY `order`;"
+    let commentViewQuery="SELECT * FROM `"+commentBoardType+"` WHERE `post_no`="+postNo+" AND `comment_deleted`=0 ORDER BY `order`;"
     return new Promise(resolve => {
-        conn.query(viewCommentQuery, (error, results) => {
+        conn.query(commentViewQuery, (error, results) => {
             if(error) resolve(error)
             for(let i=0;i<Object.keys(results).length;i++){
                 result[i]={

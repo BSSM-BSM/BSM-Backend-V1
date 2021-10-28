@@ -8,6 +8,7 @@ const loginController = require('../controllers/api/login')
 const boardController = require('../controllers/api/board')
 const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
+const likeController = require('../controllers/api/like')
 
 router.post('/login', loginController.login)
 router.post('/islogin', loginController.islogin)
@@ -21,5 +22,7 @@ router.delete('/post/:boardType/:postNo', postController.del)
 router.get('/comment/:boardType/:postNo', commentController.view)
 router.post('/comment/:boardType/:postNo', commentController.write)
 router.delete('/comment/:boardType/:postNo', commentController.del)
+
+router.post('/like/:boardType/:postNo', likeController.like)
 
 module.exports = router
