@@ -24,8 +24,17 @@ const view = (boardType, postNo) => {
         })
     })
 }
-const write = (boardType, postNo) => {
+const write = (boardType, postNo,member_code,nickname,post_title,post_content) =&amp;gt; {
     result=new Array()
+	let postQuery="INSERT INTO `"+boarType+"`(member_code,member_nickname,post_title,post_content,post_data) values("+member_code+",'"+nickname+"','"+post_title+"','"+post_content+"',now())");
+	return new Promise(reslove =&amp;gt;{
+		conn.query(postQuery, (error) => {
+			if(error) resolve(error)
+			result={
+				status:1
+			}
+			reslove(result)
+		}
 }
 const del = (boardType, postNo) => {
     result=new Array()
