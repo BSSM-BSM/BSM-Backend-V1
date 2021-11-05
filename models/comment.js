@@ -1,14 +1,21 @@
 const conn = require('../db')
+const getMembersLevel = require('./membersLevel')
 
 let result=new Array()
 
-const view = (commentBoardType, postNo) => {
+const view = async (commentBoardType, postNo) => {
+    let membersLevel = await getMembersLevel.get()
     result=new Array()
     let commentViewQuery="SELECT * FROM `"+commentBoardType+"` WHERE `post_no`="+postNo+" AND `comment_deleted`=0 ORDER BY `order`;"
     return new Promise(resolve => {
         conn.query(commentViewQuery, (error, results) => {
             if(error) resolve(error)
             for(let i=0;i<Object.keys(results).length;i++){
+                if(membersLevel[results[i].member_code]>0){
+                    results[i].member_level=membersLevel[results[i].member_code]
+                }else{
+                    results[i].member_level=0
+                }
                 result[i]={
                     idx:results[i].comment_index,
                     memberCode:results[i].member_code,

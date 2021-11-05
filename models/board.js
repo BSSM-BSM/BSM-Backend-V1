@@ -1,14 +1,22 @@
 const conn = require('../db')
+const getMembersLevel = require('./membersLevel')
+
 
 let result=new Array()
 
-const view = (boardType) => {
+const view = async (boardType) => {
+    let membersLevel = await getMembersLevel.get()
     result=new Array()
     let boardQuery="SELECT * FROM `"+boardType+"` WHERE `post_deleted`=0 ORDER BY `post_no` DESC;"
     return new Promise(resolve => {
         conn.query(boardQuery, (error, results) => {
             if(error) resolve(error)
             for(let i=0;i<Object.keys(results).length;i++){
+                if(membersLevel[results[i].member_code]>0){
+                    results[i].member_level=membersLevel[results[i].member_code]
+                }else{
+                    results[i].member_level=0
+                }
                 result[i]={
                     boardType:boardType,
                     postNo:results[i].post_no,
@@ -16,6 +24,7 @@ const view = (boardType) => {
                     postComments:results[i].post_comments,
                     memberCode:results[i].member_code,
                     memberNickname:results[i].member_nickname,
+                    memberLevel:results[i].member_level,
                     postDate:results[i].post_date,
                     postHit:results[i].post_hit,
                     postLike:results[i].like,
