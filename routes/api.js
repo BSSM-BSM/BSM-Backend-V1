@@ -16,6 +16,7 @@ router.post('/islogin', loginController.islogin)
 router.get('/board/:boardType', boardController.view)
 
 router.get('/post/:boardType/:postNo', postController.view)
+router.post('/post/:boardType', postController.write)
 router.post('/post/:boardType/:postNo', postController.write)
 router.delete('/post/:boardType/:postNo', postController.del)
 

@@ -27,15 +27,15 @@ const view = (boardType, postNo) => {
 }
 const write = (boardType, memberCode, memberNickname, postTitle, postContent) => {
     result=new Array()
-	const postQuery="INSERT INTO ?? (member_code, member_nickname, post_title, post_content, post_data) values(?, ?, ?, ?, now())"
+	const postQuery="INSERT INTO ?? (member_code, member_nickname, post_title, post_content, post_date) values(?, ?, ?, ?, now())"
     const params=[boardType, memberCode, memberNickname, postTitle, postContent]
-	return new Promise(reslove => {
+	return new Promise(resolve => {
 		conn.query(postQuery, params, (error) => {
 			if(error) resolve(error)
 			result={
 				status:1
 			}
-			reslove(result)
+			resolve(result)
 		})
     })
 }
