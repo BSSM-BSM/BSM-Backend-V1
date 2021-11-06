@@ -6,9 +6,10 @@ let result=new Array()
 const view = async (commentBoardType, postNo) => {
     let membersLevel = await getMembersLevel.get()
     result=new Array()
-    let commentViewQuery="SELECT * FROM `"+commentBoardType+"` WHERE `post_no`="+postNo+" AND `comment_deleted`=0 ORDER BY `order`;"
+    const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `order`"
+    const params=[commentBoardType, postNo]
     return new Promise(resolve => {
-        conn.query(commentViewQuery, (error, results) => {
+        conn.query(commentViewQuery, params, (error, results) => {
             if(error) resolve(error)
             for(let i=0;i<Object.keys(results).length;i++){
                 if(membersLevel[results[i].member_code]>0){
@@ -31,20 +32,23 @@ const view = async (commentBoardType, postNo) => {
 }
 const write = (boardType, commentBoardType, postNo, memberCode, memberNickname, comment) => {
     result=new Array()
-    let commentIndexQuery="SELECT `order` from `"+commentBoardType+"` where `depth`=0 and `post_no`="+postNo+" order by `comment_index` desc limit 1;"
+    const commentIndexQuery="SELECT `order` from ?? where `depth`=0 and `post_no`=? order by `comment_index` desc limit 1"
+    const params=[commentBoardType, postNo]
     return new Promise(resolve => {
-        conn.query(commentIndexQuery, (error, order) => {
+        conn.query(commentIndexQuery, params, (error, order) => {
             if(error) resolve(error)
             if(order[0].order==null){
                 order = 1;
             }else{
                 order = order[0].order+1;
             }
-            let commentWriteQuery="INSERT INTO `"+commentBoardType+"` (`post_no`, `depth`, `order`, `parent_no`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES ("+postNo+", 0, "+order+", NULL, "+memberCode+", '"+memberNickname+"', '"+comment+"', now());"
-            conn.query(commentWriteQuery, (error) => {
+            const commentWriteQuery="INSERT INTO ?? (`post_no`, `depth`, `order`, `parent_no`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES (?, 0, ?, NULL, ?, ?, ?, now());"
+            const params=[commentBoardType, postNo, order, memberCode, memberNickname, comment]
+            conn.query(commentWriteQuery, params, (error) => {
                 if(error) resolve(error)
-                let commentUpdateQuery = "UPDATE `"+boardType+"` set `post_comments`=`post_comments`+1 where `post_no`="+postNo
-                conn.query(commentUpdateQuery, (error) => {
+                const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`+1 where `post_no`=?"
+                const params=[boardType, postNo]
+                conn.query(commentUpdateQuery, params, (error) => {
                     if(error) resolve(error)
                     resolve(1)
                 })
@@ -54,16 +58,19 @@ const write = (boardType, commentBoardType, postNo, memberCode, memberNickname, 
 }
 const del = (boardType, commentBoardType, postNo, memberCode, commentIndex) => {
     result=new Array()
-    let commentCheckQuery="SELECT `member_code` FROM `"+commentBoardType+"` WHERE `comment_index`= "+commentIndex+" AND `post_no`="+postNo
+    const commentCheckQuery="SELECT `member_code` FROM ?? WHERE `comment_index`= ? AND `post_no`=?"
+    const params=[commentBoardType, commentIndex, postNo]
     return new Promise(resolve => {
-        conn.query(commentCheckQuery, (error, checkMemberCode) => {
+        conn.query(commentCheckQuery, params, (error, checkMemberCode) => {
             if(error) resolve(error)
             if(checkMemberCode[0].member_code==memberCode){
-                let commentDeleteQuery="UPDATE `"+commentBoardType+"` SET `comment_deleted` = 1 WHERE `comment_index`= "+commentIndex+" AND `post_no`="+postNo
-                conn.query(commentDeleteQuery, (error) => {
+                const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
+                const params=[commentBoardType, commentIndex, postNo]
+                conn.query(commentDeleteQuery, params, (error) => {
                     if(error) resolve(error)
-                    let commentUpdateQuery = "UPDATE `"+boardType+"` set `post_comments`=`post_comments`-1 where `post_no`="+postNo
-                    conn.query(commentUpdateQuery, (error) => {
+                    const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`-1 where `post_no`=?"
+                    const params=[boardType, postNo]
+                    conn.query(commentUpdateQuery, params, (error) => {
                         if(error) resolve(error)
                         resolve(1)
                     })

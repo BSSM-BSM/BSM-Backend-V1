@@ -6,9 +6,10 @@ let result={
 };
 
 const login = (member_id, member_pw) => {
-    let loginQuery="SELECT * FROM `members` WHERE `member_id`='"+member_id+"'"
+    const loginQuery="SELECT * FROM `members` WHERE `member_id`=?"
+    const params=[member_id]
     return new Promise(resolve => {
-        conn.query(loginQuery, (error, results) => {
+        conn.query(loginQuery, params, (error, results) => {
             if(error) resolve(error)
             if(Object.keys(results).length){
                 results=results[0]

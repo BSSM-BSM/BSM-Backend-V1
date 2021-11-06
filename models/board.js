@@ -7,9 +7,10 @@ let result=new Array()
 const view = async (boardType) => {
     let membersLevel = await getMembersLevel.get()
     result=new Array()
-    let boardQuery="SELECT * FROM `"+boardType+"` WHERE `post_deleted`=0 ORDER BY `post_no` DESC;"
+    const boardQuery="SELECT * FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC"
+    const params=[boardType]
     return new Promise(resolve => {
-        conn.query(boardQuery, (error, results) => {
+        conn.query(boardQuery, params, (error, results) => {
             if(error) resolve(error)
             for(let i=0;i<Object.keys(results).length;i++){
                 if(membersLevel[results[i].member_code]>0){
