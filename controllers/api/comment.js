@@ -1,6 +1,4 @@
-let result={
-    status:2,
-}
+let result
 let dbResult={
     bool:false,
 }
@@ -18,6 +16,7 @@ const view = async (req, res) =>{
     dbResult = await model.view(commentBoardType, req.params.postNo)
     result={
         status:1,
+        subStatus:0,
         arrComment:dbResult,
     }
     res.send(JSON.stringify(result))
@@ -35,10 +34,7 @@ const write = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break
     }
-    dbResult = await model.write(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.session.memberNickname, req.body.comment)
-    result={
-        status:dbResult
-    }
+    result = await model.write(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.session.memberNickname, req.body.comment)
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
@@ -54,10 +50,7 @@ const del = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break
     }
-    dbResult = await model.del(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.body.commentIndex)
-    result={
-        status:dbResult
-    }
+    result = await model.del(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.body.commentIndex)
     res.send(JSON.stringify(result))
 }
 

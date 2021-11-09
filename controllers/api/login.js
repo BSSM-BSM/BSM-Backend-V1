@@ -15,10 +15,12 @@ const login = async (req, res) =>{
         req.session.memberLevel=dbResult.member_level
         result={
             status:1,
+            subStatus:0
         }
     }else{
         result={
-            status:4,
+            status:5,
+            subStatus:0
         }
     }
     res.send(JSON.stringify(result))
@@ -27,11 +29,13 @@ const islogin = (req, res) =>{
     if(req.session.islogin){
         result={
             status:1,
+            subStatus:0,
             is_login:true
         }
     }else{
         result={
             status:1,
+            subStatus:0,
             is_login:false
         }
     }

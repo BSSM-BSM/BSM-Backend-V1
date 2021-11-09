@@ -1,9 +1,4 @@
-let result={
-    status:2,
-}
-let dbResult={
-    bool:false,
-}
+let result
 const like = async (req, res) =>{
     let model = require('../../models/like')
     let boardType, likeBoardType;
@@ -17,8 +12,7 @@ const like = async (req, res) =>{
             likeBoardType='anonymous_like'
             break
     }
-    dbResult = await model.like(boardType, likeBoardType, req.params.postNo, req.session.memberCode, req.body.like)
-    result=dbResult
+    result = await model.like(boardType, likeBoardType, req.params.postNo, req.session.memberCode, req.body.like)
     res.send(JSON.stringify(result))
 }
 

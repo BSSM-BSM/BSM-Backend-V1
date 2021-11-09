@@ -10,7 +10,7 @@ const view = async (commentBoardType, postNo) => {
     const params=[commentBoardType, postNo]
     return new Promise(resolve => {
         conn.query(commentViewQuery, params, (error, results) => {
-            if(error) resolve(error)
+            if(error) resolve({status:2,subStatus:0})
             for(let i=0;i<Object.keys(results).length;i++){
                 if(membersLevel[results[i].member_code]>0){
                     results[i].member_level=membersLevel[results[i].member_code]
@@ -36,8 +36,8 @@ const write = (boardType, commentBoardType, postNo, memberCode, memberNickname, 
     const params=[commentBoardType, postNo]
     return new Promise(resolve => {
         conn.query(commentIndexQuery, params, (error, order) => {
-            if(error) resolve(error)
-            if(order[0].order==null){
+            if(error) resolve({status:2,subStatus:0})
+            if(order[0]==null){
                 order = 1;
             }else{
                 order = order[0].order+1;
@@ -45,12 +45,12 @@ const write = (boardType, commentBoardType, postNo, memberCode, memberNickname, 
             const commentWriteQuery="INSERT INTO ?? (`post_no`, `depth`, `order`, `parent_no`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES (?, 0, ?, NULL, ?, ?, ?, now());"
             const params=[commentBoardType, postNo, order, memberCode, memberNickname, comment]
             conn.query(commentWriteQuery, params, (error) => {
-                if(error) resolve(error)
+                if(error) resolve({status:2,subStatus:0})
                 const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`+1 where `post_no`=?"
                 const params=[boardType, postNo]
                 conn.query(commentUpdateQuery, params, (error) => {
-                    if(error) resolve(error)
-                    resolve(1)
+                    if(error) resolve({status:2,subStatus:0})
+                    resolve({status:1,subStatus:0})
                 })
             })
         })
@@ -62,21 +62,21 @@ const del = (boardType, commentBoardType, postNo, memberCode, commentIndex) => {
     const params=[commentBoardType, commentIndex, postNo]
     return new Promise(resolve => {
         conn.query(commentCheckQuery, params, (error, checkMemberCode) => {
-            if(error) resolve(error)
+            if(error) resolve({status:2,subStatus:0})
             if(checkMemberCode[0].member_code==memberCode){
                 const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
                 const params=[commentBoardType, commentIndex, postNo]
                 conn.query(commentDeleteQuery, params, (error) => {
-                    if(error) resolve(error)
+                    if(error) resolve({status:2,subStatus:0})
                     const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`-1 where `post_no`=?"
                     const params=[boardType, postNo]
                     conn.query(commentUpdateQuery, params, (error) => {
-                        if(error) resolve(error)
-                        resolve(1)
+                        if(error) resolve({status:2,subStatus:0})
+                        resolve({status:1,subStatus:0})
                     })
                 })
             }else{
-                resolve(20)
+                resolve({status:3,subStatus:8})
             }
         })
     })

@@ -29,8 +29,19 @@ const write = async (req, res) =>{
     result = await model.write(boardType, req.session.memberCode, req.session.memberNickname, req.body.postTitle, req.body.postContent)
     res.send(JSON.stringify(result))
 }
-const del = (req, res) =>{
-    res.send()
+const del = async (req, res) =>{
+    let model = require('../../models/post')
+    let boardType;
+    switch(req.params.boardType){
+        case 'board':
+            boardType='board'
+            break;
+        case 'anonymous':
+            boardType='anonymous'
+            break
+    }
+    result = await model.del(boardType, req.params.postNo, req.session.memberCode)
+    res.send(JSON.stringify(result))
 }
 
 module.exports = {
