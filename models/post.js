@@ -26,7 +26,7 @@ const view = (boardType, postNo) => {
         })
     })
 }
-const write = (boardType, memberCode, memberNickname, postTitle, postContent) => {
+const write = (memberCode, memberNickname, boardType, postTitle, postContent) => {
     result=new Array()
 	const postQuery="INSERT INTO ?? (member_code, member_nickname, post_title, post_content, post_date) values(?, ?, ?, ?, now())"
     const params=[boardType, memberCode, memberNickname, postTitle, postContent]
@@ -37,7 +37,27 @@ const write = (boardType, memberCode, memberNickname, postTitle, postContent) =>
 		})
     })
 }
-const del = (boardType, postNo, memberCode) => {
+const update = (memberCode, boardType, postNo, postTitle, postContent) => {
+    result=new Array()
+    const postCheckQuery="SELECT `member_code` FROM ?? WHERE `post_no`=?"
+    const params=[boardType, postNo]
+    return new Promise(resolve => {
+        conn.query(postCheckQuery, params, (error, checkMemberCode) => {
+            if(error) resolve({status:2,subStatus:0})
+            if(checkMemberCode[0].member_code==memberCode){
+                const postUpdateQuery="UPDATE ?? SET `post_title`=?, `post_content`=? WHERE `post_no`=?"
+                const params=[boardType, postTitle, postContent, postNo]
+                conn.query(postUpdateQuery, params, (error) => {
+                    if(error) resolve({status:2,subStatus:0})
+                    resolve({status:1,subStatus:0})
+                })
+            }else{
+                resolve({status:3,subStatus:8})
+            }
+        })
+    })
+}
+const del = (memberCode, boardType, postNo) => {
     result=new Array()
     const postCheckQuery="SELECT `member_code` FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
@@ -61,5 +81,6 @@ const del = (boardType, postNo, memberCode) => {
 module.exports = {
     view:view,
     write:write,
+    update,update,
     del:del,
 }

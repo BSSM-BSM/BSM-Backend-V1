@@ -17,7 +17,7 @@ router.get('/board/:boardType', boardController.view)
 
 router.get('/post/:boardType/:postNo', postController.view)
 router.post('/post/:boardType', postController.write)
-router.post('/post/:boardType/:postNo', postController.write)
+router.patch('/post/:boardType/:postNo', postController.update)
 router.delete('/post/:boardType/:postNo', postController.del)
 
 router.get('/comment/:boardType/:postNo', commentController.view)
