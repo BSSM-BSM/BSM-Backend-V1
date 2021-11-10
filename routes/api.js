@@ -4,14 +4,15 @@ const router = express.Router()
 router.use(express.json())
 router.use(express.urlencoded({extended:false}))
 
-const loginController = require('../controllers/api/login')
+const accountController = require('../controllers/api/account')
 const boardController = require('../controllers/api/board')
 const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
 const likeController = require('../controllers/api/like')
 
-router.post('/login', loginController.login)
-router.post('/islogin', loginController.islogin)
+router.post('/account/login', accountController.login)
+router.get('/account/islogin', accountController.islogin)
+router.post('/account/signUp', accountController.signUp)
 
 router.get('/board/:boardType', boardController.view)
 
