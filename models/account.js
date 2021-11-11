@@ -35,7 +35,6 @@ const signUp = (memberId, memberPw, memberNickname, code) => {
             memberClass=results.member_class
             memberStudentNo=results.member_studentNo
             memberName=results.member_name
-            console.log(salt)
             const params=[
                 memberLevel,
                 memberId,

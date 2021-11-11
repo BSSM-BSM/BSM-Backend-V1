@@ -1,3 +1,12 @@
+const js_xss = require('xss')
+const xss = new js_xss.FilterXSS({
+    onIgnoreTagAttr: function (tag, name, value, isWhiteAttr) {
+        if (name.substr(0, 5) === "style") {
+            return name + '="' + js_xss.escapeAttrValue(value) + '"';
+        }
+    },
+});
+
 let result={
     status:2,
 }
@@ -26,7 +35,7 @@ const write = async (req, res) =>{
             boardType='anonymous'
             break
     }
-    result = await model.write(req.session.memberCode, req.session.memberNickname, boardType, req.body.postTitle, req.body.postContent)
+    result = await model.write(req.session.memberCode, req.session.memberNickname, boardType, xss.process(req.body.postTitle), xss.process(req.body.postContent))
     res.send(JSON.stringify(result))
 }
 const update = async (req, res) =>{
@@ -40,7 +49,7 @@ const update = async (req, res) =>{
             boardType='anonymous'
             break
     }
-    result = await model.update(req.session.memberCode, boardType, req.params.postNo, req.body.postTitle, req.body.postContent)
+    result = await model.update(req.session.memberCode, boardType, req.params.postNo, xss.process(req.body.postTitle), xss.process(req.body.postContent))
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{

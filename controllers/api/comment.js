@@ -1,3 +1,7 @@
+const js_xss = require('xss')
+const xss = new js_xss.FilterXSS({
+    whiteList: {},
+})
 let result
 let dbResult={
     bool:false,
@@ -34,7 +38,7 @@ const write = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break
     }
-    result = await model.write(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.session.memberNickname, req.body.comment)
+    result = await model.write(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.session.memberNickname, xss.process(req.body.comment))
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
