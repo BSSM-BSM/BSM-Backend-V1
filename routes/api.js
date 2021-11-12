@@ -6,6 +6,7 @@ router.use(express.urlencoded({extended:false}))
 
 const accountController = require('../controllers/api/account')
 const searchController = require('../controllers/api/search')
+const mealController = require('../controllers/api/meal')
 const boardController = require('../controllers/api/board')
 const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
@@ -16,6 +17,8 @@ router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
+
+router.get('/meal/:mealDate', mealController.get)
 
 router.get('/board/:boardType', boardController.view)
 

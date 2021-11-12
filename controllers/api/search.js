@@ -6,7 +6,7 @@ const get = async (req, res) =>{
     result={
         status:1,
         subStatus:0,
-        arrSearchResult:''
+        arrSearchResult:[]
     }
     if(dbResult){
         if(Object.keys(dbResult).length){
