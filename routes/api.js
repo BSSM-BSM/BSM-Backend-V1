@@ -5,6 +5,7 @@ router.use(express.json())
 router.use(express.urlencoded({extended:false}))
 
 const accountController = require('../controllers/api/account')
+const searchController = require('../controllers/api/search')
 const boardController = require('../controllers/api/board')
 const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
@@ -13,6 +14,8 @@ const likeController = require('../controllers/api/like')
 router.post('/account/login', accountController.login)
 router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
+
+router.get('/search/:searchType/:searchStr', searchController.get)
 
 router.get('/board/:boardType', boardController.view)
 
