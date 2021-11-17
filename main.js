@@ -31,10 +31,13 @@ app.use('/logout', logoutRouter)
 app.use((req, res, next) => res.status(404).render('404', {
     member:{
         islogin:req.session.islogin,
-        code:req.session.member_code,
-        id:req.session.member_id,
-        nickname:req.session.member_nickname,
-        level:req.session.member_level,
+        code:req.session.memberCode,
+        id:req.session.memberId,
+        nickname:req.session.memberNickname,
+        level:req.session.memberLevel,
+        grade:req.session.grade,
+        classNo:req.session.classNo,
+        studentNo:req.session.studentNo,
     }
 }))
 app.listen(80)

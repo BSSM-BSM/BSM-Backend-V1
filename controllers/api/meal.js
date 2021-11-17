@@ -23,6 +23,8 @@ const get = async (req, res) =>{
             lunch:lunch,
             dinner:dinner
         }
+    }else{
+        arrMeal=null
     }
     result={
         status:1,

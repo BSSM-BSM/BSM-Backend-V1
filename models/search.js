@@ -6,7 +6,6 @@ const getBoard = (searchType, searchStr) => {
     return new Promise(resolve => {
         conn.query(searchQuery, params, (error, results) => {
             if(error) resolve(false)
-            console.log(results)
             resolve(results)
         })
     })

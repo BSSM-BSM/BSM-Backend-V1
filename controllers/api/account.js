@@ -26,6 +26,9 @@ const login = async (req, res) =>{
                     req.session.memberId=dbResult.member_id
                     req.session.memberNickname=dbResult.member_nickname
                     req.session.memberLevel=dbResult.member_level
+                    req.session.grade=dbResult.member_grade
+                    req.session.classNo=dbResult.member_class
+                    req.session.studentNo=dbResult.member_studentNo
                     result={
                         status:1,
                         subStatus:0
