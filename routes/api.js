@@ -1,5 +1,15 @@
 const express = require('express')
 const router = express.Router()
+const multer = require('multer')
+const imageUpload = multer({storage:multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/resource/board/upload_images/')
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
+    }
+  })
+})
 
 router.use(express.json())
 router.use(express.urlencoded({extended:true}))
@@ -13,6 +23,7 @@ const boardController = require('../controllers/api/board')
 const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
 const likeController = require('../controllers/api/like')
+const imageUploadController = require('../controllers/api/imageUpload')
 
 router.post('/account/login', accountController.login)
 router.get('/account/islogin', accountController.islogin)
@@ -38,5 +49,7 @@ router.post('/comment/:boardType/:postNo', commentController.write)
 router.delete('/comment/:boardType/:postNo', commentController.del)
 
 router.post('/like/:boardType/:postNo', likeController.like)
+
+router.post('/imageUpload', imageUpload.single('file'), imageUploadController.upload)
 
 module.exports = router

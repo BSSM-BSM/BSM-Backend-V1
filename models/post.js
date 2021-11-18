@@ -22,7 +22,12 @@ const view = (boardType, postNo) => {
                 postHit:results.post_hit,
                 postLike:results.like,
             }
-            resolve(result)
+            const postHitQuery="UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?"
+            const params=[boardType, postNo]
+            conn.query(postHitQuery, params, (error) => {
+                if(error) resolve({status:2,subStatus:0})
+                resolve(result)
+            })
         })
     })
 }

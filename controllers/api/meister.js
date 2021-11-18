@@ -18,7 +18,7 @@ const get = async (req, res) =>{
             'bun':""+req.params.studentNo
         }
     }
-    result = iconv.decode(await getHttp(options), 'euc-kr')
+    iconv.decode(await getHttp(options), 'euc-kr')
     options = {
         uri:'https://bssm.meistergo.co.kr/ss/ss_a40j.php', 
         method:'POST',
