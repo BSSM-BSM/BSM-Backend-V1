@@ -3,7 +3,7 @@ const router = express.Router()
 
 router.get('/write/:boardType', (req ,res) => res.render('post_write', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
@@ -17,7 +17,7 @@ router.get('/write/:boardType', (req ,res) => res.render('post_write', {
 }))
 router.get('/write/:boardType/:postNo', (req ,res) => res.render('post_write', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
@@ -31,7 +31,7 @@ router.get('/write/:boardType/:postNo', (req ,res) => res.render('post_write', {
 }))
 router.get('/:boardType', (req ,res) => res.render('board', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
@@ -46,7 +46,7 @@ router.get('/:boardType', (req ,res) => res.render('board', {
 }))
 router.get('/:boardType/:postNo', (req ,res) => res.render('board', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,

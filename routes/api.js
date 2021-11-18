@@ -2,12 +2,13 @@ const express = require('express')
 const router = express.Router()
 
 router.use(express.json())
-router.use(express.urlencoded({extended:false}))
+router.use(express.urlencoded({extended:true}))
 
 const accountController = require('../controllers/api/account')
 const searchController = require('../controllers/api/search')
 const mealController = require('../controllers/api/meal')
 const timetableController = require('../controllers/api/timetable')
+const meisterController = require('../controllers/api/meister')
 const boardController = require('../controllers/api/board')
 const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
@@ -22,6 +23,8 @@ router.get('/search/:searchType/:searchStr', searchController.get)
 router.get('/meal/:mealDate', mealController.get)
 
 router.get('/timetable/:grade/:classNo', timetableController.get)
+
+router.post('/meister/:grade/:classNo/:studentNo', meisterController.get)
 
 router.get('/board/:boardType', boardController.view)
 

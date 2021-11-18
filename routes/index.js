@@ -3,7 +3,7 @@ const router = express.Router()
 
 router.get('/', (req ,res) => res.render('index', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
@@ -15,7 +15,7 @@ router.get('/', (req ,res) => res.render('index', {
 }))
 router.get('/meal', (req ,res) => res.render('meal', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
@@ -27,7 +27,19 @@ router.get('/meal', (req ,res) => res.render('meal', {
 }))
 router.get('/timetable', (req ,res) => res.render('timetable', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
+        code:req.session.memberCode,
+        id:req.session.memberId,
+        nickname:req.session.memberNickname,
+        level:req.session.memberLevel,
+        grade:req.session.grade,
+        classNo:req.session.classNo,
+        studentNo:req.session.studentNo,
+    }
+}))
+router.get('/meister', (req ,res) => res.render('meister', {
+    member:{
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
