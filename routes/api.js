@@ -28,6 +28,7 @@ const imageUploadController = require('../controllers/api/imageUpload')
 router.post('/account/login', accountController.login)
 router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
+router.get('/account/:memberCode', accountController.view)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
 

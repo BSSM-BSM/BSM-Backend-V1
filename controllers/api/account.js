@@ -4,7 +4,7 @@ let result
 let dbResult
 const login = async (req, res) =>{
     let model = require('../../models/account')
-    dbResult = await model.getMember(req.body.member_id)
+    dbResult = await model.getMemberId(req.body.member_id)
     result={
         status:5,
         subStatus:0
@@ -110,9 +110,36 @@ const islogin = (req, res) =>{
     }
     res.send(result)
 }
+const view = async (req, res) =>{
+    let model = require('../../models/account')
+    let member
+    dbResult = await model.getMember(req.params.memberCode)
+    if(Object.keys(dbResult).length){
+        member={
+            memberCode:dbResult.member_code,
+            memberNickname:dbResult.member_nickname,
+            memberLevel:dbResult.member_level,
+            memberCreated:dbResult.member_created,
+            memberEnrolled:dbResult.member_enrolled,
+            memberGrade:dbResult.member_grade,
+            memberClass:dbResult.member_class,
+            memberStudentNo:dbResult.member_studentNo,
+            memberName:dbResult.member_name,
+        }
+    }else{
+        member=null
+    }
+    result={
+        status:1,
+        subStatus:0,
+        member:member
+    }
+    res.send(JSON.stringify(result))
+}
 
 module.exports = {
     login:login,
     islogin:islogin,
-    signUp:signUp
+    signUp:signUp,
+    view:view
 }

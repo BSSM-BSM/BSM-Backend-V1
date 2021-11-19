@@ -13,6 +13,19 @@ router.get('/', (req ,res) => res.render('index', {
         studentNo:req.session.studentNo,
     }
 }))
+router.get('/memberinfo/:memberCode', (req ,res) => res.render('memberinfo', {
+    memberCode:req.params.memberCode,
+    member:{
+        isLogin:req.session.isLogin,
+        code:req.session.memberCode,
+        id:req.session.memberId,
+        nickname:req.session.memberNickname,
+        level:req.session.memberLevel,
+        grade:req.session.grade,
+        classNo:req.session.classNo,
+        studentNo:req.session.studentNo,
+    }
+}))
 router.get('/meal', (req ,res) => res.render('meal', {
     member:{
         isLogin:req.session.isLogin,

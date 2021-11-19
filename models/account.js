@@ -1,17 +1,25 @@
 const conn = require('../db')
 const crypto = require('crypto');
 
-let result={
-    bool:false,
-};
-
-const getMember = (memberId) => {
+const getMemberId = (memberId) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_id`=?"
     const params=[memberId]
     return new Promise(resolve => {
         conn.query(getMemberQuery, params, (error, results) => {
             if(error) resolve(false)
-            resolve(results[0])
+            if(Object.keys(results).length)
+                resolve(results[0])
+        })
+    })
+}
+const getMember = (memberCode) => {
+    const getMemberQuery="SELECT * FROM `members` WHERE `member_code`=?"
+    const params=[memberCode]
+    return new Promise(resolve => {
+        conn.query(getMemberQuery, params, (error, results) => {
+            if(error) resolve(false)
+            if(Object.keys(results).length)
+                resolve(results[0])
         })
     })
 }
@@ -60,6 +68,7 @@ const signUp = (memberId, memberPw, memberNickname, code) => {
 }
 
 module.exports = {
+    getMemberId:getMemberId,
     getMember:getMember,
     signUp:signUp
 }
