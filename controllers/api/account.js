@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const sharp = require('sharp')
 
 let result
 let dbResult
@@ -136,10 +137,31 @@ const view = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
+const profileUpload = async (req, res) =>{
+    const fileDir="public/resource/member/profile_images/"
+    result={
+        status:1,
+        subStatus:0,
+        filePath:fileDir.split('.')[0]+'.png'
+    }
+    await sharp(fileDir+req.file.filename)
+    .resize({width:128,height:128})
+    .png()
+    .toFile(fileDir+req.file.filename.split('.')[0].split('-')[1]+'.png', (error, info) => {
+        if(error){
+            result={
+                status:2,
+                subStatus:4
+            }
+        }
+    })
+    res.send(JSON.stringify(result))
+}
 
 module.exports = {
     login:login,
     islogin:islogin,
     signUp:signUp,
-    view:view
+    view:view,
+    profileUpload:profileUpload
 }

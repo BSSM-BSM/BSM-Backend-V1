@@ -10,6 +10,15 @@ const imageUpload = multer({storage:multer.diskStorage({
     }
   })
 })
+const profileUpload = multer({storage:multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/resource/member/profile_images/')
+    },
+    filename: function (req, file, cb) {
+      cb(null, 'temp-profile_'+req.session.memberCode+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
+    }
+  })
+})
 
 router.use(express.json())
 router.use(express.urlencoded({extended:true}))
@@ -29,6 +38,7 @@ router.post('/account/login', accountController.login)
 router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
 router.get('/account/:memberCode', accountController.view)
+router.post('/account/profileUpload', profileUpload.single('file'), accountController.profileUpload)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
 
