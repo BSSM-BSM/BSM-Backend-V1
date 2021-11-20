@@ -3,7 +3,7 @@ const getMembersLevel = require('./membersLevel')
 
 let result=new Array()
 
-const view = async (commentBoardType, postNo) => {
+const view = async (commentBoardType, postNo, isAnonymous) => {
     let membersLevel = await getMembersLevel.get()
     result=new Array()
     const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `order`"
@@ -16,6 +16,11 @@ const view = async (commentBoardType, postNo) => {
                     results[i].member_level=membersLevel[results[i].member_code]
                 }else{
                     results[i].member_level=0
+                }
+                if(isAnonymous){
+                    results[i].member_code=-1
+                    results[i].member_level=0
+                    results[i].member_nickname='ㅇㅇ'
                 }
                 result[i]={
                     idx:results[i].comment_index,

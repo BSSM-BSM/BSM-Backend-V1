@@ -8,16 +8,18 @@ let dbResult={
 }
 const view = async (req, res) =>{
     let model = require('../../models/comment')
-    let commentBoardType;
+    let commentBoardType, isAnonymous;
     switch(req.params.boardType){
         case 'board':
             commentBoardType='board_comment'
+            isAnonymous=false
             break;
         case 'anonymous':
             commentBoardType='anonymous_comment'
+            isAnonymous=true
             break
     }
-    dbResult = await model.view(commentBoardType, req.params.postNo)
+    dbResult = await model.view(commentBoardType, req.params.postNo, isAnonymous)
     result={
         status:1,
         subStatus:0,

@@ -12,16 +12,18 @@ let result={
 }
 const view = async (req, res) =>{
     let model = require('../../models/post')
-    let boardType;
+    let boardType, isAnonymous;
     switch(req.params.boardType){
         case 'board':
             boardType='board'
+            isAnonymous=false
             break;
         case 'anonymous':
             boardType='anonymous'
+            isAnonymous=true
             break
     }
-    result = await model.view(boardType, req.params.postNo)
+    result = await model.view(boardType, req.params.postNo, isAnonymous)
     res.send(JSON.stringify(result))
 }
 const write = async (req, res) =>{

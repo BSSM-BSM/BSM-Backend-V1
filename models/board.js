@@ -4,7 +4,7 @@ const getMembersLevel = require('./membersLevel')
 
 let result=new Array()
 
-const view = async (boardType) => {
+const view = async (boardType, isAnonymous) => {
     let membersLevel = await getMembersLevel.get()
     result=new Array()
     const boardQuery="SELECT * FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC"
@@ -17,6 +17,11 @@ const view = async (boardType) => {
                     results[i].member_level=membersLevel[results[i].member_code]
                 }else{
                     results[i].member_level=0
+                }
+                if(isAnonymous){
+                    results[i].member_code=-1
+                    results[i].member_level=0
+                    results[i].member_nickname='ㅇㅇ'
                 }
                 result[i]={
                     boardType:boardType,

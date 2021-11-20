@@ -2,7 +2,7 @@ const conn = require('../db')
 
 let result=new Array()
 
-const view = (boardType, postNo) => {
+const view = (boardType, postNo, isAnonymous) => {
     result=new Array()
     const postQuery="SELECT * FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
@@ -10,6 +10,11 @@ const view = (boardType, postNo) => {
         conn.query(postQuery, params, (error, results) => {
             if(error) resolve({status:2,subStatus:0})
             results=results[0];
+            if(isAnonymous){
+                results.member_code=-1
+                results.member_level=0
+                results.member_nickname='ㅇㅇ'
+            }
             result={
                 status:1,
                 subStatus:0,
