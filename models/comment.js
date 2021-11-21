@@ -9,26 +9,26 @@ const view = async (commentBoardType, postNo, isAnonymous) => {
     const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `order`"
     const params=[commentBoardType, postNo]
     return new Promise(resolve => {
-        conn.query(commentViewQuery, params, (error, results) => {
+        conn.query(commentViewQuery, params, (error, rows) => {
             if(error) resolve({status:2,subStatus:0})
-            for(let i=0;i<Object.keys(results).length;i++){
-                if(membersLevel[results[i].member_code]>0){
-                    results[i].member_level=membersLevel[results[i].member_code]
+            for(let i=0;i<rows.length;i++){
+                if(membersLevel[rows[i].member_code]>0){
+                    rows[i].member_level=membersLevel[rows[i].member_code]
                 }else{
-                    results[i].member_level=0
+                    rows[i].member_level=0
                 }
                 if(isAnonymous){
-                    results[i].member_code=-1
-                    results[i].member_level=0
-                    results[i].member_nickname='ㅇㅇ'
+                    rows[i].member_code=-1
+                    rows[i].member_level=0
+                    rows[i].member_nickname='ㅇㅇ'
                 }
                 result[i]={
-                    idx:results[i].comment_index,
-                    memberCode:results[i].member_code,
-                    memberNickname:results[i].member_nickname,
-                    memberLevel:results[i].member_level,
-                    comment:results[i].comment,
-                    commentDate:results[i].comment_date,
+                    idx:rows[i].comment_index,
+                    memberCode:rows[i].member_code,
+                    memberNickname:rows[i].member_nickname,
+                    memberLevel:rows[i].member_level,
+                    comment:rows[i].comment,
+                    commentDate:rows[i].comment_date,
                 };
             }
             resolve(result)

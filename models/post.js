@@ -7,32 +7,35 @@ const view = (boardType, postNo, isAnonymous) => {
     const postQuery="SELECT * FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
     return new Promise(resolve => {
-        conn.query(postQuery, params, (error, results) => {
+        conn.query(postQuery, params, (error, rows) => {
             if(error) resolve({status:2,subStatus:0})
-            results=results[0];
-            if(isAnonymous){
-                results.member_code=-1
-                results.member_level=0
-                results.member_nickname='ㅇㅇ'
+            if(!rows.length) resolve({status:3,subStatus:6})
+            else{
+                rows=rows[0]
+                if(isAnonymous){
+                    rows.member_code=-1
+                    rows.member_level=0
+                    rows.member_nickname='ㅇㅇ'
+                }
+                result={
+                    status:1,
+                    subStatus:0,
+                    postTitle:rows.post_title,
+                    postComments:rows.post_comments,
+                    postContent:rows.post_content,
+                    memberCode:rows.member_code,
+                    memberNickname:rows.member_nickname,
+                    postDate:rows.post_date,
+                    postHit:rows.post_hit,
+                    postLike:rows.like,
+                }
+                const postHitQuery="UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?"
+                const params=[boardType, postNo]
+                conn.query(postHitQuery, params, (error) => {
+                    if(error) resolve({status:2,subStatus:0})
+                    resolve(result)
+                })
             }
-            result={
-                status:1,
-                subStatus:0,
-                postTitle:results.post_title,
-                postComments:results.post_comments,
-                postContent:results.post_content,
-                memberCode:results.member_code,
-                memberNickname:results.member_nickname,
-                postDate:results.post_date,
-                postHit:results.post_hit,
-                postLike:results.like,
-            }
-            const postHitQuery="UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?"
-            const params=[boardType, postNo]
-            conn.query(postHitQuery, params, (error) => {
-                if(error) resolve({status:2,subStatus:0})
-                resolve(result)
-            })
         })
     })
 }

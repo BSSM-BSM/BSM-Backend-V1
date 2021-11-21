@@ -20,7 +20,7 @@ const like = (boardType, likeBoardType, postNo, memberCode, like) => {
     return new Promise(resolve => {
         conn.query(likeCheckQuery, likeCheckParams, (error, likeCheck) => {
             if(error) resolve(error)
-            if(Object.keys(likeCheck).length){//대상 글에 좋아요 또는 싫어요를 누른 적이 있으면
+            if(likeCheck.length){//대상 글에 좋아요 또는 싫어요를 누른 적이 있으면
                 likeCheck=likeCheck[0].like
                 likeQuery="UPDATE ?? SET `like`=? WHERE `post_no`=? AND `member_code`=?"
                 likeParams=[likeBoardType, like, postNo, memberCode]
