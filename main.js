@@ -37,6 +37,9 @@ app.use('/board', boardRouter)
 app.use('/api', apiRouter)
 app.use('/logout', logoutRouter)
 
+const versionController = require('./controllers/api/version')
+app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환
+
 app.use((req, res, next) => res.status(404).render('404', {
     member:{
         islogin:req.session.islogin,

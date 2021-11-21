@@ -16,14 +16,16 @@ const view = async (req, res) =>{
     switch(req.params.boardType){
         case 'board':
             boardType='board'
+            likeBoardType='board_like'
             isAnonymous=false
             break;
         case 'anonymous':
             boardType='anonymous'
+            likeBoardType='anonymous_like'
             isAnonymous=true
             break
     }
-    result = await model.view(boardType, req.params.postNo, isAnonymous)
+    result = await model.view(req.session.memberCode, boardType, likeBoardType, req.params.postNo, isAnonymous)
     res.send(JSON.stringify(result))
 }
 const write = async (req, res) =>{

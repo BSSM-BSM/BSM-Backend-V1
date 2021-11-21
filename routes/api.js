@@ -23,6 +23,7 @@ const profileUpload = multer({storage:multer.diskStorage({
 router.use(express.json())
 router.use(express.urlencoded({extended:true}))
 
+const versionController = require('../controllers/api/version')
 const accountController = require('../controllers/api/account')
 const searchController = require('../controllers/api/search')
 const mealController = require('../controllers/api/meal')
@@ -33,6 +34,8 @@ const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
 const likeController = require('../controllers/api/like')
 const imageUploadController = require('../controllers/api/imageUpload')
+
+router.get('/version/:app/:os', versionController.get)
 
 router.post('/account/login', accountController.login)
 router.get('/account/islogin', accountController.islogin)

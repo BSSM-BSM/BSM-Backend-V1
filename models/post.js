@@ -2,7 +2,7 @@ const conn = require('../db')
 
 let result=new Array()
 
-const view = (boardType, postNo, isAnonymous) => {
+const view = (memberCode, boardType, likeBoardType, postNo, isAnonymous) => {
     result=new Array()
     const postQuery="SELECT * FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
@@ -29,11 +29,21 @@ const view = (boardType, postNo, isAnonymous) => {
                     postHit:rows.post_hit,
                     postLike:rows.like,
                 }
-                const postHitQuery="UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?"
-                const params=[boardType, postNo]
-                conn.query(postHitQuery, params, (error) => {
+                const likeCheckQuery="SELECT `like` FROM ?? WHERE `post_no`= ? AND `member_code`=?"
+                const likeCheckParams=[likeBoardType, postNo, memberCode]
+                conn.query(likeCheckQuery, likeCheckParams, (error, likeCheck) => {
                     if(error) resolve({status:2,subStatus:0})
-                    resolve(result)
+                    if(likeCheck.length){
+                        result['like']=likeCheck[0].like
+                    }else{
+                        result['like']=0
+                    }
+                    const postHitQuery="UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?"
+                    const params=[boardType, postNo]
+                    conn.query(postHitQuery, params, (error) => {
+                        if(error) resolve({status:2,subStatus:0})
+                        resolve(result)
+                    })
                 })
             }
         })
