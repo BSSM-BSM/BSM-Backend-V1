@@ -15,6 +15,7 @@ const view = async (req, res) =>{
     let boardType, isAnonymous;
     switch(req.params.boardType){
         case 'board':
+            if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
             boardType='board'
             likeBoardType='board_like'
             isAnonymous=false
@@ -23,12 +24,16 @@ const view = async (req, res) =>{
             boardType='anonymous'
             likeBoardType='anonymous_like'
             isAnonymous=true
-            break
+            break;
+        default:
+            res.send(JSON.stringify({status:3,subStatus:0}))
+            return;
     }
     result = await model.view(req.session.memberCode, boardType, likeBoardType, req.params.postNo, isAnonymous)
     res.send(JSON.stringify(result))
 }
 const write = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     let model = require('../../models/post')
     let boardType;
     switch(req.params.boardType){
@@ -43,6 +48,7 @@ const write = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const update = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     let model = require('../../models/post')
     let boardType;
     switch(req.params.boardType){
@@ -57,6 +63,7 @@ const update = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     let model = require('../../models/post')
     let boardType;
     switch(req.params.boardType){

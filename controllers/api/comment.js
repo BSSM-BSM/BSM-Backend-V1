@@ -11,13 +11,17 @@ const view = async (req, res) =>{
     let commentBoardType, isAnonymous;
     switch(req.params.boardType){
         case 'board':
+            if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
             commentBoardType='board_comment'
             isAnonymous=false
             break;
         case 'anonymous':
             commentBoardType='anonymous_comment'
             isAnonymous=true
-            break
+            break;
+        default:
+            res.send(JSON.stringify({status:3,subStatus:0}))
+            return;
     }
     dbResult = await model.view(commentBoardType, req.params.postNo, isAnonymous)
     result={
@@ -28,6 +32,7 @@ const view = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const write = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     let model = require('../../models/comment')
     let boardType, commentBoardType;
     switch(req.params.boardType){
@@ -44,6 +49,7 @@ const write = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     let model = require('../../models/comment')
     let boardType, commentBoardType;
     switch(req.params.boardType){

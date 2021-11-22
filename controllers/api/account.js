@@ -137,6 +137,7 @@ const view = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const profileUpload = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     const fileDir="public/resource/member/profile_images/"
     result={
         status:1,

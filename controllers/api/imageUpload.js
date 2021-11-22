@@ -1,5 +1,6 @@
 let result
 const upload = async (req, res) =>{
+    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     result={
         status:1,
         subStatus:0,

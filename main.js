@@ -25,6 +25,7 @@ app.use(
 
 const indexRouter = require('./routes/index')
 const boardRouter = require('./routes/board')
+const appRouter = require('./routes/app')
 const apiRouter = require('./routes/api')
 const logoutRouter = require('./routes/logout')
 
@@ -34,6 +35,7 @@ app.use(express.static('public'));
 
 app.use('/', indexRouter)
 app.use('/board', boardRouter)
+app.use('/app', appRouter)
 app.use('/api', apiRouter)
 app.use('/logout', logoutRouter)
 
@@ -42,7 +44,7 @@ app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하
 
 app.use((req, res, next) => res.status(404).render('404', {
     member:{
-        islogin:req.session.islogin,
+        isLogin:req.session.isLogin,
         code:req.session.memberCode,
         id:req.session.memberId,
         nickname:req.session.memberNickname,
@@ -50,6 +52,6 @@ app.use((req, res, next) => res.status(404).render('404', {
         grade:req.session.grade,
         classNo:req.session.classNo,
         studentNo:req.session.studentNo,
-    }
+    },
 }))
-app.listen(80)
+app.listen(4000)
