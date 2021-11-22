@@ -226,7 +226,34 @@ const validCode = async (req, res) =>{
         }
         res.send(JSON.stringify(result))
     }
-    
+}
+const pwReset = async (req, res) =>{
+    result={
+        status:3,
+        subStatus:0
+    }
+    if(req.session.memberPwReset!=null){
+        const model = require('../../models/account')
+        if(req.body.member_pw!==req.body.member_pw_check){// 비밀번호 재입력 확인
+            result={
+                status:5,
+                subStatus:1,
+            }
+        }else{
+            if(await model.pwReset(req.session.memberPwReset, req.body.member_pw)){
+                result={
+                    status:1,
+                    subStatus:0
+                }
+            }else{
+                result={
+                    status:2,
+                    subStatus:0
+                }
+            }
+        }
+    }
+    res.send(JSON.stringify(result))
 }
 module.exports = {
     login:login,
@@ -234,5 +261,6 @@ module.exports = {
     signUp:signUp,
     view:view,
     profileUpload:profileUpload,
-    validCode:validCode
+    validCode:validCode,
+    pwReset:pwReset
 }
