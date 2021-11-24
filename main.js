@@ -5,7 +5,7 @@ const FileStore = require("session-file-store")(session);
 
 const app = express()
 app.set('etag', false)
-app.set('trust proxy', 1)
+//app.set('trust proxy', 1)
 app.use(
     session({
         proxy:true,
@@ -16,7 +16,7 @@ app.use(
         cookie:{
             path:"/",
             httpOnly:true,
-            secure:true,
+            //secure:true,
             maxAge:24*14*1000*60*60// 14일간 저장 24시간*14일*1000ms*60초*60분
         },
         store:new FileStore({logFn: function(){}}),

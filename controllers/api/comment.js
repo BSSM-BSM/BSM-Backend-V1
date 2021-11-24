@@ -23,7 +23,7 @@ const view = async (req, res) =>{
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;
     }
-    dbResult = await model.view(commentBoardType, req.params.postNo, isAnonymous)
+    dbResult = await model.view(req.session.memberCode, req.session.memberLevel, commentBoardType, req.params.postNo, isAnonymous)
     result={
         status:1,
         subStatus:0,
@@ -45,7 +45,7 @@ const write = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break
     }
-    result = await model.write(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.session.memberNickname, xss.process(req.body.comment))
+    result = await model.write(req.session.memberCode, boardType, commentBoardType, req.params.postNo, req.session.memberNickname, xss.process(req.body.comment))
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
@@ -62,7 +62,7 @@ const del = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break
     }
-    result = await model.del(boardType, commentBoardType, req.params.postNo, req.session.memberCode, req.body.commentIndex)
+    result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, commentBoardType, req.params.postNo, req.body.commentIndex)
     res.send(JSON.stringify(result))
 }
 

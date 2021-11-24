@@ -3,7 +3,7 @@ const getMembersLevel = require('./membersLevel')
 
 let result=new Array()
 
-const view = async (commentBoardType, postNo, isAnonymous) => {
+const view = async (memberCode, memberLevel, commentBoardType, postNo, isAnonymous) => {
     let membersLevel = await getMembersLevel.get()
     result=new Array()
     const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `order`"
@@ -17,6 +17,11 @@ const view = async (commentBoardType, postNo, isAnonymous) => {
                 }else{
                     rows[i].member_level=0
                 }
+                if(memberCode>0 && rows[i].member_code===memberCode || memberLevel>=3){
+                    rows[i].permission=true;
+                }else{
+                    rows[i].permission=false;
+                }
                 if(isAnonymous){
                     rows[i].member_code=-1
                     rows[i].member_level=0
@@ -29,13 +34,14 @@ const view = async (commentBoardType, postNo, isAnonymous) => {
                     memberLevel:rows[i].member_level,
                     comment:rows[i].comment,
                     commentDate:rows[i].comment_date,
+                    permission:rows[i].permission,
                 };
             }
             resolve(result)
         })
     })
 }
-const write = (boardType, commentBoardType, postNo, memberCode, memberNickname, comment) => {
+const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, comment) => {
     result=new Array()
     const commentIndexQuery="SELECT `order` from ?? where `depth`=0 and `post_no`=? order by `comment_index` desc limit 1"
     const params=[commentBoardType, postNo]
@@ -61,14 +67,14 @@ const write = (boardType, commentBoardType, postNo, memberCode, memberNickname, 
         })
     })
 }
-const del = (boardType, commentBoardType, postNo, memberCode, commentIndex) => {
+const del = (memberCode, memberLevel, boardType, commentBoardType, postNo, commentIndex) => {
     result=new Array()
     const commentCheckQuery="SELECT `member_code` FROM ?? WHERE `comment_index`= ? AND `post_no`=?"
     const params=[commentBoardType, commentIndex, postNo]
     return new Promise(resolve => {
         conn.query(commentCheckQuery, params, (error, checkMemberCode) => {
             if(error) resolve({status:2,subStatus:0})
-            if(checkMemberCode[0].member_code==memberCode){
+            if(checkMemberCode[0].member_code==memberCode || memberLevel>=3){
                 const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
                 const params=[commentBoardType, commentIndex, postNo]
                 conn.query(commentDeleteQuery, params, (error) => {

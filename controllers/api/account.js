@@ -14,7 +14,8 @@ const login = async (req, res) =>{
     if(dbResult){
         if(dbResult.member_salt===''){
             if(dbResult.member_pw===crypto.createHash('sha3-256').update(req.body.member_pw).digest('hex')){
-                req.session.memberPwReset=dbResult.member_code
+                req.session.destroy();
+                req.session.memberCode=dbResult.member_code
                 result={
                     status:4,
                     subStatus:2
@@ -227,12 +228,12 @@ const validCode = async (req, res) =>{
         res.send(JSON.stringify(result))
     }
 }
-const pwReset = async (req, res) =>{
+const pwEdit = async (req, res) =>{
     result={
         status:3,
         subStatus:0
     }
-    if(req.session.memberPwReset!=null){
+    if(req.session.memberCode!=null){
         const model = require('../../models/account')
         if(req.body.member_pw!==req.body.member_pw_check){// 비밀번호 재입력 확인
             result={
@@ -240,7 +241,8 @@ const pwReset = async (req, res) =>{
                 subStatus:1,
             }
         }else{
-            if(await model.pwReset(req.session.memberPwReset, req.body.member_pw)){
+            if(await model.pwEdit(req.session.memberCode, req.body.member_pw)){
+                req.session.destroy();
                 result={
                     status:1,
                     subStatus:0
@@ -262,5 +264,5 @@ module.exports = {
     view:view,
     profileUpload:profileUpload,
     validCode:validCode,
-    pwReset:pwReset
+    pwEdit:pwEdit
 }

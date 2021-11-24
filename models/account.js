@@ -83,14 +83,14 @@ const signUp = (memberId, memberPw, memberNickname, code) => {
         })
     })
 }
-const pwReset = (memberCode, memberPw) => {
+const pwEdit = (memberCode, memberPw) => {
     //비밀번호 해시및 salt처리
     salt=crypto.randomBytes(32).toString('hex')
     memberPw=crypto.createHash('sha3-256').update(salt+memberPw).digest('hex')
-    const pwResetQuery="UPDATE `members` SET `member_pw`=?, `member_salt`=? WHERE `member_code`=?"
+    const pwEditQuery="UPDATE `members` SET `member_pw`=?, `member_salt`=? WHERE `member_code`=?"
     const params=[memberPw, salt, memberCode]
     return new Promise(resolve => {
-        conn.query(pwResetQuery, params, (error, rows) => {
+        conn.query(pwEditQuery, params, (error, rows) => {
             if(error) resolve(false)
             resolve(true)
         })
@@ -102,5 +102,5 @@ module.exports = {
     getMemberCode:getMemberCode,
     getMember:getMember,
     signUp:signUp,
-    pwReset:pwReset
+    pwEdit:pwEdit
 }

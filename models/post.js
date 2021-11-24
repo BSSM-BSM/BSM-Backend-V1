@@ -2,7 +2,7 @@ const conn = require('../db')
 
 let result=new Array()
 
-const view = (memberCode, boardType, likeBoardType, postNo, isAnonymous) => {
+const view = (memberCode, memberLevel, boardType, likeBoardType, postNo, isAnonymous) => {
     result=new Array()
     const postQuery="SELECT * FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
@@ -12,6 +12,11 @@ const view = (memberCode, boardType, likeBoardType, postNo, isAnonymous) => {
             if(!rows.length) resolve({status:3,subStatus:6})
             else{
                 rows=rows[0]
+                if(memberCode>0 && rows.member_code===memberCode || memberLevel>=3){
+                    rows.permission=true;
+                }else{
+                    rows.permission=false;
+                }
                 if(isAnonymous){
                     rows.member_code=-1
                     rows.member_level=0
@@ -28,6 +33,7 @@ const view = (memberCode, boardType, likeBoardType, postNo, isAnonymous) => {
                     postDate:rows.post_date,
                     postHit:rows.post_hit,
                     postLike:rows.like,
+                    permission:rows.permission,
                 }
                 const likeCheckQuery="SELECT `like` FROM ?? WHERE `post_no`= ? AND `member_code`=?"
                 const likeCheckParams=[likeBoardType, postNo, memberCode]
@@ -60,14 +66,14 @@ const write = (memberCode, memberNickname, boardType, postTitle, postContent) =>
 		})
     })
 }
-const update = (memberCode, boardType, postNo, postTitle, postContent) => {
+const update = (memberCode, memberLevel, boardType, postNo, postTitle, postContent) => {
     result=new Array()
     const postCheckQuery="SELECT `member_code` FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
     return new Promise(resolve => {
         conn.query(postCheckQuery, params, (error, checkMemberCode) => {
             if(error) resolve({status:2,subStatus:0})
-            if(checkMemberCode[0].member_code==memberCode){
+            if(checkMemberCode[0].member_code==memberCode || memberLevel>=3){
                 const postUpdateQuery="UPDATE ?? SET `post_title`=?, `post_content`=? WHERE `post_no`=?"
                 const params=[boardType, postTitle, postContent, postNo]
                 conn.query(postUpdateQuery, params, (error) => {
@@ -80,14 +86,14 @@ const update = (memberCode, boardType, postNo, postTitle, postContent) => {
         })
     })
 }
-const del = (memberCode, boardType, postNo) => {
+const del = (memberCode, memberLevel, boardType, postNo) => {
     result=new Array()
     const postCheckQuery="SELECT `member_code` FROM ?? WHERE `post_no`=?"
     const params=[boardType, postNo]
     return new Promise(resolve => {
         conn.query(postCheckQuery, params, (error, checkMemberCode) => {
             if(error) resolve({status:2,subStatus:0})
-            if(checkMemberCode[0].member_code==memberCode){
+            if(checkMemberCode[0].member_code==memberCode || memberLevel>=3){
                 const postDeleteQuery="UPDATE ?? SET `post_deleted` = 1 WHERE `post_no`=?"
                 const params=[boardType, postNo]
                 conn.query(postDeleteQuery, params, (error) => {

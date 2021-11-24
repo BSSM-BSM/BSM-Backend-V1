@@ -29,7 +29,7 @@ const view = async (req, res) =>{
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;
     }
-    result = await model.view(req.session.memberCode, boardType, likeBoardType, req.params.postNo, isAnonymous)
+    result = await model.view(req.session.memberCode, req.session.memberLevel, boardType, likeBoardType, req.params.postNo, isAnonymous)
     res.send(JSON.stringify(result))
 }
 const write = async (req, res) =>{
@@ -59,7 +59,7 @@ const update = async (req, res) =>{
             boardType='anonymous'
             break
     }
-    result = await model.update(req.session.memberCode, boardType, req.params.postNo, xss.process(req.body.postTitle), xss.process(req.body.postContent))
+    result = await model.update(req.session.memberCode, req.session.memberLevel, boardType, req.params.postNo, xss.process(req.body.postTitle), xss.process(req.body.postContent))
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
@@ -74,7 +74,7 @@ const del = async (req, res) =>{
             boardType='anonymous'
             break
     }
-    result = await model.del(req.session.memberCode, boardType, req.params.postNo)
+    result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, req.params.postNo)
     res.send(JSON.stringify(result))
 }
 
