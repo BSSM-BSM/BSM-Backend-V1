@@ -12,12 +12,12 @@ app.use(
         key:'SESSION',
         secret:process.env.SESSION_SECRET,
         resave:false,
-        saveUninitialized:true,
+        saveUninitialized:false,
         cookie:{
             path:"/",
             httpOnly:true,
             //secure:true,
-            maxAge:24*14*1000*60*60// 14일간 저장 24시간*14일*1000ms*60초*60분
+            maxAge:24*30*1000*60*60// 30일간 저장 24시간*14일*1000ms*60초*60분
         },
         store:new FileStore({logFn: function(){}}),
     })
@@ -28,6 +28,7 @@ const boardRouter = require('./routes/board')
 const appRouter = require('./routes/app')
 const apiRouter = require('./routes/api')
 const logoutRouter = require('./routes/logout')
+const birthRouter = require('./routes/birth')
 
 app.set('view engine', 'ejs')
 app.set('views', './views/pages');
@@ -38,11 +39,12 @@ app.use('/board', boardRouter)
 app.use('/app', appRouter)
 app.use('/api', apiRouter)
 app.use('/logout', logoutRouter)
+app.use('/birth', birthRouter)
 
 const versionController = require('./controllers/api/version')
 app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환
 
-app.use((req, res, next) => res.status(404).render('404', {
+app.use((req, res) => res.status(404).render('404', {
     member:{
         isLogin:req.session.isLogin,
         code:req.session.memberCode,

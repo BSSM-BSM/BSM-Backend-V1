@@ -12,6 +12,9 @@ const view = (memberCode, memberLevel, boardType, likeBoardType, postNo, isAnony
             if(!rows.length) resolve({status:3,subStatus:6})
             else{
                 rows=rows[0]
+                if(rows.post_deleted){
+                    resolve({status:3,subStatus:6})
+                }
                 if(memberCode>0 && rows.member_code===memberCode || memberLevel>=3){
                     rows.permission=true;
                 }else{

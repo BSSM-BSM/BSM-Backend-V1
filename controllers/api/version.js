@@ -6,7 +6,7 @@ const get = async (req, res) =>{
                 status:1,
                 subStatus:0,
                 versionCode:1,
-                versionName:'1.0.0'
+                versionName:'1.0.1'
             }
             break
         case 'app':
