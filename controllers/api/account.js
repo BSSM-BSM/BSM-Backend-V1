@@ -127,6 +127,11 @@ const view = async (req, res) =>{
             memberStudentNo:dbResult.member_studentNo,
             memberName:dbResult.member_name,
         }
+        if(req.session.memberCode>0 && dbResult.member_code===req.session.memberCode){
+            member.permission=true;
+        }else{
+            member.permission=false;
+        }
     }else{
         member=null
     }
