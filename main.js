@@ -2,10 +2,27 @@ require("dotenv").config({ path: "./config/env/.env" });
 const express = require('express')
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
+const helmet = require("helmet");
 
 const app = express()
+
+// 보안설정
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
+app.use(helmet.dnsPrefetchControl());
+app.use(helmet.expectCt());
+app.use(helmet.frameguard());
+app.use(helmet.hidePoweredBy());
+app.use(helmet.hsts());
+app.use(helmet.ieNoOpen());
+app.use(helmet.noSniff());
+app.use(helmet.permittedCrossDomainPolicies());
+app.use(helmet.referrerPolicy());
+app.use(helmet.xssFilter());
+
 app.set('etag', false)
-//app.set('trust proxy', 1)
+// app.set('trust proxy', 1)
 app.use(
     session({
         proxy:true,
@@ -16,10 +33,10 @@ app.use(
         cookie:{
             path:"/",
             httpOnly:true,
-            //secure:true,
-            maxAge:24*30*1000*60*60// 30일간 저장 24시간*14일*1000ms*60초*60분
+            // secure:true,
+            maxAge:24*30*1000*60*60// 30일간 저장 24시간*30일*1000ms*60초*60분
         },
-        store:new FileStore({logFn: function(){}}),
+        store:new FileStore({logFn:()=>{}}),
     })
 );
 
