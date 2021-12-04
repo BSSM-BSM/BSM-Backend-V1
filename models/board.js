@@ -4,7 +4,7 @@ const getMembersLevel = require('./membersLevel')
 
 let result=new Object();
 
-const view = async (boardType, page, isAnonymous) => {
+const view = async (boardType, page, limit, isAnonymous) => {
     let membersLevel = await getMembersLevel.get()
     return new Promise(resolve => {
         // 총 게시물 갯수
@@ -14,7 +14,7 @@ const view = async (boardType, page, isAnonymous) => {
             if(error) resolve(error)
             result=new Object();
             // 게시판 페이지 수 계산
-            let totalPage, startPost, limitPost=15;
+            let totalPage, startPost, limitPost=limit;
             startPost = (page-1)*limitPost;
             totalPage=Math.ceil(Object.keys(totalPost).length/limitPost);
             result.pages=totalPage;

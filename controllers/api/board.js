@@ -6,7 +6,7 @@ let dbResult={
 }
 const view = async (req, res) =>{
     let model = require('../../models/board')
-    let boardType, isAnonymous, page;
+    let boardType, isAnonymous, page, limit;
     switch(req.params.boardType){
         case 'board':
             if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
@@ -21,12 +21,17 @@ const view = async (req, res) =>{
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;
     }
-    if(req.query.page>1){
-        page=req.query.page;
+    if(req.query.page>=1){
+        page=parseInt(req.query.page);
     }else{
         page=1;
     }
-    dbResult = await model.view(boardType, page, isAnonymous)
+    if(req.query.limit>=5){
+        limit=parseInt(req.query.limit);
+    }else{
+        limit=15;
+    }
+    dbResult = await model.view(boardType, page, limit, isAnonymous)
     result={
         status:1,
         arrBoard:dbResult.arrBoard,
