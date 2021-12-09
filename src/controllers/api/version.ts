@@ -1,5 +1,13 @@
-let result
-const get = async (req, res) =>{
+import { Expression } from "typescript"
+import express from "express"
+
+let result:{
+    status:number;
+    subStatus:number;
+    versionCode:number;
+    versionName:string;
+}
+const get = async (req:express.Request, res:express.Response) =>{
     switch(req.params.app){
         case 'web':
             result={
@@ -24,7 +32,7 @@ const get = async (req, res) =>{
     }
     res.send(result)
 }
-const getLegacy = async (req, res) =>{
+const getLegacy = async (req:express.Request, res:express.Response) =>{
     result={
         status:1,
         subStatus:0,

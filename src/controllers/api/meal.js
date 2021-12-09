@@ -2,7 +2,7 @@ const model = require('../../models/meal')
 const webpush = require('../../push')
 const schedule = require('node-schedule')
 const mealDate = {
-    morning:schedule.scheduleJob('0 30 7 * * 2-6', async () =>{
+    morning:schedule.scheduleJob('0 30 6 * * 2-6', async () =>{
         // 아침 식사 1시간전 알림
         const today = new Date();
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())
