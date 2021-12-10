@@ -1,9 +1,15 @@
-let result, dbResult
-const get = async (req, res) =>{
-    const model = require('../../models/timetable')
-    let arrTimetable=[]
+import express from "express"
+const model = require('../../models/timetable')
+let result:{
+    status:number;
+    subStatus:number;
+    arrTimetable:string[] | null;
+};
+let dbResult;
+const get = async (req:express.Request, res:express.Response) =>{
+    let arrTimetable:string[]|null=[]
     dbResult = await model.get(req.params.grade, req.params.classNo)
-    if(Object.keys(dbResult).length){
+    if(dbResult.length){
         dbResult=dbResult[0]
         arrTimetable=[
             dbResult['monday'].split(','),
@@ -25,7 +31,6 @@ const get = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
-
 module.exports = {
     get:get
 }

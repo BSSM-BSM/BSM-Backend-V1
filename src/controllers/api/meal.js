@@ -8,7 +8,7 @@ const mealDate = {
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())
         if(Object.keys(dbResult).length){
             dbResult=dbResult[0]
-            if(dbResult.morning!=null){
+            if(dbResult.morning!=""){
                 const payload = JSON.stringify({
                     title:"오늘의 아침",
                     body:dbResult.morning,
@@ -24,7 +24,7 @@ const mealDate = {
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())
         if(Object.keys(dbResult).length){
             dbResult=dbResult[0]
-            if(dbResult.lunch!=null){
+            if(dbResult.lunch!=""){
                 const payload = JSON.stringify({
                     title:"오늘의 점심",
                     body:dbResult.lunch,
@@ -40,7 +40,7 @@ const mealDate = {
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())
         if(Object.keys(dbResult).length){
             dbResult=dbResult[0]
-            if(dbResult.dinner!=null){
+            if(dbResult.dinner!=""){
                 const payload = JSON.stringify({
                     title:"오늘의 저녁",
                     body:dbResult.dinner,
@@ -58,15 +58,15 @@ const get = async (req, res) =>{
     dbResult = await model.getMeal(req.params.mealDate)
     if(Object.keys(dbResult).length){
         dbResult=dbResult[0]
-        if(dbResult.morning!=null)
+        if(dbResult.morning!="")
             morning=dbResult.morning;
         else
             morning=null;
-        if(dbResult.lunch!=null)
+        if(dbResult.lunch!="")
             lunch=dbResult.lunch;
         else
             lunch=null;
-        if(dbResult.dinner!=null)
+        if(dbResult.dinner!="")
             dinner=dbResult.dinner;
         else
             dinner=null;

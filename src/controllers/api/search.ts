@@ -1,6 +1,11 @@
-let result
+import express from "express"
+let result:{
+    status:number;
+    subStatus:number;
+    arrSearchResult:object|null;
+}
 let dbResult
-const get = async (req, res) =>{
+const get = async (req:express.Request, res:express.Response) =>{
     let model = require('../../models/search')
     dbResult = await model.getBoard(req.params.searchType, req.params.searchStr)
     result={
@@ -9,7 +14,7 @@ const get = async (req, res) =>{
         arrSearchResult:[]
     }
     if(dbResult){
-        if(Object.keys(dbResult).length){
+        if(dbResult.length){
             let arrSearchResult=[]
             for(let i=0;i<Object.keys(dbResult).length;i++){
                 arrSearchResult[i]={
