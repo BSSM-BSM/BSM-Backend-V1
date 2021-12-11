@@ -6,8 +6,8 @@ webpush.setVapidDetails(
     process.env.PUSH_PRIVATE_KEY,
 );
 let tokenList = [];
-const push = async (payload) => {
-    tokenList = await getPushToken();
+const push = async (payload, to) => {
+    tokenList = await getPushToken(to);
     try{
         await Promise.all(tokenList.map(t => {
             webpush.sendNotification(t, payload);
@@ -27,11 +27,20 @@ const register = async (endpoint, auth, p256dh, memberCode) => {
     })
 }
 
-const getPushToken = async () => {
-    const getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE `meal`=1";
+const getPushToken = async (to) => {
+    let getPushTokenQuery;
+    switch(to){
+        case 'all':
+            getPushTokenQuery="SELECT * FROM `push_subscribe`";
+            break;
+        default:
+            getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE ?=1";
+            break;
+    }
     return new Promise(resolve => {
         let result = [];
-        conn.query(getPushTokenQuery, (error, rows) => {
+        const params=[to]
+        conn.query(getPushTokenQuery, params, (error, rows) => {
             if(error) resolve(false)
             for(let i=0;i<rows.length;i++){
                 result.push({

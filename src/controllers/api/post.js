@@ -6,6 +6,7 @@ const xss = new js_xss.FilterXSS({
         }
     },
 });
+const webpush = require('../../push')
 
 let result={
     status:2,
@@ -51,6 +52,12 @@ const write = async (req, res) =>{
         case 'notice':
             if(req.session.memberLevel<3){res.send(JSON.stringify({status:3,subStatus:1}));return;}
             boardType='notice'
+            const payload = JSON.stringify({
+                title:"새로운 공지사항이 있습니다",
+                body:req.body.postTitle,
+                link:"/board/notice"
+            })
+            webpush.push(payload, 'all');
             break;
     }
     result = await model.write(req.session.memberCode, req.session.memberNickname, boardType, xss.process(req.body.postTitle), xss.process(req.body.postContent))

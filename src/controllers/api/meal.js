@@ -14,7 +14,7 @@ const mealDate = {
                     body:dbResult.morning,
                     link:"/meal"
                 })
-                webpush.push(payload);
+                webpush.push(payload, 'meal');
             }
         }
     }),
@@ -30,7 +30,7 @@ const mealDate = {
                     body:dbResult.lunch,
                     link:"/meal"
                 })
-                webpush.push(payload);
+                webpush.push(payload, 'meal');
             }
         }
     }),
@@ -46,7 +46,7 @@ const mealDate = {
                     body:dbResult.dinner,
                     link:"/meal"
                 })
-                webpush.push(payload);
+                webpush.push(payload, 'meal');
             }
         }
     }),
