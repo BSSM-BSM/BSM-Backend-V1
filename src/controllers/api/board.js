@@ -17,6 +17,10 @@ const view = async (req, res) =>{
             boardType='anonymous'
             isAnonymous=true
             break;
+        case 'notice':
+            boardType='notice'
+            isAnonymous=false
+            break;
         default:
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;

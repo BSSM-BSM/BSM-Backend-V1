@@ -19,6 +19,10 @@ const view = async (req, res) =>{
             commentBoardType='anonymous_comment'
             isAnonymous=true
             break;
+        case 'notice':
+            commentBoardType='notice_comment'
+            isAnonymous=false
+            break;
         default:
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;
@@ -43,7 +47,11 @@ const write = async (req, res) =>{
         case 'anonymous':
             boardType='anonymous'
             commentBoardType='anonymous_comment'
-            break
+            break;
+        case 'notice':
+            commentBoardType='notice_comment'
+            isAnonymous=false
+            break;
     }
     result = await model.write(req.session.memberCode, boardType, commentBoardType, req.params.postNo, req.session.memberNickname, xss.process(req.body.comment))
     res.send(JSON.stringify(result))
@@ -60,7 +68,11 @@ const del = async (req, res) =>{
         case 'anonymous':
             boardType='anonymous'
             commentBoardType='anonymous_comment'
-            break
+            break;
+        case 'notice':
+            commentBoardType='notice_comment'
+            isAnonymous=false
+            break;
     }
     result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, commentBoardType, req.params.postNo, req.body.commentIndex)
     res.send(JSON.stringify(result))

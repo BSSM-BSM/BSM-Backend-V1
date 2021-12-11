@@ -25,6 +25,11 @@ const view = async (req, res) =>{
             likeBoardType='anonymous_like'
             isAnonymous=true
             break;
+        case 'notice':
+            boardType='notice'
+            likeBoardType='notice_like'
+            isAnonymous=false
+            break;
         default:
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;
@@ -42,7 +47,11 @@ const write = async (req, res) =>{
             break;
         case 'anonymous':
             boardType='anonymous'
-            break
+            break;
+        case 'notice':
+            if(req.session.memberLevel<3){res.send(JSON.stringify({status:3,subStatus:1}));return;}
+            boardType='notice'
+            break;
     }
     result = await model.write(req.session.memberCode, req.session.memberNickname, boardType, xss.process(req.body.postTitle), xss.process(req.body.postContent))
     res.send(JSON.stringify(result))
@@ -57,7 +66,11 @@ const update = async (req, res) =>{
             break;
         case 'anonymous':
             boardType='anonymous'
-            break
+            break;
+        case 'notice':
+            if(req.session.memberLevel<3){res.send(JSON.stringify({status:3,subStatus:1}));return;}
+            boardType='notice'
+            break;
     }
     result = await model.update(req.session.memberCode, req.session.memberLevel, boardType, req.params.postNo, xss.process(req.body.postTitle), xss.process(req.body.postContent))
     res.send(JSON.stringify(result))
@@ -72,7 +85,11 @@ const del = async (req, res) =>{
             break;
         case 'anonymous':
             boardType='anonymous'
-            break
+            break;
+        case 'notice':
+            if(req.session.memberLevel<3){res.send(JSON.stringify({status:3,subStatus:1}));return;}
+            boardType='notice'
+            break;
     }
     result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, req.params.postNo)
     res.send(JSON.stringify(result))

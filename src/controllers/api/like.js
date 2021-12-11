@@ -11,7 +11,11 @@ const like = async (req, res) =>{
         case 'anonymous':
             boardType='anonymous'
             likeBoardType='anonymous_like'
-            break
+            break;
+        case 'notice':
+            boardType='notice'
+            likeBoardType='notice_like'
+            break;
     }
     result = await model.like(boardType, likeBoardType, req.params.postNo, req.session.memberCode, req.body.like)
     res.send(JSON.stringify(result))
