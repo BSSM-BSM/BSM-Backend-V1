@@ -2,7 +2,7 @@ const model = require('../../models/meal')
 const webpush = require('../../push')
 const schedule = require('node-schedule')
 const mealDate = {
-    morning:schedule.scheduleJob('0 30 6 * * 2-6', async () =>{
+    morning:schedule.scheduleJob('0 30 6 * * 1-5', async () =>{
         // 아침 식사 1시간전 알림
         const today = new Date();
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())
@@ -18,7 +18,7 @@ const mealDate = {
             }
         }
     }),
-    lunch:schedule.scheduleJob('0 30 11 * * 2-6', async () =>{
+    lunch:schedule.scheduleJob('0 30 11 * * 1-5', async () =>{
         // 점심 식사 1시간전 알림
         const today = new Date();
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())
@@ -34,7 +34,7 @@ const mealDate = {
             }
         }
     }),
-    dinner:schedule.scheduleJob('0 0 17 * * 2-6', async () =>{
+    dinner:schedule.scheduleJob('0 0 17 * * 1-5', async () =>{
         // 저녁 식사 1시간전 알림
         const today = new Date();
         dbResult = await model.getMeal(today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate())

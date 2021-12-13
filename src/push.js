@@ -33,24 +33,26 @@ const getPushToken = async (to) => {
         case 'all':
             getPushTokenQuery="SELECT * FROM `push_subscribe`";
             break;
-        default:
-            getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE ?=1";
+        case 'meal':
+            getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE `meal`=1";
             break;
+        default:
+            resolve(null)
+            return;
     }
     return new Promise(resolve => {
         let result = [];
-        const params=[to]
-        conn.query(getPushTokenQuery, params, (error, rows) => {
+        conn.query(getPushTokenQuery, (error, rows) => {
             if(error) resolve(false)
-            for(let i=0;i<rows.length;i++){
+            rows.forEach(row => {
                 result.push({
-                    endpoint:rows[i].endpoint,
+                    endpoint:row.endpoint,
                     keys:{
-                        auth:rows[i].auth,
-                        p256dh:rows[i].p256dh,
+                        auth:row.auth,
+                        p256dh:row.p256dh,
                     }
                 })
-            }
+            });
             resolve(result)
         })
     })
