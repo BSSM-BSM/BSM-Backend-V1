@@ -54,7 +54,8 @@ router.get('/meal/:mealDate', mealController.get)
 
 router.get('/timetable/:grade/:classNo', timetableController.get)
 
-router.post('/meister/:grade/:classNo/:studentNo', meisterController.get)
+router.post('/meister/point/:grade/:classNo/:studentNo', meisterController.getPoint)
+router.get('/meister/score/:grade/:classNo/:studentNo', meisterController.getScore)
 
 router.get('/board/:boardType', boardController.view)
 
