@@ -1,5 +1,6 @@
 let result={
     status:2,
+    subStatus:0,
 }
 let dbResult={
     bool:false,
@@ -38,6 +39,7 @@ const view = async (req, res) =>{
     dbResult = await model.view(boardType, page, limit, isAnonymous)
     result={
         status:1,
+        subStatus:0,
         arrBoard:dbResult.arrBoard,
         pages:dbResult.pages
     }

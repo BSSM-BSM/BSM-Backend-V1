@@ -21,8 +21,8 @@ const view = async (boardType, page, limit, isAnonymous) => {
             const boardQuery="SELECT * FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC LIMIT ?, ?"
             const params=[boardType, startPost, limitPost];
             conn.query(boardQuery, params, (error, rows) => {
-                if(error) resolve(error)
-                if(!rows.length) resolve({status:3,subStatus:6})
+                if(error) result.arrBoard=null;
+                if(!rows.length) result.arrBoard=null;
                 else{
                     result.arrBoard=new Array()
                     for(let i=0;i<Object.keys(rows).length;i++){
@@ -49,8 +49,8 @@ const view = async (boardType, page, limit, isAnonymous) => {
                             postLike:rows[i].like,
                         };
                     }
-                    resolve(result)
                 }
+                resolve(result)
             })
         })
     })

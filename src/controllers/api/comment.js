@@ -70,8 +70,8 @@ const del = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break;
         case 'notice':
+            boardType='notice'
             commentBoardType='notice_comment'
-            isAnonymous=false
             break;
     }
     result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, commentBoardType, req.params.postNo, req.body.commentIndex)
