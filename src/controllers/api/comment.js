@@ -49,8 +49,8 @@ const write = async (req, res) =>{
             commentBoardType='anonymous_comment'
             break;
         case 'notice':
+            boardType='notice'
             commentBoardType='notice_comment'
-            isAnonymous=false
             break;
     }
     result = await model.write(req.session.memberCode, boardType, commentBoardType, req.params.postNo, req.session.memberNickname, xss.process(req.body.comment))

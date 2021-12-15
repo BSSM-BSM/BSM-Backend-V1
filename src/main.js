@@ -34,7 +34,7 @@ app.use(
             path:"/",
             httpOnly:true,
             // secure:true,
-            maxAge:24*30*1000*60*60// 30일간 저장 24시간*30일*1000ms*60초*60분
+            maxAge:24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
         },
         store:new FileStore({logFn:()=>{}}),
     })

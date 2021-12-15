@@ -52,15 +52,18 @@ const getScore = async (req, res) =>{
                 'uniqNo':dbResult['uniq_no']
             }
         }
-        result = iconv.decode(await getHttp(options), 'euc-kr')
-        res.send(result)
+        result={
+            status:1,
+            subStatus:0,
+            result:iconv.decode(await getHttp(options), 'euc-kr')
+        }
     }else{
         result={
             status:3,
             subStatus:8
         }
-        res.send(JSON.stringify(result))
     }
+    res.send(JSON.stringify(result))
 }
 
 const getHttp = (options) =>{
