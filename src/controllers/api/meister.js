@@ -40,7 +40,6 @@ const getPoint = async (req, res) =>{
 }
 
 const getScore = async (req, res) =>{
-    console.log([req.params.grade, req.params.classNo, req.params.studentNo])
     dbResult = await model.getMeisterNo(req.params.grade, req.params.classNo, req.params.studentNo)
     if(dbResult){
         options = {

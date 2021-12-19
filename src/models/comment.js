@@ -73,6 +73,7 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                     memberLevel:e.member_level,
                     comment:e.comment,
                     commentDate:e.comment_date,
+                    depth:depth,
                     permission:e.permission,
                     child:commentTree(childList, depth+1, memberCode, memberLevel, isAnonymous)// 대댓글 재귀 호출
                 })
@@ -84,6 +85,7 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                     memberLevel:e.member_level,
                     comment:e.comment,
                     commentDate:e.comment_date,
+                    depth:depth,
                     permission:e.permission
                 })
             }
