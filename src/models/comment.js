@@ -6,7 +6,7 @@ let membersLevel = []
 const view = async (memberCode, memberLevel, commentBoardType, postNo, isAnonymous) => {
     membersLevel = await getMembersLevel.get()
     result = []
-    const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `order`"
+    const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `comment_index`"
     const params=[commentBoardType, postNo]
     return new Promise(resolve => {
         conn.query(commentViewQuery, params, (error, rows) => {
@@ -40,7 +40,7 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                 commentList.forEach(child => {// 불러오려는 대댓글들만 배열에 넣음
                     if(
                         child.depth!=depth &&// 현재 깊이의 댓글이 아니고
-                        !(child.depth==depth+1 && child.parent_no!=e.order)){
+                        !(child.depth==depth+1 && child.parent_idx!=e.comment_index)){
                         /*
                         자신의 자식 댓글들만 불러오기위한 조건문
                         만약 댓글의 깊이가 바로 밑이고 대댓글의 부모가 현재 댓글과 같다면
@@ -55,7 +55,7 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                         밑의 코드로도 표현가능
                         if(child.depth!=depth){// 현재 깊이의 댓글이 아니고
                             if(child.depth==depth+1){// 만약 댓글의 깊이가 바로 밑이라면
-                                if(child.parent_no==e.order){// 대댓글의 부모가 현재 댓글과 같다면
+                                if(child.parent_idx==e.comment_index){// 대댓글의 부모가 현재 댓글과 같다면
                                     childList.push(child);
                                 }
                             }else{//아니면 바로 넣음
@@ -91,20 +91,34 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
     });
     return result;
 }
-const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, comment) => {
+const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, comment, depth, parentIdx) => {
     result=new Array()
-    const commentIndexQuery="SELECT `order` from ?? where `depth`=0 and `post_no`=? order by `comment_index` desc limit 1"
-    const params=[commentBoardType, postNo]
+    let commentCheckQuery
+    let params
+    if(depth<1){// 그냥 댓글
+        commentCheckQuery="SELECT `post_no` FROM ?? WHERE `post_no`=?"
+        params=[boardType, postNo]
+    }else{// 대댓글
+        commentCheckQuery="SELECT `parent` FROM ?? WHERE `post_no`=? AND `comment_index`=? AND `depth`=?"
+        params=[commentBoardType, postNo, parentIdx, depth-1]
+    }
     return new Promise(resolve => {
-        conn.query(commentIndexQuery, params, (error, order) => {
+        conn.query(commentCheckQuery, params, (error, row) => {
             if(error) resolve({status:2,subStatus:0})
-            if(order[0]==null){
-                order = 1;
+            if(row[0]==null){
+                resolve({status:3,subStatus:0})
+                return;
             }else{
-                order = order[0].order+1;
+                if(depth>0 && row[0].parent==0){// 대댓글이 있는지 표시
+                    const commentParentQuery = "UPDATE ?? SET `parent`=1 WHERE `comment_index`=?"
+                    const params=[commentBoardType, parentIdx]
+                    conn.query(commentParentQuery, params, (error) => {
+                        if(error) resolve({status:2,subStatus:0})
+                    })
+                }
             }
-            const commentWriteQuery="INSERT INTO ?? (`post_no`, `depth`, `order`, `parent_no`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES (?, 0, ?, NULL, ?, ?, ?, now());"
-            const params=[commentBoardType, postNo, order, memberCode, memberNickname, comment]
+            const commentWriteQuery="INSERT INTO ?? (`post_no`, `depth`, `parent_idx`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES (?, ?, ?, ?, ?, ?, now());"
+            const params=[commentBoardType, postNo, depth, parentIdx, memberCode, memberNickname, comment]
             conn.query(commentWriteQuery, params, (error) => {
                 if(error) resolve({status:2,subStatus:0})
                 const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`+1 where `post_no`=?"
@@ -117,27 +131,32 @@ const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, 
         })
     })
 }
-const del = (memberCode, memberLevel, boardType, commentBoardType, postNo, commentIndex) => {
+const del = (memberCode, memberLevel, boardType, commentBoardType, postNo, commentIdx) => {
     result=new Array()
     const commentCheckQuery="SELECT `member_code` FROM ?? WHERE `comment_index`= ? AND `post_no`=?"
-    const params=[commentBoardType, commentIndex, postNo]
+    const params=[commentBoardType, commentIdx, postNo]
     return new Promise(resolve => {
         conn.query(commentCheckQuery, params, (error, checkMemberCode) => {
             if(error) resolve({status:2,subStatus:0})
-            if(checkMemberCode[0].member_code==memberCode || memberLevel>=3){
-                const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
-                const params=[commentBoardType, commentIndex, postNo]
-                conn.query(commentDeleteQuery, params, (error) => {
-                    if(error) resolve({status:2,subStatus:0})
-                    const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`-1 where `post_no`=?"
-                    const params=[boardType, postNo]
-                    conn.query(commentUpdateQuery, params, (error) => {
-                        if(error) resolve({status:2,subStatus:0})
-                        resolve({status:1,subStatus:0})
-                    })
-                })
+            if(checkMemberCode[0]==null){
+                resolve({status:3,subStatus:0})
+                return;
             }else{
-                resolve({status:3,subStatus:8})
+                if(checkMemberCode[0].member_code==memberCode || memberLevel>=3){
+                    const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
+                    const params=[commentBoardType, commentIdx, postNo]
+                    conn.query(commentDeleteQuery, params, (error) => {
+                        if(error) resolve({status:2,subStatus:0})
+                        const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`-1 where `post_no`=?"
+                        const params=[boardType, postNo]
+                        conn.query(commentUpdateQuery, params, (error) => {
+                            if(error) resolve({status:2,subStatus:0})
+                            resolve({status:1,subStatus:0})
+                        })
+                    })
+                }else{
+                    resolve({status:3,subStatus:7})
+                }
             }
         })
     })

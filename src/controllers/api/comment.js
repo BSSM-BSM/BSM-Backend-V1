@@ -38,7 +38,7 @@ const view = async (req, res) =>{
 const write = async (req, res) =>{
     if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
     let model = require('../../models/comment')
-    let boardType, commentBoardType;
+    let boardType, commentBoardType, depth, parentIdx;
     switch(req.params.boardType){
         case 'board':
             boardType='board'
@@ -52,8 +52,20 @@ const write = async (req, res) =>{
             boardType='notice'
             commentBoardType='notice_comment'
             break;
+        default:
+            break;
     }
-    result = await model.write(req.session.memberCode, boardType, commentBoardType, req.params.postNo, req.session.memberNickname, xss.process(req.body.comment))
+    if(req.params.depth>0){
+        depth=parseInt(req.params.depth);
+    }else{
+        depth=0;
+    }
+    if(req.params.parentIdx>0){
+        parentIdx=parseInt(req.params.parentIdx);
+    }else{
+        parentIdx=null;
+    }
+    result = await model.write(req.session.memberCode, boardType, commentBoardType, req.params.postNo, req.session.memberNickname, xss.process(req.body.comment), depth, parentIdx)
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
@@ -74,7 +86,7 @@ const del = async (req, res) =>{
             commentBoardType='notice_comment'
             break;
     }
-    result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, commentBoardType, req.params.postNo, req.body.commentIndex)
+    result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, commentBoardType, req.params.postNo, req.params.commentIdx)
     res.send(JSON.stringify(result))
 }
 

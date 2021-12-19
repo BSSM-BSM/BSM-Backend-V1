@@ -65,8 +65,9 @@ router.patch('/post/:boardType/:postNo', postController.update)
 router.delete('/post/:boardType/:postNo', postController.del)
 
 router.get('/comment/:boardType/:postNo', commentController.view)
+router.post('/comment/:boardType/:postNo/:depth/:parentIdx', commentController.write)
 router.post('/comment/:boardType/:postNo', commentController.write)
-router.delete('/comment/:boardType/:postNo', commentController.del)
+router.delete('/comment/:boardType/:postNo/:commentIdx', commentController.del)
 
 router.post('/like/:boardType/:postNo', likeController.like)
 
