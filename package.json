@@ -1,4 +1,6 @@
 {
+  "name":"BSM",
+  "version":"1.2.0",
   "dependencies": {
     "@types/express": "^4.17.13",
     "@types/mysql": "^2.15.19",

@@ -16,16 +16,17 @@ const view = async (boardType, page, limit, isAnonymous) => {
             // 게시판 페이지 수 계산
             let totalPage, startPost, limitPost=limit;
             startPost = (page-1)*limitPost;
-            totalPage=Math.ceil(Object.keys(totalPost).length/limitPost);
+            totalPage=Math.ceil(totalPost.length/limitPost);
             result.pages=totalPage;
             const boardQuery="SELECT * FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC LIMIT ?, ?"
             const params=[boardType, startPost, limitPost];
             conn.query(boardQuery, params, (error, rows) => {
                 if(error) result.arrBoard=null;
-                if(!rows.length) result.arrBoard=null;
+                let n = rows.length;
+                if(!n) result.arrBoard=null;
                 else{
                     result.arrBoard=new Array()
-                    for(let i=0;i<Object.keys(rows).length;i++){
+                    for(let i=0;i<n;i++){
                         if(membersLevel[rows[i].member_code]>0){
                             rows[i].member_level=membersLevel[rows[i].member_code]
                         }else{
