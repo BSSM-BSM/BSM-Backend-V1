@@ -113,32 +113,16 @@ const islogin = (req, res) =>{
 }
 const view = async (req, res) =>{
     const model = require('../../models/account')
-    let member
     dbResult = await model.getMemberCode(req.params.memberCode)
-    if(dbResult){
-        member={
-            memberCode:dbResult.member_code,
-            memberNickname:dbResult.member_nickname,
-            memberLevel:dbResult.member_level,
-            memberCreated:dbResult.member_created,
-            memberEnrolled:dbResult.member_enrolled,
-            memberGrade:dbResult.member_grade,
-            memberClass:dbResult.member_class,
-            memberStudentNo:dbResult.member_studentNo,
-            memberName:dbResult.member_name,
-        }
-        if(req.session.memberCode>0 && dbResult.member_code===req.session.memberCode){
-            member.permission=true;
-        }else{
-            member.permission=false;
-        }
+    if(req.session.memberCode>0 && dbResult.member_code===req.session.memberCode){
+        dbResult.permission=true;
     }else{
-        member=null
+        dbResult.permission=false;
     }
     result={
         status:1,
         subStatus:0,
-        member:member
+        member:dbResult
     }
     res.send(JSON.stringify(result))
 }

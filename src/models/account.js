@@ -20,10 +20,37 @@ const getMemberCode = (memberCode) => {
     return new Promise(resolve => {
         conn.query(getMemberQuery, params, (error, rows) => {
             if(error) resolve(false)
-            if(rows.length)
-                resolve(rows[0])
-            else
-                resolve(false)
+            if(rows.length){
+                rows=rows[0]
+                resolve({
+                    memberType:"active",
+                    memberCode:memberCode,
+                    memberNickname:rows.member_nickname,
+                    memberLevel:rows.member_level,
+                    memberCreated:rows.member_created,
+                    memberEnrolled:rows.member_enrolled,
+                    memberGrade:rows.member_grade,
+                    memberClass:rows.member_class,
+                    memberStudentNo:rows.member_studentNo,
+                    memberName:rows.member_name
+                })
+            }else
+                if(memberCode==0){
+                    resolve({
+                        memberType:"deleted",
+                        memberCode:memberCode,
+                    })
+                }else if(memberCode==-1){
+                    resolve({
+                        memberType:"anonymous",
+                        memberCode:memberCode,
+                    })
+                }else{
+                    resolve({
+                        memberType:"none",
+                        memberCode:memberCode,
+                    })
+                }
         })
     })
 }
