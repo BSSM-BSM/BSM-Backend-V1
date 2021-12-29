@@ -6,7 +6,7 @@ let membersLevel = []
 const view = async (memberCode, memberLevel, commentBoardType, postNo, isAnonymous) => {
     membersLevel = await getMembersLevel.get()
     result = []
-    const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 ORDER BY `comment_index`"
+    const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? ORDER BY `comment_index`"
     const params=[commentBoardType, postNo]
     return new Promise(resolve => {
         conn.query(commentViewQuery, params, (error, rows) => {
@@ -18,22 +18,48 @@ const view = async (memberCode, memberLevel, commentBoardType, postNo, isAnonymo
 }
 const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) => {
     let result = [];
+    let comment = {}
     commentList.forEach(e => {
         if(e.depth==depth){// 대댓글의 깊이가 불러오려는 현재 깊이와 같으면
-            if(membersLevel[e.member_code]>0){// 관리자 댓글인지 확인
-                e.member_level=membersLevel[e.member_code]
+            if(e.comment_deleted==0){
+                if(membersLevel[e.member_code]>0){// 관리자 댓글인지 확인
+                    e.member_level=membersLevel[e.member_code]
+                }else{
+                    e.member_level=0
+                }
+                if(memberCode>0 && e.member_code===memberCode || memberLevel>=3){// 자신의 댓글인지 확인
+                    e.permission=true;
+                }else{
+                    e.permission=false;
+                }
+                if(isAnonymous){// 익명 댓글인지 확인
+                    e.member_code=-1
+                    e.member_level=0
+                    e.member_nickname='ㅇㅇ'
+                }
+                comment = {
+                    idx:e.comment_index,
+                    memberCode:e.member_code,
+                    memberNickname:e.member_nickname,
+                    memberLevel:e.member_level,
+                    comment:e.comment,
+                    commentDate:e.comment_date,
+                    depth:depth,
+                    permission:e.permission,
+                    deleted:false
+                }
             }else{
-                e.member_level=0
-            }
-            if(memberCode>0 && e.member_code===memberCode || memberLevel>=3){// 자신의 댓글인지 확인
-                e.permission=true;
-            }else{
-                e.permission=false;
-            }
-            if(isAnonymous){// 익명 댓글인지 확인
-                e.member_code=-1
-                e.member_level=0
-                e.member_nickname='ㅇㅇ'
+                comment = {
+                    idx:e.comment_index,
+                    memberCode:-1,
+                    memberNickname:"삭제된 댓글 입니다",
+                    memberLevel:0,
+                    comment:"",
+                    commentDate:e.comment_date,
+                    depth:depth,
+                    permission:false,
+                    deleted:true,
+                }
             }
             if(e.parent==1){// 만약 대댓글이 더 있다면
                 let childList = []
@@ -66,29 +92,9 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                         childList.push(child);
                     }
                 });
-                result.push({
-                    idx:e.comment_index,
-                    memberCode:e.member_code,
-                    memberNickname:e.member_nickname,
-                    memberLevel:e.member_level,
-                    comment:e.comment,
-                    commentDate:e.comment_date,
-                    depth:depth,
-                    permission:e.permission,
-                    child:commentTree(childList, depth+1, memberCode, memberLevel, isAnonymous)// 대댓글 재귀 호출
-                })
-            }else{
-                result.push({
-                    idx:e.comment_index,
-                    memberCode:e.member_code,
-                    memberNickname:e.member_nickname,
-                    memberLevel:e.member_level,
-                    comment:e.comment,
-                    commentDate:e.comment_date,
-                    depth:depth,
-                    permission:e.permission
-                })
+                comment.child=commentTree(childList, depth+1, memberCode, memberLevel, isAnonymous)// 대댓글 재귀 호출
             }
+            result.push(comment)
         }
     });
     return result;
@@ -101,7 +107,7 @@ const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, 
         commentCheckQuery="SELECT `post_no` FROM ?? WHERE `post_no`=?"
         params=[boardType, postNo]
     }else{// 대댓글
-        commentCheckQuery="SELECT `parent` FROM ?? WHERE `post_no`=? AND `comment_index`=? AND `depth`=?"
+        commentCheckQuery="SELECT `parent` FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 AND `comment_index`=? AND `depth`=?"
         params=[commentBoardType, postNo, parentIdx, depth-1]
     }
     return new Promise(resolve => {
@@ -135,7 +141,7 @@ const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, 
 }
 const del = (memberCode, memberLevel, boardType, commentBoardType, postNo, commentIdx) => {
     result=new Array()
-    const commentCheckQuery="SELECT `member_code` FROM ?? WHERE `comment_index`= ? AND `post_no`=?"
+    const commentCheckQuery="SELECT `member_code` FROM ?? WHERE `comment_index`= ? AND `post_no`=? AND `comment_deleted`=0"
     const params=[commentBoardType, commentIdx, postNo]
     return new Promise(resolve => {
         conn.query(commentCheckQuery, params, (error, checkMemberCode) => {

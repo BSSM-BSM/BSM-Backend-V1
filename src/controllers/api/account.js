@@ -114,7 +114,7 @@ const islogin = (req, res) =>{
 const view = async (req, res) =>{
     const model = require('../../models/account')
     dbResult = await model.getMemberCode(req.params.memberCode)
-    if(req.session.memberCode>0 && dbResult.member_code===req.session.memberCode){
+    if(req.session.memberCode>0 && dbResult.memberCode==req.session.memberCode){
         dbResult.permission=true;
     }else{
         dbResult.permission=false;
