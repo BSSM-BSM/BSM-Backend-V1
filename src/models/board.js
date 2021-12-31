@@ -8,17 +8,17 @@ const view = async (boardType, page, limit, isAnonymous) => {
     let membersLevel = await getMembersLevel.get()
     return new Promise(resolve => {
         // 총 게시물 갯수
-        const totalPostQuery="SELECT * FROM ?? WHERE `post_deleted`=0"
+        const totalPostQuery="SELECT COUNT(`post_no`) FROM ?? WHERE `post_deleted`=0"
         const params=[boardType]
-        conn.query(totalPostQuery, params, (error, totalPost) => {
+        conn.query(totalPostQuery, params, (error, total) => {
             if(error) resolve(error)
             result=new Object();
             // 게시판 페이지 수 계산
             let totalPage, startPost, limitPost=limit;
             startPost = (page-1)*limitPost;
-            totalPage=Math.ceil(totalPost.length/limitPost);
+            totalPage=Math.ceil(total[0]["COUNT(`post_no`)"]/limitPost);
             result.pages=totalPage;
-            const boardQuery="SELECT * FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC LIMIT ?, ?"
+            const boardQuery="SELECT `post_no`, `post_title`, `post_comments`, `member_code`, `member_nickname`, `post_date`, `post_hit`, `like` FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC LIMIT ?, ?"
             const params=[boardType, startPost, limitPost];
             conn.query(boardQuery, params, (error, rows) => {
                 if(error) result.arrBoard=null;

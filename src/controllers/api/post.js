@@ -1,10 +1,15 @@
 const js_xss = require('xss')
 const xss = new js_xss.FilterXSS({
-    onIgnoreTagAttr: function (tag, name, value, isWhiteAttr) {
-        if (name.substr(0, 5) === "style") {
+    onIgnoreTagAttr:(tag, name, value, isWhiteAttr) => {
+        if(name.substr(0, 5) === "style") {
             return name + '="' + js_xss.escapeAttrValue(value) + '"';
         }
     },
+    onIgnoreTag:(tag, html, options) => {
+        if(tag.substr(0, 6) === "iframe") {
+            return html;
+        }
+    }
 });
 const webpush = require('../../push')
 
