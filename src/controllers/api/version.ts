@@ -13,8 +13,8 @@ const get = async (req:express.Request, res:express.Response) =>{
             result={
                 status:1,
                 subStatus:0,
-                versionCode:1,
-                versionName:'1.1.0'
+                versionCode:2,
+                versionName:'1.2.0'
             }
             break
         case 'app':

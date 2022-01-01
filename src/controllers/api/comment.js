@@ -1,11 +1,11 @@
 const js_xss = require('xss')
 const xss = new js_xss.FilterXSS({
-    whiteList: {},
+    whiteList: {
+        img: ["emoticon"]
+    },
 })
 let result
-let dbResult={
-    bool:false,
-}
+let dbResult
 const view = async (req, res) =>{
     let model = require('../../models/comment')
     let commentBoardType, isAnonymous;
