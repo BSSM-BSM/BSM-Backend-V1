@@ -1,7 +1,7 @@
 const js_xss = require('xss')
 const xss = new js_xss.FilterXSS({
     whiteList: {
-        img: ["emoticon"]
+        img: ["e_id", "e_idx", "e_type"]
     },
 })
 let result
@@ -55,6 +55,7 @@ const write = async (req, res) =>{
         default:
             break;
     }
+    if(req.body.comment.length<1){res.send(JSON.stringify({status:3,subStatus:0}));return;}
     if(req.params.depth>0){
         depth=parseInt(req.params.depth);
     }else{

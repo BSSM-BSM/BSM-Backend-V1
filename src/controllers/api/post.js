@@ -4,6 +4,17 @@ const xss = new js_xss.FilterXSS({
         if(name.substr(0, 5) === "style") {
             return name + '="' + js_xss.escapeAttrValue(value) + '"';
         }
+        if(tag.substr(0, 3)==="img"){
+            if(name.substr(0, 4) === "e_id") {
+                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            }
+            if(name.substr(0, 5) === "e_idx") {
+                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            }
+            if(name.substr(0, 6) === "e_type") {
+                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            }
+        }
     },
     onIgnoreTag:(tag, html, options) => {
         if(tag.substr(0, 6) === "iframe") {
