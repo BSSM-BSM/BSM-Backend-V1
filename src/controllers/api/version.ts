@@ -23,8 +23,8 @@ const get = async (req:express.Request, res:express.Response) =>{
                     result={
                         status:1,
                         subStatus:0,
-                        versionCode:7,
-                        versionName:'1.0.0'
+                        versionCode:8,
+                        versionName:'1.0.0\n안드로이드 네이티브 앱은 지원이 종료되었습니다\n웹 앱을 다운 받아주세요'
                     }
                     break;
             }
@@ -36,8 +36,8 @@ const getLegacy = async (req:express.Request, res:express.Response) =>{
     result={
         status:1,
         subStatus:0,
-        versionCode:7,
-        versionName:'1.0.0\n현재 호환되지 않는 버전을 사용하고 있습니다\n이 버전의 대부분의 기능이 작동되지 않을 수 있습니다\n업데이트 해주시길 바랍니다'
+        versionCode:8,
+        versionName:'1.0.0\n안드로이드 네이티브 앱은 지원이 종료되었습니다\n웹 앱을 다운 받아주세요'
     }
     res.send(result)
 }

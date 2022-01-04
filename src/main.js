@@ -27,7 +27,6 @@ const jwt = require('./jwt')
 
 const indexRouter = require('./routes/index')
 const boardRouter = require('./routes/board')
-const appRouter = require('./routes/app')
 const apiRouter = require('./routes/api')
 const logoutRouter = require('./routes/logout')
 
@@ -37,7 +36,6 @@ app.use(express.static('public'));
 
 app.use('/', indexRouter)
 app.use('/board', boardRouter)
-app.use('/app', appRouter)
 app.use('/api', apiRouter)
 app.use('/logout', logoutRouter)
 
