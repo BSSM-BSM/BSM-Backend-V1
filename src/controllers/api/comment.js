@@ -1,3 +1,4 @@
+const jwt = require('../../jwt')
 const js_xss = require('xss')
 const xss = new js_xss.FilterXSS({
     whiteList: {
@@ -9,9 +10,10 @@ let dbResult
 const view = async (req, res) =>{
     let model = require('../../models/comment')
     let commentBoardType, isAnonymous;
+    const jwtValue = await jwt.check(req.cookies.token);
     switch(req.params.boardType){
         case 'board':
-            if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+            if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
             commentBoardType='board_comment'
             isAnonymous=false
             break;
@@ -27,7 +29,7 @@ const view = async (req, res) =>{
             res.send(JSON.stringify({status:3,subStatus:0}))
             return;
     }
-    dbResult = await model.view(req.session.memberCode, req.session.memberLevel, commentBoardType, req.params.postNo, isAnonymous)
+    dbResult = await model.view(jwtValue.memberCode, jwtValue.memberLevel, commentBoardType, req.params.postNo, isAnonymous)
     result={
         status:1,
         subStatus:0,
@@ -36,7 +38,8 @@ const view = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const write = async (req, res) =>{
-    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+    const jwtValue = await jwt.check(req.cookies.token);
+    if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     let model = require('../../models/comment')
     let boardType, commentBoardType, depth, parentIdx;
     switch(req.params.boardType){
@@ -55,7 +58,7 @@ const write = async (req, res) =>{
         default:
             break;
     }
-    if(req.body.comment.length<1){res.send(JSON.stringify({status:3,subStatus:0}));return;}
+    if(req.body.comment==undefined || req.body.comment.length<1){res.send(JSON.stringify({status:3,subStatus:0}));return;}
     if(req.params.depth>0){
         depth=parseInt(req.params.depth);
     }else{
@@ -66,11 +69,12 @@ const write = async (req, res) =>{
     }else{
         parentIdx=null;
     }
-    result = await model.write(req.session.memberCode, boardType, commentBoardType, req.params.postNo, req.session.memberNickname, xss.process(req.body.comment), depth, parentIdx)
+    result = await model.write(jwtValue.memberCode, boardType, commentBoardType, req.params.postNo, jwtValue.memberNickname, xss.process(req.body.comment), depth, parentIdx)
     res.send(JSON.stringify(result))
 }
 const del = async (req, res) =>{
-    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+    const jwtValue = await jwt.check(req.cookies.token);
+    if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     let model = require('../../models/comment')
     let boardType, commentBoardType;
     switch(req.params.boardType){
@@ -87,7 +91,7 @@ const del = async (req, res) =>{
             commentBoardType='notice_comment'
             break;
     }
-    result = await model.del(req.session.memberCode, req.session.memberLevel, boardType, commentBoardType, req.params.postNo, req.params.commentIdx)
+    result = await model.del(jwtValue.memberCode, jwtValue.memberLevel, boardType, commentBoardType, req.params.postNo, req.params.commentIdx)
     res.send(JSON.stringify(result))
 }
 

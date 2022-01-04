@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('../jwt')
 
 router.get('/', (req ,res) => {
-    req.session.destroy(() => {
-        res.clearCookie('SESSION');
-        res.redirect('/');
-    });
+    res.clearCookie('token');
+    res.clearCookie('refreshToken');
+    res.redirect('/');
 })
 
 module.exports = router;

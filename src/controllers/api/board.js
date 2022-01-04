@@ -1,16 +1,12 @@
-let result={
-    status:2,
-    subStatus:0,
-}
-let dbResult={
-    bool:false,
-}
+const jwt = require('../../jwt')
+let result, dbResult
 const view = async (req, res) =>{
     let model = require('../../models/board')
     let boardType, isAnonymous, page, limit;
+    const jwtValue = await jwt.check(req.cookies.token);
     switch(req.params.boardType){
         case 'board':
-            if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+            if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
             boardType='board'
             isAnonymous=false
             break;

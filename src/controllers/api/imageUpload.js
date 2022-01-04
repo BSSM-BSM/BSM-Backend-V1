@@ -1,6 +1,7 @@
+const jwt = require('../../jwt')
 let result
 const upload = async (req, res) =>{
-    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+    if(!await jwt.check(req.cookies.token).isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     result={
         status:1,
         subStatus:0,

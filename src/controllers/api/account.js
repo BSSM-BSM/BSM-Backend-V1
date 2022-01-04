@@ -1,3 +1,4 @@
+const jwt = require('../../jwt')
 const crypto = require('crypto')
 const sharp = require('sharp')
 const nodemailer = require("nodemailer")
@@ -14,8 +15,16 @@ const login = async (req, res) =>{
     if(dbResult){
         if(dbResult.member_salt===''){
             if(dbResult.member_pw===crypto.createHash('sha3-256').update(req.body.member_pw).digest('hex')){
-                req.session.destroy();
-                req.session.memberCode=dbResult.member_code
+                const jwtToken = await jwt.sign({
+                    isLogin:false,
+                    memberCode:dbResult.member_code
+                });
+                res.cookie('token', jwtToken.token, {
+                    path:"/",
+                    httpOnly:true,
+                    secure:true,
+                    maxAge:1*1000*60*60// 1시간 저장 1시간*1000ms*60초*60분
+                });
                 result={
                     status:4,
                     subStatus:2
@@ -23,17 +32,32 @@ const login = async (req, res) =>{
             }
         }else{
             if(dbResult.member_pw===crypto.createHash('sha3-256').update(dbResult.member_salt+req.body.member_pw).digest('hex')){
-                req.session.isLogin=true
-                req.session.memberCode=dbResult.member_code
-                req.session.memberId=dbResult.member_id
-                req.session.memberNickname=dbResult.member_nickname
-                req.session.memberLevel=dbResult.member_level
-                req.session.grade=dbResult.member_grade
-                req.session.classNo=dbResult.member_class
-                req.session.studentNo=dbResult.member_studentNo
+                const jwtToken = await jwt.sign({
+                    isLogin:true,
+                    memberCode:dbResult.member_code,
+                    memberId:dbResult.member_id,
+                    memberNickname:dbResult.member_nickname,
+                    memberLevel:dbResult.member_level,
+                    grade:dbResult.member_grade,
+                    classNo:dbResult.member_class,
+                    studentNo:dbResult.member_studentNo
+                });
+                res.cookie('token', jwtToken.token, {
+                    path:"/",
+                    httpOnly:true,
+                    secure:true,
+                    maxAge:1*1000*60*60// 1시간 저장 1시간*1000ms*60초*60분
+                });
+                res.cookie('refreshToken', jwtToken.refreshToken, {
+                    path:"/",
+                    httpOnly:true,
+                    secure:true,
+                    maxAge:24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
+                });
                 result={
                     status:1,
-                    subStatus:0
+                    subStatus:0,
+                    jwt:jwtToken
                 }
             }
         }
@@ -95,8 +119,8 @@ const signUp = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
-const islogin = (req, res) =>{
-    if(req.session.isLogin){
+const islogin = async (req, res) =>{
+    if(!await jwt.check(req.cookies.token).isLogin){
         result={
             status:1,
             subStatus:0,
@@ -112,9 +136,10 @@ const islogin = (req, res) =>{
     res.send(result)
 }
 const view = async (req, res) =>{
+    const jwtValue = await jwt.check(req.cookies.token);
     const model = require('../../models/account')
     dbResult = await model.getMemberCode(req.params.memberCode)
-    if(req.session.memberCode>0 && dbResult.memberCode==req.session.memberCode){
+    if(jwtValue.memberCode>0 && dbResult.memberCode==jwtValue.memberCode){
         dbResult.permission=true;
     }else{
         dbResult.permission=false;
@@ -127,7 +152,7 @@ const view = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const profileUpload = async (req, res) =>{
-    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+    if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     const fileDir="public/resource/member/profile_images/"
     result={
         status:1,
@@ -218,11 +243,12 @@ const validCode = async (req, res) =>{
     }
 }
 const pwEdit = async (req, res) =>{
+    const jwtValue = await jwt.check(req.cookies.token);
     result={
         status:3,
         subStatus:0
     }
-    if(req.session.memberCode!=null){
+    if(jwtValue.memberCode){
         const model = require('../../models/account')
         if(req.body.member_pw!==req.body.member_pw_check){// 비밀번호 재입력 확인
             result={
@@ -230,8 +256,9 @@ const pwEdit = async (req, res) =>{
                 subStatus:1,
             }
         }else{
-            if(await model.pwEdit(req.session.memberCode, req.body.member_pw)){
-                req.session.destroy();
+            if(await model.pwEdit(jwtValue.memberCode, req.body.member_pw)){
+                res.clearCookie('token');
+                res.clearCookie('refreshToken');
                 result={
                     status:1,
                     subStatus:0

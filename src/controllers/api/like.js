@@ -1,6 +1,8 @@
+const jwt = require('../../jwt')
 let result
 const like = async (req, res) =>{
-    if(!req.session.isLogin){res.send(JSON.stringify({status:4,subStatus:1}));return;}
+    const jwtValue = await jwt.check(req.cookies.token);
+    if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     let model = require('../../models/like')
     let boardType, likeBoardType;
     switch(req.params.boardType){
@@ -17,7 +19,7 @@ const like = async (req, res) =>{
             likeBoardType='notice_like'
             break;
     }
-    result = await model.like(boardType, likeBoardType, req.params.postNo, req.session.memberCode, req.body.like)
+    result = await model.like(boardType, likeBoardType, req.params.postNo, jwtValue.memberCode, req.body.like)
     res.send(JSON.stringify(result))
 }
 

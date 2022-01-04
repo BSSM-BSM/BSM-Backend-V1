@@ -1,7 +1,6 @@
 require("dotenv").config({ path: "./config/env/.env" });
 const express = require('express')
-const session = require("express-session");
-const FileStore = require("session-file-store")(session);
+const cookieParser = require('cookie-parser');
 const helmet = require("helmet");
 
 const app = express()
@@ -23,22 +22,8 @@ app.use(helmet.xssFilter());
 
 app.set('etag', false)
 // app.set('trust proxy', 1)
-app.use(
-    session({
-        proxy:true,
-        key:'SESSION',
-        secret:process.env.SESSION_SECRET,
-        resave:false,
-        saveUninitialized:false,
-        cookie:{
-            path:"/",
-            httpOnly:true,
-            // secure:true,
-            maxAge:24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
-        },
-        store:new FileStore({logFn:()=>{}}),
-    })
-);
+app.use(cookieParser());
+const jwt = require('./jwt')
 
 const indexRouter = require('./routes/index')
 const boardRouter = require('./routes/board')
@@ -59,16 +44,19 @@ app.use('/logout', logoutRouter)
 const versionController = require('./controllers/api/version')
 app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환
 
-app.use((req, res) => res.status(404).render('404', {
-    member:{
-        isLogin:req.session.isLogin,
-        code:req.session.memberCode,
-        id:req.session.memberId,
-        nickname:req.session.memberNickname,
-        level:req.session.memberLevel,
-        grade:req.session.grade,
-        classNo:req.session.classNo,
-        studentNo:req.session.studentNo,
-    },
-}))
+app.use(async (req, res) => {
+        const jwtValue = await jwt.check(req.cookies.token);
+        res.status(404).render('404', {
+            member:{
+                isLogin:jwtValue.isLogin,
+                code:jwtValue.memberCode,
+                id:jwtValue.memberId,
+                nickname:jwtValue.memberNickname,
+                level:jwtValue.memberLevel,
+                grade:jwtValue.grade,
+                classNo:jwtValue.classNo,
+                studentNo:jwtValue.studentNo,
+            }
+        })
+    })
 app.listen(4000)

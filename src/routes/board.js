@@ -1,63 +1,70 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('../jwt')
 
-router.get('/write/:boardType', (req ,res) => res.render('post_write', {
-    member:{
-        isLogin:req.session.isLogin,
-        code:req.session.memberCode,
-        id:req.session.memberId,
-        nickname:req.session.memberNickname,
-        level:req.session.memberLevel,
-        grade:req.session.grade,
-        classNo:req.session.classNo,
-        studentNo:req.session.studentNo,
-    },
-    boardType:req.params.boardType,
-    postNo:req.params.postNo,
-}))
-router.get('/write/:boardType/:postNo', (req ,res) => res.render('post_write', {
-    member:{
-        isLogin:req.session.isLogin,
-        code:req.session.memberCode,
-        id:req.session.memberId,
-        nickname:req.session.memberNickname,
-        level:req.session.memberLevel,
-        grade:req.session.grade,
-        classNo:req.session.classNo,
-        studentNo:req.session.studentNo,
-    },
-    boardType:req.params.boardType,
-    postNo:req.params.postNo,
-}))
-router.get('/:boardType', (req ,res) => res.render('board', {
-    member:{
-        isLogin:req.session.isLogin,
-        code:req.session.memberCode,
-        id:req.session.memberId,
-        nickname:req.session.memberNickname,
-        level:req.session.memberLevel,
-        grade:req.session.grade,
-        classNo:req.session.classNo,
-        studentNo:req.session.studentNo,
-    },
-    boardType:req.params.boardType,
-    page:req.query.page,
-    postNo:null,
-}))
-router.get('/:boardType/:postNo', (req ,res) => res.render('board', {
-    member:{
-        isLogin:req.session.isLogin,
-        code:req.session.memberCode,
-        id:req.session.memberId,
-        nickname:req.session.memberNickname,
-        level:req.session.memberLevel,
-        grade:req.session.grade,
-        classNo:req.session.classNo,
-        studentNo:req.session.studentNo,
-    },
-    boardType:req.params.boardType,
-    page:req.query.page,
-    postNo:req.params.postNo,
-}))
+router.get('/write/:boardType', async (req ,res) => {
+    const jwtValue = await jwt.check(req.cookies.token);
+    res.render('post_write', {
+        member:{
+            isLogin:jwtValue.isLogin,
+            code:jwtValue.memberCode,
+            id:jwtValue.memberId,
+            nickname:jwtValue.memberNickname,
+            level:jwtValue.memberLevel,
+            grade:jwtValue.grade,
+            classNo:jwtValue.classNo,
+            studentNo:jwtValue.studentNo,
+        },
+        boardType:req.params.boardType,
+        postNo:null,
+    })
+})
+router.get('/write/:boardType/:postNo', async (req ,res) => {
+    const jwtValue = await jwt.check(req.cookies.token);
+    res.render('post_write', {
+        member:{
+            isLogin:jwtValue.isLogin,
+            code:jwtValue.memberCode,
+            id:jwtValue.memberId,
+            nickname:jwtValue.memberNickname,
+            level:jwtValue.memberLevel,
+            grade:jwtValue.grade,
+            classNo:jwtValue.classNo,
+            studentNo:jwtValue.studentNo,
+        },
+        boardType:req.params.boardType,
+        postNo:req.params.postNo,
+    })
+})
+router.get('/:boardType', async (req ,res) => {
+    const jwtValue = await jwt.check(req.cookies.token);
+    res.render('board', {
+        member:{
+            isLogin:jwtValue.isLogin,
+            code:jwtValue.memberCode,
+            id:jwtValue.memberId,
+            nickname:jwtValue.memberNickname,
+            level:jwtValue.memberLevel,
+            grade:jwtValue.grade,
+            classNo:jwtValue.classNo,
+            studentNo:jwtValue.studentNo,
+        }
+    })
+})
+router.get('/:boardType/:postNo', async (req ,res) => {
+    const jwtValue = await jwt.check(req.cookies.token);
+    res.render('board', {
+        member:{
+            isLogin:jwtValue.isLogin,
+            code:jwtValue.memberCode,
+            id:jwtValue.memberId,
+            nickname:jwtValue.memberNickname,
+            level:jwtValue.memberLevel,
+            grade:jwtValue.grade,
+            classNo:jwtValue.classNo,
+            studentNo:jwtValue.studentNo,
+        }
+    })
+})
 
 module.exports = router

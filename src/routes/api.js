@@ -1,8 +1,11 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('../jwt')
 const multer = require('multer')
 const imageUpload = multer({storage:multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination:async function (req, file, cb) {
+      const jwtValue = await jwt.check(req.cookies.token);
+      if(!jwtValue.isLogin) return;
       cb(null, 'public/resource/board/upload_images/')
     },
     filename: function (req, file, cb) {
@@ -11,7 +14,9 @@ const imageUpload = multer({storage:multer.diskStorage({
   })
 })
 const profileUpload = multer({storage:multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination:async function (req, file, cb) {
+      const jwtValue = await jwt.check(req.cookies.token);
+      if(!jwtValue.isLogin) return;
       cb(null, 'public/resource/member/profile_images/')
     },
     filename: function (req, file, cb) {
