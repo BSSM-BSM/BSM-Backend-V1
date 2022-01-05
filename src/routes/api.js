@@ -19,8 +19,9 @@ const profileUpload = multer({storage:multer.diskStorage({
       if(!jwtValue.isLogin) return;
       cb(null, 'public/resource/member/profile_images/')
     },
-    filename: function (req, file, cb) {
-      cb(null, 'temp-profile_'+req.session.memberCode+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
+    filename:async function (req, file, cb) {
+      const jwtValue = await jwt.check(req.cookies.token);
+      cb(null, 'temp-profile_'+jwtValue.memberCode+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
     }
   })
 })
@@ -40,6 +41,7 @@ const postController = require('../controllers/api/post')
 const commentController = require('../controllers/api/comment')
 const likeController = require('../controllers/api/like')
 const imageUploadController = require('../controllers/api/imageUpload')
+const emoticonController = require('../controllers/api/emoticon')
 
 router.post('/meal/register', pushController.register)
 
@@ -77,5 +79,8 @@ router.delete('/comment/:boardType/:postNo/:commentIdx', commentController.del)
 router.post('/like/:boardType/:postNo', likeController.like)
 
 router.post('/imageUpload', imageUpload.single('file'), imageUploadController.upload)
+
+router.get('/emoticon/:id', emoticonController.getemoticon)
+router.get('/emoticon', emoticonController.getemoticons)
 
 module.exports = router
