@@ -1,14 +1,15 @@
-const conn = require('../db')
+const pool = require('../db')
 
-const getMeal = (mealDate) => {
+const getMeal = async mealDate => {
+    let rows
     const mealSearchQuery="SELECT * FROM `food` WHERE `food_date`=?"
-    const params=[mealDate]
-    return new Promise(resolve => {
-        conn.query(mealSearchQuery, params, (error, rows) => {
-            if(error) resolve(false)
-            resolve(rows)
-        })
-    })
+    try{
+        [rows] = await pool.query(mealSearchQuery, [mealDate])
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    return rows
 }
 
 module.exports = {

@@ -42,8 +42,8 @@ app.use('/logout', logoutRouter)
 const versionController = require('./controllers/api/version')
 app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환
 
-app.use(async (req, res) => {
-        const jwtValue = await jwt.check(req.cookies.token);
+app.use((req, res) => {
+        const jwtValue = jwt.check(req.cookies.token);
         res.status(404).render('404', {
             member:{
                 isLogin:jwtValue.isLogin,

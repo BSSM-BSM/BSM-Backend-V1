@@ -5,7 +5,7 @@ const options = {
     algorithm:process.env.JWT_ALG,
     expiresIn:process.env.JWT_EXP
 }
-const sign = async (
+const sign = (
     payload:{
         isLogin:boolean,
         memberCode:number,
@@ -22,7 +22,7 @@ const sign = async (
     };
     return result;
 }
-const verify = async (token:String) => {
+const verify = (token:String) => {
     let decoded;
     try {
         decoded = jwt.verify(token, secretKey);
@@ -37,9 +37,9 @@ const verify = async (token:String) => {
     }
     return decoded;
 }
-const check = async (token:String|undefined) => {
+const check = (token:String|undefined) => {
     if(token){
-        const result = await verify(token);
+        const result = verify(token);
         if(result=='EXPIRED' || result=='INVALID'){
             return {
                 isLogin:false,

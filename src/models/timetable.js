@@ -1,14 +1,15 @@
-const conn = require('../db')
+const pool = require('../db')
 
-const get = (grade, classNo) => {
+const get = async (grade, classNo) => {
+    let rows
     const timetableSearchQuery="SELECT * FROM `timetable` WHERE `grade`=? AND `classNo`=?"
-    const params=[grade, classNo]
-    return new Promise(resolve => {
-        conn.query(timetableSearchQuery, params, (error, rows) => {
-            if(error) resolve(false)
-            resolve(rows)
-        })
-    })
+    try{
+        [rows] = await pool.query(timetableSearchQuery, [grade, classNo])
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    return rows
 }
 
 module.exports = {

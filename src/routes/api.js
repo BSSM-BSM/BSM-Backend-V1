@@ -2,25 +2,27 @@ const express = require('express')
 const router = express.Router()
 const jwt = require('../jwt')
 const multer = require('multer')
-const imageUpload = multer({storage:multer.diskStorage({
-    destination:async function (req, file, cb) {
-      const jwtValue = await jwt.check(req.cookies.token);
+const imageUpload = multer({
+  storage:multer.diskStorage({
+    destination:(req, file, cb) => {
+      const jwtValue = jwt.check(req.cookies.token);
       if(!jwtValue.isLogin) return;
       cb(null, 'public/resource/board/upload_images/')
     },
-    filename: function (req, file, cb) {
+    filename:(req, file, cb) => {
       cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
     }
   })
 })
-const profileUpload = multer({storage:multer.diskStorage({
-    destination:async function (req, file, cb) {
-      const jwtValue = await jwt.check(req.cookies.token);
+const profileUpload = multer({
+  storage:multer.diskStorage({
+    destination:(req, file, cb) => {
+      const jwtValue = jwt.check(req.cookies.token);
       if(!jwtValue.isLogin) return;
       cb(null, 'public/resource/member/profile_images/')
     },
-    filename:async function (req, file, cb) {
-      const jwtValue = await jwt.check(req.cookies.token);
+    filename:(req, file, cb) => {
+      const jwtValue = jwt.check(req.cookies.token);
       cb(null, 'temp-profile_'+jwtValue.memberCode+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
     }
   })

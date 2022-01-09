@@ -2,8 +2,8 @@ const express = require('express')
 const router = express.Router()
 const jwt = require('../jwt')
 
-router.get('/write/:boardType', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/write/:boardType', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('post_write', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -19,8 +19,8 @@ router.get('/write/:boardType', async (req ,res) => {
         postNo:null,
     })
 })
-router.get('/write/:boardType/:postNo', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/write/:boardType/:postNo', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('post_write', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -36,8 +36,8 @@ router.get('/write/:boardType/:postNo', async (req ,res) => {
         postNo:req.params.postNo,
     })
 })
-router.get('/:boardType', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/:boardType', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('board', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -51,8 +51,8 @@ router.get('/:boardType', async (req ,res) => {
         }
     })
 })
-router.get('/:boardType/:postNo', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/:boardType/:postNo', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('board', {
         member:{
             isLogin:jwtValue.isLogin,

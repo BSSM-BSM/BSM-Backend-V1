@@ -2,8 +2,8 @@ const express = require('express')
 const router = express.Router()
 const jwt = require('../jwt')
 
-router.get('/', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('index', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -17,8 +17,8 @@ router.get('/', async (req ,res) => {
         }
     })
 })
-router.get('/memberinfo/:memberCode', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/memberinfo/:memberCode', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('memberinfo', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -33,8 +33,8 @@ router.get('/memberinfo/:memberCode', async (req ,res) => {
         memberCode:req.params.memberCode
     })
 })
-router.get('/meal', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/meal', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('meal', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -48,8 +48,8 @@ router.get('/meal', async (req ,res) => {
         }
     })
 })
-router.get('/timetable', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/timetable', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('timetable', {
         member:{
             isLogin:jwtValue.isLogin,
@@ -63,8 +63,8 @@ router.get('/timetable', async (req ,res) => {
         }
     })
 })
-router.get('/meister', async (req ,res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+router.get('/meister', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
     res.render('meister', {
         member:{
             isLogin:jwtValue.isLogin,

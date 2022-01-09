@@ -3,7 +3,7 @@ const model = require('../../models/emoticon')
 
 let result, dbResult;
 const getemoticon = async (req, res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+    const jwtValue = jwt.check(req.cookies.token);
     if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     dbResult = await model.getemoticon(req.params.id)
     result = {
@@ -14,7 +14,7 @@ const getemoticon = async (req, res) => {
     res.send(JSON.stringify(result))
 }
 const getemoticons = async (req, res) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+    const jwtValue = jwt.check(req.cookies.token);
     if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     dbResult = await model.getemoticons()
     result = {

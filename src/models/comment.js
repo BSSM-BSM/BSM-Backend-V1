@@ -1,20 +1,19 @@
-const conn = require('../db')
+const pool = require('../db')
 const getMembersLevel = require('./membersLevel')
 
 let result = []
 let membersLevel = []
 const view = async (memberCode, memberLevel, commentBoardType, postNo, isAnonymous) => {
-    membersLevel = await getMembersLevel.get()
-    result = []
+    let rows
+    membersLevel = await getMembersLevel
     const commentViewQuery="SELECT * FROM ?? WHERE `post_no`=? ORDER BY `comment_index`"
-    const params=[commentBoardType, postNo]
-    return new Promise(resolve => {
-        conn.query(commentViewQuery, params, (error, rows) => {
-            if(error) resolve({status:2,subStatus:0})
-            result=commentTree(rows, 0, memberCode, memberLevel, isAnonymous);// 대댓글 트리
-            resolve(result)
-        })
-    })
+    try{
+        [rows] = await pool.query(commentViewQuery, [commentBoardType, postNo])
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    return commentTree(rows, 0, memberCode, memberLevel, isAnonymous);// 대댓글 트리
 }
 const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) => {
     let result = [];
@@ -99,10 +98,9 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
     });
     return result;
 }
-const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, comment, depth, parentIdx) => {
+const write = async (memberCode, boardType, commentBoardType, postNo, memberNickname, comment, depth, parentIdx) => {
+    let rows, commentCheckQuery, params
     result=new Array()
-    let commentCheckQuery
-    let params
     if(depth<1){// 그냥 댓글
         commentCheckQuery="SELECT `post_no` FROM ?? WHERE `post_no`=?"
         params=[boardType, postNo]
@@ -110,64 +108,71 @@ const write = (memberCode, boardType, commentBoardType, postNo, memberNickname, 
         commentCheckQuery="SELECT `parent` FROM ?? WHERE `post_no`=? AND `comment_deleted`=0 AND `comment_index`=? AND `depth`=?"
         params=[commentBoardType, postNo, parentIdx, depth-1]
     }
-    return new Promise(resolve => {
-        conn.query(commentCheckQuery, params, (error, row) => {
-            if(error) resolve({status:2,subStatus:0})
-            if(row[0]==null){
-                resolve({status:3,subStatus:0})
-                return;
-            }else{
-                if(depth>0 && row[0].parent==0){// 대댓글이 있는지 표시
-                    const commentParentQuery = "UPDATE ?? SET `parent`=1 WHERE `comment_index`=?"
-                    const params=[commentBoardType, parentIdx]
-                    conn.query(commentParentQuery, params, (error) => {
-                        if(error) resolve({status:2,subStatus:0})
-                    })
-                }
-            }
-            const commentWriteQuery="INSERT INTO ?? (`post_no`, `depth`, `parent_idx`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES (?, ?, ?, ?, ?, ?, now());"
-            const params=[commentBoardType, postNo, depth, parentIdx, memberCode, memberNickname, comment]
-            conn.query(commentWriteQuery, params, (error) => {
-                if(error) resolve({status:2,subStatus:0})
-                const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`+1 where `post_no`=?"
-                const params=[boardType, postNo]
-                conn.query(commentUpdateQuery, params, (error) => {
-                    if(error) resolve({status:2,subStatus:0})
-                    resolve({status:1,subStatus:0})
-                })
-            })
-        })
-    })
+    try{
+        [rows] = await pool.query(commentCheckQuery, params)
+    }catch(err){
+        console.error(err)
+        return {status:2,subStatus:0}
+    }
+    if(rows[0]==null){
+        return {status:3,subStatus:0}
+    }
+    if(depth>0 && rows[0].parent==0){// 대댓글이 있는지 표시
+        const commentParentQuery = "UPDATE ?? SET `parent`=1 WHERE `comment_index`=?"
+        try{
+            await pool.query(commentParentQuery, [commentBoardType, parentIdx])
+        }catch(err){
+            console.error(err)
+            return {status:2,subStatus:0}
+        }
+    }
+    const commentWriteQuery="INSERT INTO ?? (`post_no`, `depth`, `parent_idx`, `member_code`, `member_nickname`, `comment`, `comment_date`) VALUES (?, ?, ?, ?, ?, ?, now());"
+    try{
+        await pool.query(commentWriteQuery, [commentBoardType, postNo, depth, parentIdx, memberCode, memberNickname, comment])
+    }catch(err){
+        console.error(err)
+        return {status:2,subStatus:0}
+    }
+    const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`+1 where `post_no`=?"
+    try{
+        await pool.query(commentUpdateQuery, [boardType, postNo])
+    }catch(err){
+        console.error(err)
+        return {status:2,subStatus:0}
+    }
+    return {status:1,subStatus:0}
 }
-const del = (memberCode, memberLevel, boardType, commentBoardType, postNo, commentIdx) => {
+const del = async (memberCode, memberLevel, boardType, commentBoardType, postNo, commentIdx) => {
+    let rows
     result=new Array()
     const commentCheckQuery="SELECT `member_code` FROM ?? WHERE `comment_index`= ? AND `post_no`=? AND `comment_deleted`=0"
-    const params=[commentBoardType, commentIdx, postNo]
-    return new Promise(resolve => {
-        conn.query(commentCheckQuery, params, (error, checkMemberCode) => {
-            if(error) resolve({status:2,subStatus:0})
-            if(checkMemberCode[0]==null){
-                resolve({status:3,subStatus:0})
-                return;
-            }else{
-                if(checkMemberCode[0].member_code==memberCode || memberLevel>=3){
-                    const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
-                    const params=[commentBoardType, commentIdx, postNo]
-                    conn.query(commentDeleteQuery, params, (error) => {
-                        if(error) resolve({status:2,subStatus:0})
-                        const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`-1 where `post_no`=?"
-                        const params=[boardType, postNo]
-                        conn.query(commentUpdateQuery, params, (error) => {
-                            if(error) resolve({status:2,subStatus:0})
-                            resolve({status:1,subStatus:0})
-                        })
-                    })
-                }else{
-                    resolve({status:3,subStatus:7})
-                }
-            }
-        })
-    })
+    try{
+        [rows] = await pool.query(commentCheckQuery, [commentBoardType, commentIdx, postNo])
+    }catch(err){
+        console.error(err)
+        return {status:2,subStatus:0};
+    }
+    if(rows[0]==null){
+        return {status:3,subStatus:0}
+    }
+    if(!(rows[0].member_code==memberCode || memberLevel>=3)){
+        return {status:3,subStatus:7}
+    }
+    const commentDeleteQuery="UPDATE ?? SET `comment_deleted` = 1 WHERE `comment_index`= ? AND `post_no`=?"
+    try{
+        await pool.query(commentDeleteQuery, [commentBoardType, commentIdx, postNo])
+    }catch(err){
+        console.error(err)
+        return {status:2,subStatus:0};
+    }
+    const commentUpdateQuery = "UPDATE ?? set `post_comments`=`post_comments`-1 where `post_no`=?"
+    try{
+        await pool.query(commentUpdateQuery, [boardType, postNo])
+    }catch(err){
+        console.error(err)
+        return {status:2,subStatus:0};
+    }
+    return {status:1,subStatus:0}
 }
 
 module.exports = {
