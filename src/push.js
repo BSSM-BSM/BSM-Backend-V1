@@ -1,61 +1,62 @@
 const webpush = require('web-push')
-const conn = require('./db')
+const pool = require('./db')
 webpush.setVapidDetails(
     "mailto:BSM@bssm.kro.kr",
     process.env.PUSH_PUBLIC_KEY,
     process.env.PUSH_PRIVATE_KEY,
 );
-let tokenList = [];
 const push = async (payload, to) => {
-    tokenList = await getPushToken(to);
-    try{
-        await Promise.all(tokenList.map(t => {
-            webpush.sendNotification(t, payload);
-        }));
-    }catch(e){
-        console.error(e);
+    const tokenList = await getPushToken(to);
+    if(tokenList){
+        try{
+            Promise.all(tokenList.map(t => {
+                webpush.sendNotification(t, payload);
+            }));
+        }catch(e){
+            console.error(e);
+        }
     }
 }
 const register = async (endpoint, auth, p256dh, memberCode) => {
     const pushRegisterQuery="INSERT INTO `push_subscribe` VALUES(?, ?, ?, ?, 1)";
-    const params=[endpoint, auth, p256dh, memberCode];
-    return new Promise(resolve => {
-        conn.query(pushRegisterQuery, params, (error, rows) => {
-            if(error) resolve(false)
-            resolve(rows)
-        })
-    })
+    try{
+        await pool.query(pushRegisterQuery, [endpoint, auth, p256dh, memberCode])
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    return true
 }
 
 const getPushToken = async (to) => {
-    let getPushTokenQuery;
+    let rows, getPushTokenQuery;
     switch(to){
         case 'all':
             getPushTokenQuery="SELECT * FROM `push_subscribe`";
             break;
         case 'meal':
-            getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE `meal`=1";
+            getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE `meal`=1 AND `member_code`=1";
             break;
         default:
-            resolve(null)
-            return;
+            return null;
     }
-    return new Promise(resolve => {
-        let result = [];
-        conn.query(getPushTokenQuery, (error, rows) => {
-            if(error) resolve(false)
-            rows.forEach(row => {
-                result.push({
-                    endpoint:row.endpoint,
-                    keys:{
-                        auth:row.auth,
-                        p256dh:row.p256dh,
-                    }
-                })
-            });
-            resolve(result)
+    try{
+        [rows] = await pool.query(getPushTokenQuery)
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    let result = [];
+    rows.forEach(row => {
+        result.push({
+            endpoint:row.endpoint,
+            keys:{
+                auth:row.auth,
+                p256dh:row.p256dh,
+            }
         })
-    })
+    });
+    return result;
 }
 module.exports = {
     push:push,
