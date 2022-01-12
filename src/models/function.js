@@ -1,9 +1,9 @@
-const conn = require('../db')
+const pool = require('../db')
 
-const overlapCheck = (table, a, b) => {
-    const getQuery="SELECT * FROM ?? WHERE ?=?"
+const overlapCheck = async (table, a, b) => {
+    const getQuery=`SELECT * FROM ?? WHERE ${a}=?`
     try{
-        const [rows] = await pool.query(getQuery, [table, a, b])
+        const [rows] = await pool.query(getQuery, [table, b])
         if(rows.length){
             return true
         }else{
@@ -14,10 +14,10 @@ const overlapCheck = (table, a, b) => {
         return null;
     }
 }
-const validCheck = (table, a, b, c, d) => {
-    const getQuery="SELECT * FROM ?? WHERE ?=? AND ?=?"
+const validCheck = async (table, a, b, c, d) => {
+    const getQuery=`SELECT * FROM ?? WHERE ${a}=? AND ${c}=?`
     try{
-        const [rows] = await pool.query(getQuery, [table, a, b, c, d])
+        const [rows] = await pool.query(getQuery, [table, b, d])
         if(rows.length){
             return true
         }else{
