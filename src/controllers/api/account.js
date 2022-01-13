@@ -152,8 +152,6 @@ const view = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const profileUpload = async (req, res) =>{
-    const jwtValue = await jwt.check(req.cookies.token);
-    if(!jwtValue.isLogin){res.send(JSON.stringify(jwtValue.msg));return;}
     const fileDir="public/resource/member/profile_images/"
     result={
         status:1,

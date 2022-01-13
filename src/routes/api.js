@@ -2,6 +2,14 @@ const express = require('express')
 const router = express.Router()
 const jwt = require('../jwt')
 const multer = require('multer')
+
+const loginCheck = (req, res, next) => {
+  const jwtValue = jwt.check(req.cookies.token);
+  if(!jwtValue.isLogin){
+    return res.send(JSON.stringify(jwtValue.msg));
+  }
+  next();
+}
 const imageUpload = multer({
   storage:multer.diskStorage({
     destination:(req, file, cb) => {
@@ -54,7 +62,7 @@ router.post('/account/pwEdit', accountController.pwEdit)
 router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
 router.get('/account/:memberCode', accountController.view)
-router.post('/account/profileUpload', profileUpload.single('file'), accountController.profileUpload)
+router.post('/account/profileUpload', loginCheck, profileUpload.single('file'), accountController.profileUpload)
 router.post('/account/validCode', accountController.validCode)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
@@ -80,7 +88,7 @@ router.delete('/comment/:boardType/:postNo/:commentIdx', commentController.del)
 
 router.post('/like/:boardType/:postNo', likeController.like)
 
-router.post('/imageUpload', imageUpload.single('file'), imageUploadController.upload)
+router.post('/imageUpload', loginCheck, imageUpload.single('file'), imageUploadController.upload)
 
 router.get('/emoticon/:id', emoticonController.getemoticon)
 router.get('/emoticon', emoticonController.getemoticons)
