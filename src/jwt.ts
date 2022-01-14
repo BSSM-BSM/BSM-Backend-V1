@@ -1,23 +1,13 @@
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const secretKey = process.env.SECRET_KEY
-const options = {
-    algorithm:process.env.JWT_ALG,
-    expiresIn:process.env.JWT_EXP
-}
 const sign = (
-    payload:{
-        isLogin:boolean,
-        memberCode:number,
-        memberId:String,
-        memberNickname:String,
-        memberLevel:number,
-        grade:number,
-        classNo:number,
-        studentNo:number
-    }) => {
+    payload:object, expire:string) => {
     const result = {
-        token: jwt.sign(payload, secretKey, options),
+        token: jwt.sign(payload, secretKey, {
+            algorithm:'HS256',
+            expiresIn:expire
+        }),
         refreshToken:crypto.randomBytes(64).toString('hex')
     };
     return result;
@@ -48,7 +38,7 @@ const check = (token:String|undefined) => {
                 }
             };
         }else{
-            if(result.isLogin){
+            if(!result.isLogin){
                 result.msg={
                     status:4,subStatus:1
                 }

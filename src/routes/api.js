@@ -64,6 +64,7 @@ router.post('/account/signUp', accountController.signUp)
 router.get('/account/:memberCode', accountController.view)
 router.post('/account/profileUpload', loginCheck, profileUpload.single('file'), accountController.profileUpload)
 router.post('/account/validCode', accountController.validCode)
+router.post('/account/pwResetMail', accountController.pwResetMail)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
 
