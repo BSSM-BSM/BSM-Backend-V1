@@ -276,14 +276,17 @@ const pwEdit = async (req, res) =>{
         status:3,
         subStatus:0
     }
-    if(jwtValue.pwEdit){
+    if(jwtValue.pwEdit||jwtValue.memberCode){
+        let memberCode
+        if(jwtValue.memberCode) memberCode = jwtValue.memberCode
+        if(jwtValue.pwEdit) memberCode = jwtValue.pwEdit
         if(req.body.member_pw!==req.body.member_pw_check){// 비밀번호 재입력 확인
             result={
                 status:5,
                 subStatus:1,
             }
         }else{
-            if(await model.pwEdit(jwtValue.pwEdit, req.body.member_pw)){
+            if(await model.pwEdit(memberCode, req.body.member_pw)){
                 res.clearCookie('token');
                 res.clearCookie('refreshToken');
                 result={
