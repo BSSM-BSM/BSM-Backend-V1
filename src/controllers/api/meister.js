@@ -19,23 +19,33 @@ const getPoint = async (req, res) =>{
             'bun':""+req.params.studentNo
         }
     }
-    iconv.decode(await getHttp(options), 'euc-kr')
-    options = {
-        uri:'https://bssm.meistergo.co.kr/ss/ss_a40j.php', 
-        method:'POST',
-        encoding:null,
-        form:{
-            'caseBy':'listview',
-            'pageNumber':1,
-            'onPageCnt':100,
+    if(iconv.decode(await getHttp(options), 'euc-kr')=='true'){
+        options = {
+            uri:'https://bssm.meistergo.co.kr/ss/ss_a40j.php', 
+            method:'POST',
+            encoding:null,
+            form:{
+                'caseBy':'listview',
+                'pageNumber':1,
+                'onPageCnt':100,
+            }
+        }
+        result={
+            status:1,
+            subStatus:0,
+            result:iconv.decode(await getHttp(options), 'euc-kr')
+        }
+        options = {
+            uri:'https://bssm.meistergo.co.kr/logout.php', 
+            method:'GET',
+        }
+        getHttp(options)
+    }else{
+        result={
+            status:5,
+            subStatus:0
         }
     }
-    result = iconv.decode(await getHttp(options), 'euc-kr')
-    options = {
-        uri:'https://bssm.meistergo.co.kr/logout.php', 
-        method:'GET',
-    }
-    await getHttp(options)
     res.send(result)
 }
 
