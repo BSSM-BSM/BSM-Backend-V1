@@ -78,5 +78,32 @@ router.get('/meister', (req ,res) => {
         }
     })
 })
+router.get('/pwReset', (req ,res) => {
+    const jwtValue = jwt.verify(req.query.token);
+    if(jwtValue=='EXPIRED'){
+        return res.send("토큰 유효기간이 만료되었습니다")
+    }
+    if(!jwtValue.pwEdit){
+        return res.send("정상적인 접근이 아닙니다")
+    }
+    res.cookie('token', req.query.token, {
+        path:"/",
+        httpOnly:true,
+        secure:true,
+        maxAge:1000*60*5
+    });
+    res.render('etc/pwReset', {
+        member:{
+            isLogin:false,
+            code:null,
+            id:null,
+            nickname:null,
+            level:null,
+            grade:null,
+            classNo:null,
+            studentNo:null,
+        }
+    })
+})
 
 module.exports = router;

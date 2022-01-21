@@ -268,7 +268,7 @@ const pwResetMail = async (req, res) => {
     }
 }
 const pwEdit = async (req, res) =>{
-    const jwtValue = await jwt.verify(req.cookies.token);
+    const jwtValue = jwt.verify(req.cookies.token);
     if(jwtValue=='EXPIRED'){
         return res.send(JSON.stringify({status:3,subStatus:10}))
     }
