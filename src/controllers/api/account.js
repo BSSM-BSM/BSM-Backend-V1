@@ -8,7 +8,7 @@ const mail = require('../../mail')
 let result
 let dbResult
 const login = async (req, res) =>{
-    dbResult = await model.getMemberId(req.body.member_id)
+    dbResult = await model.getMemberById(req.body.member_id)
     result={
         status:5,
         subStatus:0
@@ -33,7 +33,7 @@ const login = async (req, res) =>{
             }
         }else{
             if(dbResult.member_pw===crypto.createHash('sha3-256').update(dbResult.member_salt+req.body.member_pw).digest('hex')){
-                const jwtToken = await jwt.sign({
+                const jwtToken = await jwt.login({
                     isLogin:true,
                     memberCode:dbResult.member_code,
                     memberId:dbResult.member_id,
@@ -42,12 +42,12 @@ const login = async (req, res) =>{
                     grade:dbResult.member_grade,
                     classNo:dbResult.member_class,
                     studentNo:dbResult.member_studentNo
-                }, '60d');
+                }, '1h');
                 res.cookie('token', jwtToken.token, {
                     path:"/",
                     httpOnly:true,
                     secure:true,
-                    maxAge:24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
+                    maxAge:1000*60*60// 1시간 동안 저장 1000ms*60초*60분
                 });
                 res.cookie('refreshToken', jwtToken.refreshToken, {
                     path:"/",
@@ -118,8 +118,8 @@ const signUp = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
-const islogin = async (req, res) =>{
-    if(!await jwt.check(req.cookies.token).isLogin){
+const islogin = (req, res) =>{
+    if(!jwt.check(req.cookies.token).isLogin){
         result={
             status:1,
             subStatus:0,
@@ -135,17 +135,42 @@ const islogin = async (req, res) =>{
     res.send(result)
 }
 const view = async (req, res) =>{
-    const jwtValue = await jwt.check(req.cookies.token);
-    dbResult = await model.getMemberCode(req.params.memberCode)
-    if(jwtValue.memberCode>0 && dbResult.memberCode==jwtValue.memberCode){
-        dbResult.permission=true;
+    const jwtValue = jwt.check(req.cookies.token);
+    const memberCode = req.params.memberCode;
+    dbResult = await model.getMemberByCode(memberCode)
+    let member = {};
+    if(dbResult){
+        member.memberType = "active",
+        member.memberCode = memberCode,
+        member.memberNickname = dbResult.member_nickname,
+        member.memberLevel = dbResult.member_level,
+        member.memberCreated = dbResult.member_created,
+        member.memberEnrolled = dbResult.member_enrolled,
+        member.memberGrade = dbResult.member_grade,
+        member.memberClass = dbResult.member_class,
+        member.memberStudentNo = dbResult.member_studentNo,
+        member.memberName = dbResult.member_name
     }else{
-        dbResult.permission=false;
+        if(memberCode==0){
+            member.memberType = "deleted"
+            member.memberCode = memberCode
+        }else if(memberCode==-1){
+            member.memberType = "anonymous"
+            member.memberCode = memberCode
+        }else{
+            member.memberType = "none"
+            member.memberCode = memberCode
+        }
+    }
+    if(jwtValue.memberCode>0 && dbResult.member_code==jwtValue.memberCode){
+        member.permission=true;
+    }else{
+        member.permission=false;
     }
     result={
         status:1,
         subStatus:0,
-        member:dbResult
+        member:member
     }
     res.send(JSON.stringify(result))
 }
@@ -217,7 +242,7 @@ const validCode = async (req, res) =>{
     }
 }
 const pwResetMail = async (req, res) => {
-    dbResult = await model.getMemberId(req.body.member_id)
+    dbResult = await model.getMemberById(req.body.member_id)
     if(dbResult){
         if(dbResult.member_class<10){
             dbResult.member_class="0"+dbResult.member_class

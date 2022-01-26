@@ -38,6 +38,7 @@ const profileUpload = multer({
 
 router.use(express.json())
 router.use(express.urlencoded({extended:true}))
+router.use(jwt.refreshToken)
 
 const pushController = require('../controllers/api/push')
 const versionController = require('../controllers/api/version')

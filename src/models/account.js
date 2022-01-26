@@ -1,7 +1,7 @@
 const pool = require('../db')
 const crypto = require('crypto');
 
-const getMemberId = async (memberId) => {
+const getMemberById = async (memberId) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_id`=?"
     try{
         const [rows] = await pool.query(getMemberQuery, [memberId])
@@ -14,46 +14,17 @@ const getMemberId = async (memberId) => {
         return null;
     }
 }
-const getMemberCode = async (memberCode) => {
-    let rows
+const getMemberByCode = async (memberCode) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_code`=?"
     try{
-        [rows] = await pool.query(getMemberQuery, [memberCode])
+        const [rows] = await pool.query(getMemberQuery, [memberCode])
+        if(rows.length)
+            return rows[0]
+        else
+            return false
     }catch(err){
         console.error(err)
         return null;
-    }
-    if(rows.length){
-        rows=rows[0]
-        return {
-            memberType:"active",
-            memberCode:memberCode,
-            memberNickname:rows.member_nickname,
-            memberLevel:rows.member_level,
-            memberCreated:rows.member_created,
-            memberEnrolled:rows.member_enrolled,
-            memberGrade:rows.member_grade,
-            memberClass:rows.member_class,
-            memberStudentNo:rows.member_studentNo,
-            memberName:rows.member_name
-        }
-    }else{
-        if(memberCode==0){
-            return {
-                memberType:"deleted",
-                memberCode:memberCode,
-            }
-        }else if(memberCode==-1){
-            return {
-                memberType:"anonymous",
-                memberCode:memberCode,
-            }
-        }else{
-            return {
-                memberType:"none",
-                memberCode:memberCode,
-            }
-        }
     }
 }
 const getMember = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
@@ -112,7 +83,7 @@ const signUp = async (memberId, memberPw, memberNickname, code) => {
         memberName,
     ]
     try{
-        await pool.query(signUpQuery, [params])
+        await pool.query(signUpQuery, params)
     }catch(err){
         console.error(err)
         return null;
@@ -134,8 +105,8 @@ const pwEdit = async (memberCode, memberPw) => {
 }
 
 module.exports = {
-    getMemberId:getMemberId,
-    getMemberCode:getMemberCode,
+    getMemberById:getMemberById,
+    getMemberByCode:getMemberByCode,
     getMember:getMember,
     signUp:signUp,
     pwEdit:pwEdit
