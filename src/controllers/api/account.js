@@ -58,7 +58,8 @@ const login = async (req, res) =>{
                 result={
                     status:1,
                     subStatus:0,
-                    jwt:jwtToken
+                    token:jwtToken.token,
+                    refreshToken:jwtToken.refreshToken
                 }
             }
         }
@@ -117,6 +118,11 @@ const signUp = async (req, res) =>{
         }
     }
     res.send(JSON.stringify(result))
+}
+const logout = (req, res) =>{
+    res.clearCookie('token');
+    res.clearCookie('refreshToken');
+    res.send(JSON.stringify({status:1,subStatus:0}));
 }
 const islogin = (req, res) =>{
     if(!jwt.check(req.cookies.token).isLogin){
@@ -330,6 +336,7 @@ const pwEdit = async (req, res) =>{
 }
 module.exports = {
     login:login,
+    logout:logout,
     islogin:islogin,
     signUp:signUp,
     view:view,

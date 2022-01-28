@@ -28,7 +28,6 @@ const jwt = require('./jwt')
 const indexRouter = require('./routes/index')
 const boardRouter = require('./routes/board')
 const apiRouter = require('./routes/api')
-const logoutRouter = require('./routes/logout')
 
 app.set('view engine', 'ejs')
 app.set('views', './views/pages');
@@ -37,7 +36,6 @@ app.use(express.static('public'));
 app.use('/', indexRouter)
 app.use('/board', boardRouter)
 app.use('/api', apiRouter)
-app.use('/logout', logoutRouter)
 
 const versionController = require('./controllers/api/version')
 app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환

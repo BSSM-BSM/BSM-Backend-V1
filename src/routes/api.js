@@ -59,6 +59,7 @@ router.post('/meal/register', pushController.register)
 router.get('/version/:app/:os', versionController.get)
 
 router.post('/account/login', accountController.login)
+router.delete('/account/logout', accountController.logout)
 router.post('/account/pwEdit', accountController.pwEdit)
 router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
