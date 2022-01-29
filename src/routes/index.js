@@ -105,5 +105,20 @@ router.get('/pwReset', (req ,res) => {
         }
     })
 })
+router.get('/emoticon', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
+    res.render('emoticon', {
+        member:{
+            isLogin:jwtValue.isLogin,
+            code:jwtValue.memberCode,
+            id:jwtValue.memberId,
+            nickname:jwtValue.memberNickname,
+            level:jwtValue.memberLevel,
+            grade:jwtValue.grade,
+            classNo:jwtValue.classNo,
+            studentNo:jwtValue.studentNo,
+        }
+    })
+})
 
 module.exports = router;

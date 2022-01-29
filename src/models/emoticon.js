@@ -77,7 +77,42 @@ const getemoticons = async () => {
     }
     return result
 }
+
+const uploadEmoticonInfo = async (name, description, memberCode) => {
+    let rows
+    const getIndexQuery = `
+    SELECT AUTO_INCREMENT 
+    FROM information_schema.tables 
+    WHERE table_name = 'emoticon' 
+    AND table_schema = DATABASE()`
+    try{
+        [rows] = await pool.query(getIndexQuery)
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    const insertEmoticonsQuery = "INSERT INTO emoticon values(?, ?, ?, now(), ?)"
+    try{
+        pool.query(insertEmoticonsQuery, [rows[0].AUTO_INCREMENT], name, description, memberCode)
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    return rows[0].AUTO_INCREMENT
+}
+const uploadEmoticon = (id, idx, type) => {
+    const insertEmoticonsQuery = "INSERT INTO emoticons values(?, ?, ?)"
+    try{
+        pool.query(insertEmoticonsQuery, id, idx, type)
+    }catch(err){
+        console.error(err)
+        return null;
+    }
+    return true
+}
 module.exports = {
     getemoticon:getemoticon,
-    getemoticons:getemoticons
+    getemoticons:getemoticons,
+    uploadEmoticonInfo:uploadEmoticonInfo,
+    uploadEmoticon:uploadEmoticon
 }
