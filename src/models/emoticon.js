@@ -3,7 +3,7 @@ const pool = require('../db')
 const getemoticon = async (id) => {
     let result = {}
     let rows
-    const getEmoticonQuery = "SELECT `name`, `created` FROM `emoticon` WHERE `id`=?"
+    const getEmoticonQuery = "SELECT `name`, `description`, `created` FROM `emoticon` WHERE `id`=?"
     try{
         [rows] = await pool.query(getEmoticonQuery, [id])
     }catch(err){
@@ -13,8 +13,9 @@ const getemoticon = async (id) => {
     if(!rows.length) return null;
     result = {
         id:id,
-        alt:rows[0].name,
+        name:rows[0].name,
         created:rows[0].created,
+        description:rows[0].description,
         e:[]
     }
     let n
@@ -93,17 +94,24 @@ const uploadEmoticonInfo = async (name, description, memberCode) => {
     }
     const insertEmoticonsQuery = "INSERT INTO emoticon values(?, ?, ?, now(), ?)"
     try{
-        pool.query(insertEmoticonsQuery, [rows[0].AUTO_INCREMENT], name, description, memberCode)
+        pool.query(insertEmoticonsQuery, [rows[0].AUTO_INCREMENT, name, description, memberCode])
     }catch(err){
         console.error(err)
         return null;
     }
     return rows[0].AUTO_INCREMENT
 }
-const uploadEmoticon = (id, idx, type) => {
-    const insertEmoticonsQuery = "INSERT INTO emoticons values(?, ?, ?)"
+const uploadEmoticons = (id, emoticonList) => {
+    let temp = []
+    let params = []
+    // 한 번에 insert 하기 위해
+    emoticonList.forEach(e => {
+        params.push(id, e.idx, e.type);
+        temp.push('(?,?,?)')
+    });
+    const insertEmoticonsQuery = `INSERT INTO emoticons values ${temp.join(',')}`;
     try{
-        pool.query(insertEmoticonsQuery, id, idx, type)
+        pool.query(insertEmoticonsQuery, params)
     }catch(err){
         console.error(err)
         return null;
@@ -114,5 +122,5 @@ module.exports = {
     getemoticon:getemoticon,
     getemoticons:getemoticons,
     uploadEmoticonInfo:uploadEmoticonInfo,
-    uploadEmoticon:uploadEmoticon
+    uploadEmoticons:uploadEmoticons
 }
