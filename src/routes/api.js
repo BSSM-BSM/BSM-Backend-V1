@@ -38,7 +38,6 @@ const profileUpload = multer({
 
 router.use(express.json())
 router.use(express.urlencoded({extended:true}))
-router.use(jwt.refreshToken)
 
 const pushController = require('../controllers/api/push')
 const versionController = require('../controllers/api/version')
@@ -54,19 +53,22 @@ const likeController = require('../controllers/api/like')
 const imageUploadController = require('../controllers/api/imageUpload')
 const emoticonController = require('../controllers/api/emoticon')
 
-router.post('/meal/register', pushController.register)
-
-router.get('/version/:app/:os', versionController.get)
-
 router.post('/account/login', accountController.login)
 router.delete('/account/logout', accountController.logout)
 router.post('/account/pwEdit', accountController.pwEdit)
-router.get('/account/islogin', accountController.islogin)
 router.post('/account/signUp', accountController.signUp)
-router.get('/account/:memberCode', accountController.view)
-router.post('/account/profileUpload', loginCheck, profileUpload.single('file'), accountController.profileUpload)
 router.post('/account/validCode', accountController.validCode)
 router.post('/account/pwResetMail', accountController.pwResetMail)
+
+router.use(jwt.refreshToken)
+
+router.get('/account/islogin', accountController.islogin)
+router.get('/account/:memberCode', accountController.view)
+router.post('/account/profileUpload', loginCheck, profileUpload.single('file'), accountController.profileUpload)
+
+router.post('/meal/register', pushController.register)
+
+router.get('/version/:app/:os', versionController.get)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
 
