@@ -9,7 +9,7 @@ module.exports = {
     {
       name:"replica",
       script:"main.js",
-      instances:-1,
+      instances:-2,
       exec_mode:"cluster",
     },
   ]

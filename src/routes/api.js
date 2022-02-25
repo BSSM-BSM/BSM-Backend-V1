@@ -59,6 +59,7 @@ router.post('/account/pwEdit', accountController.pwEdit)
 router.post('/account/signUp', accountController.signUp)
 router.post('/account/validCode', accountController.validCode)
 router.post('/account/pwResetMail', accountController.pwResetMail)
+router.post('/account/token', accountController.token)
 
 router.use(jwt.refreshToken)
 

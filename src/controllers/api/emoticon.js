@@ -29,6 +29,7 @@ const uploadProcessing = multer({
         const allowExt = [
             'png',
             'jpg',
+            'jpeg',
             'gif',
             'webp'
         ]
@@ -37,7 +38,7 @@ const uploadProcessing = multer({
         if(file.fieldname=='file'){
             if(ext != 'png') return cb(null, false);
         }
-        if(allowExt.indexOf(ext)) return cb(null, false);
+        if(allowExt.indexOf(ext)==-1) return cb(null, false);
         cb(null, true)
     },
     storage:multer.diskStorage({

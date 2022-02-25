@@ -4,6 +4,7 @@ const funcModel = require('../../models/function')
 const crypto = require('crypto')
 const sharp = require('sharp')
 const mail = require('../../mail')
+const pool = require('../../db')
 
 let result
 let dbResult
@@ -44,13 +45,15 @@ const login = async (req, res) =>{
                     studentNo:dbResult.member_studentNo
                 }, '1h');
                 res.cookie('token', jwtToken.token, {
-                    path:"/",
+                    domain:'.bssm.kro.kr',
+                    path:'/',
                     httpOnly:true,
                     secure:true,
                     maxAge:1000*60*60// 1시간 동안 저장 1000ms*60초*60분
                 });
                 res.cookie('refreshToken', jwtToken.refreshToken, {
-                    path:"/",
+                    domain:'.bssm.kro.kr',
+                    path:'/',
                     httpOnly:true,
                     secure:true,
                     maxAge:24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
@@ -334,6 +337,74 @@ const pwEdit = async (req, res) =>{
     }
     res.send(JSON.stringify(result))
 }
+const token = async (req, res) => {
+    // 리프레시 토큰이 없으면
+    if(!req.body.refreshToken){
+        return res.status(400).send(JSON.stringify({
+            message: "Bad Request",
+            statusCode: 400
+        }));
+    }
+    const result = jwt.verify(req.body.refreshToken);
+    // 리프레시 토큰이 유효하지 않으면
+    if(result=='INVALID'){
+        return res.status(400).send(JSON.stringify({
+            message: "Bad Request",
+            statusCode: 400
+        }));
+    }
+    // 리프레시 토큰이 만료되었으면
+    if(result=='EXPIRED'){
+        return res.status(401).send(JSON.stringify({
+            message: "Unauthorized",
+            statusCode: 401
+        }));
+    }
+    // db에서 리프레시 토큰 사용이 가능한지 확인
+    let rows
+    const getTokenQuery="SELECT * FROM `tokens` WHERE `token`=? AND `valid`=1";
+    try{
+        [rows] = await pool.query(getTokenQuery, [result.token]);
+    }catch(err){
+        console.error(err)
+        return res.send(JSON.stringify({status:2,subStatus:0}));
+    }
+    if(!rows[0]){
+        // 리프레시 토큰이 db에서 사용불가 되었으면
+        return res.status(401).send(JSON.stringify({
+            message: "Unauthorized",
+            statusCode: 401
+        }));
+    }
+    rows = rows[0]
+    // 유저 정보를 가져옴
+    const dbResult = await model.getMemberByCode(rows.member_code);
+    const payload = {
+        isLogin:true,
+        memberCode:dbResult.member_code,
+        memberId:dbResult.member_id,
+        memberNickname:dbResult.member_nickname,
+        memberLevel:dbResult.member_level,
+        grade:dbResult.member_grade,
+        classNo:dbResult.member_class,
+        studentNo:dbResult.member_studentNo
+    }
+    // 액세스 토큰 재발행
+    const jwtToken = jwt.sign(payload, '1h');
+    return res.send(JSON.stringify({
+        token:jwtToken.token,
+        user:{
+            isLogin:true,
+            memberCode:dbResult.member_code,
+            memberId:dbResult.member_id,
+            memberNickname:dbResult.member_nickname,
+            memberLevel:dbResult.member_level,
+            grade:dbResult.member_grade,
+            classNo:dbResult.member_class,
+            studentNo:dbResult.member_studentNo
+        }
+    }));
+}
 module.exports = {
     login:login,
     logout:logout,
@@ -343,5 +414,6 @@ module.exports = {
     profileUpload:profileUpload,
     validCode:validCode,
     pwResetMail:pwResetMail,
-    pwEdit:pwEdit
+    pwEdit:pwEdit,
+    token:token
 }

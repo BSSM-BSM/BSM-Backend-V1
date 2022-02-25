@@ -120,5 +120,20 @@ router.get('/emoticon', (req ,res) => {
         }
     })
 })
+router.get('/login', (req ,res) => {
+    const jwtValue = jwt.check(req.cookies.token);
+    res.render('etc/login', {
+        member:{
+            isLogin:jwtValue.isLogin,
+            code:jwtValue.memberCode,
+            id:jwtValue.memberId,
+            nickname:jwtValue.memberNickname,
+            level:jwtValue.memberLevel,
+            grade:jwtValue.grade,
+            classNo:jwtValue.classNo,
+            studentNo:jwtValue.studentNo,
+        }
+    })
+})
 
 module.exports = router;
