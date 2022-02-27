@@ -103,12 +103,18 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     const result = verify(req.cookies.refreshToken);
     // 리프레시 토큰이 유효하지 않으면 무시하고 넘어감
     if(result=='INVALID'){
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
         return next();
     }
     // 리프레시 토큰이 만료되었으면 로그인을 요청
     if(result=='EXPIRED'){
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
         return res.send(JSON.stringify({status:4,subStatus:5}));
     }
     // db에서 리프레시 토큰 사용이 가능한지 확인
@@ -122,7 +128,10 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     }
     if(!rows[0]){
         // 리프레시 토큰이 db에서 사용불가 되었으면 로그인을 요청
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
         return res.send(JSON.stringify({status:4,subStatus:5}));
     }
     rows = rows[0]

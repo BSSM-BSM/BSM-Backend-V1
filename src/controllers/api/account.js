@@ -123,8 +123,14 @@ const signUp = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const logout = (req, res) =>{
-    res.clearCookie('token');
-    res.clearCookie('refreshToken');
+    res.clearCookie('token', {
+        domain:'.bssm.kro.kr',
+        path:'/',
+    });
+    res.clearCookie('refreshToken', {
+        domain:'.bssm.kro.kr',
+        path:'/',
+    });
     res.send(JSON.stringify({status:1,subStatus:0}));
 }
 const islogin = (req, res) =>{
@@ -204,15 +210,9 @@ const profileUpload = async (req, res) =>{
     res.send(JSON.stringify(result))
 }
 const validCode = async (req, res) =>{
-    dbResult = await model.getMember(req.body.student_enrolled, req.body.student_grade, req.body.student_class, req.body.student_no, req.body.student_name)
+    dbResult = await model.getMemberFromCode(req.body.student_enrolled, req.body.student_grade, req.body.student_class, req.body.student_no, req.body.student_name)
     if(dbResult){
-        if(dbResult.member_class<10){
-            dbResult.member_class="0"+dbResult.member_class
-        }
-        if(dbResult.member_studentNo<10){
-            dbResult.member_studentNo="0"+dbResult.member_studentNo
-        }
-        const userMail = ""+dbResult.member_enrolled+dbResult.member_grade+dbResult.member_class+dbResult.member_studentNo+"@bssm.hs.kr"
+        const userMail = dbResult.email;
         const subject = 'BSM 회원가입 인증 코드입니다';
         const content = `
         <!DOCTYPE HTML>
@@ -253,17 +253,11 @@ const validCode = async (req, res) =>{
 const pwResetMail = async (req, res) => {
     dbResult = await model.getMemberById(req.body.member_id)
     if(dbResult){
-        if(dbResult.member_class<10){
-            dbResult.member_class="0"+dbResult.member_class
-        }
-        if(dbResult.member_studentNo<10){
-            dbResult.member_studentNo="0"+dbResult.member_studentNo
-        }
         const jwtToken = jwt.sign({
             isLogin:false,
             pwEdit:dbResult.member_code
         }, '300s');
-        const userMail = ""+dbResult.member_enrolled+dbResult.member_grade+dbResult.member_class+dbResult.member_studentNo+"@bssm.hs.kr"
+        const userMail = dbResult.email;
         const subject = 'BSM 비밀번호 재설정 링크입니다';
         const content = `
         <!DOCTYPE HTML>
