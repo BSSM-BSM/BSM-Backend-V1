@@ -3,7 +3,7 @@ const express = require('express')
 const cookieParser = require('cookie-parser');
 const helmet = require("helmet");
 
-const app = express()
+const app = express();
 
 // 보안설정
 app.use(helmet({
@@ -20,39 +20,15 @@ app.use(helmet.permittedCrossDomainPolicies());
 app.use(helmet.referrerPolicy());
 app.use(helmet.xssFilter());
 
-app.set('etag', false)
-// app.set('trust proxy', 1)
+app.set('etag', false);
+app.set('trust proxy', 1);
 app.use(cookieParser());
-const jwt = require('./jwt')
-
-const indexRouter = require('./routes/index')
-const boardRouter = require('./routes/board')
-const apiRouter = require('./routes/api')
 
 app.set('view engine', 'ejs')
 app.set('views', './views/pages');
 app.use(express.static('public'));
 
-app.use('/', indexRouter)
-app.use('/board', boardRouter)
-app.use('/api', apiRouter)
+const controller = require('./controller');
+app.use('/', controller);
 
-const versionController = require('./controllers/api/version')
-app.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환
-
-app.use((req, res) => {
-        const jwtValue = jwt.check(req.cookies.token);
-        res.status(404).render('404', {
-            member:{
-                isLogin:jwtValue.isLogin,
-                code:jwtValue.memberCode,
-                id:jwtValue.memberId,
-                nickname:jwtValue.memberNickname,
-                level:jwtValue.memberLevel,
-                grade:jwtValue.grade,
-                classNo:jwtValue.classNo,
-                studentNo:jwtValue.studentNo,
-            }
-        })
-    })
-app.listen(4000)
+app.listen(4000);
