@@ -98,7 +98,7 @@ const signUp = async (req, res) =>{
         res.send(JSON.stringify(result))
         return 0
     }
-    if(!await funcModel.overlapCheck('valid_code', 'code', req.body.code)){// 인증코드 존재여부 체크
+    if(!await funcModel.overlapCheck('student', 'code', req.body.code)){// 인증코드 존재여부 체크
         result={
             status:3,
             subStatus:2,
@@ -106,7 +106,7 @@ const signUp = async (req, res) =>{
         res.send(JSON.stringify(result))
         return 0
     }
-    if(!await funcModel.validCheck('valid_code', 'code', req.body.code, 'valid', 1)){// 인증코드 유효체크
+    if(!await funcModel.validCheck('student', 'code', req.body.code, 'code_available', 1)){// 인증코드 유효체크
         result={
             status:4,
             subStatus:3,
@@ -134,17 +134,17 @@ const logout = (req, res) =>{
     res.send(JSON.stringify({status:1,subStatus:0}));
 }
 const islogin = (req, res) =>{
-    if(!jwt.check(req.cookies.token).isLogin){
+    if(jwt.check(req.cookies.token).isLogin){
         result={
             status:1,
             subStatus:0,
-            is_login:true
+            isLogin:true
         }
     }else{
         result={
             status:1,
             subStatus:0,
-            is_login:false
+            isLogin:false
         }
     }
     res.send(result)

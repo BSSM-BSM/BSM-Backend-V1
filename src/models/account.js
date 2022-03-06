@@ -41,7 +41,7 @@ const getMember = async (studentEnrolled, studentGrade, studentClass, studentNo,
     }
 }
 const getMemberFromCode = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
-    const getMemberQuery="SELECT * FROM `valid_code` WHERE `member_enrolled`=? AND `member_grade`=? AND `member_class`=? AND `member_studentNo`=? AND `member_name`=?"
+    const getMemberQuery="SELECT * FROM `student` WHERE `member_enrolled`=? AND `member_grade`=? AND `member_class`=? AND `member_studentNo`=? AND `member_name`=?"
     try{
         const [rows] = await pool.query(getMemberQuery, [studentEnrolled, studentGrade, studentClass, studentNo, studentName])
         if(rows.length)
@@ -55,7 +55,7 @@ const getMemberFromCode = async (studentEnrolled, studentGrade, studentClass, st
 }
 const signUp = async (memberId, memberPw, memberNickname, code) => {
     //인증코드로 유저정보를 가져옴
-    const codeCheckQuery="SELECT * FROM `valid_code` WHERE `code`=?"
+    const codeCheckQuery="SELECT * FROM `student` WHERE `code`=?"
     let rows
     try{
         [rows] = await pool.query(codeCheckQuery, [code])
@@ -63,7 +63,7 @@ const signUp = async (memberId, memberPw, memberNickname, code) => {
         console.error(err)
         return null;
     }
-    const codeExpireQuery="UPDATE `valid_code` SET `valid`=0 WHERE `code`=?"
+    const codeExpireQuery="UPDATE `student` SET `code_available`=0 WHERE `code`=?"
     try{
         await pool.query(codeExpireQuery, [code])
     }catch(err){
