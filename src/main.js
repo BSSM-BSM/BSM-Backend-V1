@@ -1,5 +1,5 @@
 require("dotenv").config({ path: "./config/env/.env" });
-const express = require('express')
+const express = require('express');
 const cookieParser = require('cookie-parser');
 const helmet = require("helmet");
 
@@ -21,14 +21,18 @@ app.use(helmet.referrerPolicy());
 app.use(helmet.xssFilter());
 
 app.set('etag', false);
-app.set('trust proxy', 1);
+// app.set('trust proxy', 1);
 app.use(cookieParser());
 
-app.set('view engine', 'ejs')
+app.set('view engine', 'ejs');
 app.set('views', './views/pages');
 app.use(express.static('public'));
 
 const controller = require('./controller');
 app.use('/', controller);
+
+app.use(function (err, req, res, next) {
+    res.status(err.code).send(JSON.stringify({'statusCode':err.code,'message':err.message}))
+});
 
 app.listen(4000);

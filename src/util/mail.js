@@ -1,3 +1,4 @@
+const { InternalServerException } = require('./exceptions');
 const nodemailer = require("nodemailer")
 
 const send = (to, subject, html) => {
@@ -14,18 +15,10 @@ const send = (to, subject, html) => {
     return new Promise(resolve => {
         transport.sendMail(mailOptions, (error, response) =>{
             if(error){
-                result={
-                    status:3,
-                    subStatus:9
-                }
-            }else{
-                result={
-                    status:1,
-                    subStatus:0
-                }
+                throw new InternalServerException('Failed to send mail');
             }
-            transport.close()
-            resolve(result)
+            transport.close();
+            resolve(result);
         })
     })
 }

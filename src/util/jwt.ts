@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
-import express from "express"
-const pool = require('./db')
-const accountService = require('../api/account/account.service')
+import express from "express";
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const pool = require('./db');
+const accountRepository = require('../api/account/account.repository');
 
-const secretKey = process.env.SECRET_KEY
+const secretKey = process.env.SECRET_KEY;
 
 const sign = (
     payload:object, expire:string) => {
@@ -136,7 +136,7 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     }
     rows = rows[0]
     // 유저 정보를 가져옴
-    const dbResult = await accountService.getMemberByCode(rows.member_code);
+    const dbResult = await accountRepository.getMemberByCode(rows.member_code);
     const payload = {
         isLogin:true,
         memberCode:dbResult.member_code,
@@ -162,9 +162,9 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     return res.send(JSON.stringify({status:4,subStatus:4,token:token}));
 }
 module.exports = {
-    sign:sign,
-    login:login,
-    verify:verify,
-    check:check,
-    refreshToken:refreshToken
+    sign,
+    login,
+    verify,
+    check,
+    refreshToken
 }
