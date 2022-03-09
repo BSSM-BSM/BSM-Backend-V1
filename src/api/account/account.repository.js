@@ -11,7 +11,7 @@ const getMemberById = async (memberId) => {
         else
             return null;
     }catch(err){
-        console.error(err)
+        console.error(err);
         throw new InternalServerException();
     }
 }
@@ -81,7 +81,7 @@ const getStudentInfoByCode = async (code) => {
         else
             return null;
     }catch(err){
-        console.error(err)
+        console.error(err);
         throw new InternalServerException();
     }
 }
@@ -159,7 +159,7 @@ const getToken = async (token) => {
         else
             return null;
     }catch(err){
-        console.error(err)
+        console.error(err);
         throw new InternalServerException();
     }
 }

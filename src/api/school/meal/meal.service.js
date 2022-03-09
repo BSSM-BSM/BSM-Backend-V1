@@ -1,15 +1,18 @@
-const pool = require('../../../util/db')
+const { NotFoundException } = require('../../../util/exceptions');
+const repository = require('./meal.repository');
 
-const getMeal = async mealDate => {
-    let rows
-    const mealSearchQuery="SELECT * FROM `food` WHERE `food_date`=?"
-    try{
-        [rows] = await pool.query(mealSearchQuery, [mealDate])
-    }catch(err){
-        console.error(err)
-        return null;
+const getMeal = async (mealDate) => {
+    const mealInfo = await repository.getMeal(mealDate);
+    if(mealInfo === null){
+        throw new NotFoundException();
     }
-    return rows
+    return {
+        meal:{
+            morning:mealInfo.morning==''? null: mealInfo.morning,
+            lunch:mealInfo.lunch==''? null: mealInfo.lunch,
+            dinner:mealInfo.dinner==''? null: mealInfo.dinner
+        }
+    }
 }
 
 module.exports = {

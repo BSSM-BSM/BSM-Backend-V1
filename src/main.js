@@ -2,6 +2,7 @@ require("dotenv").config({ path: "./config/env/.env" });
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const helmet = require("helmet");
+const processName = process.env.name;
 
 const app = express();
 
@@ -34,5 +35,11 @@ app.use('/', controller);
 app.use(function (err, req, res, next) {
     res.status(err.code).send(JSON.stringify({'statusCode':err.code,'message':err.message}))
 });
+
+if(processName=="primary"){
+    const schedule = {
+        meal: require('./schedule/meal')
+    };
+}
 
 app.listen(4000);

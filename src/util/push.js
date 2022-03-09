@@ -5,41 +5,21 @@ webpush.setVapidDetails(
     process.env.PUSH_PUBLIC_KEY,
     process.env.PUSH_PRIVATE_KEY,
 );
-const push = async (payload, to) => {
-    const tokenList = await getPushToken(to);
-    if(tokenList){
-        try{
-            Promise.all(tokenList.map(t => {
-                webpush.sendNotification(t, payload);
-            }));
-        }catch(e){
-            console.error(e);
-        }
+const push = async (payload, type) => {
+    const tokenList = await getPushToken(type);
+    if(!tokenList){
+        return;
     }
-}
-const register = async (endpoint, auth, p256dh, memberCode) => {
-    const pushRegisterQuery="INSERT INTO `push_subscribe` VALUES(?, ?, ?, ?, 1)";
     try{
-        await pool.query(pushRegisterQuery, [endpoint, auth, p256dh, memberCode])
-    }catch(err){
-        console.error(err)
-        return null;
+        Promise.all(tokenList.map(t => {
+            webpush.sendNotification(t, payload);
+        }));
+    }catch(e){
+        console.error(e);
     }
-    return true
 }
 
-const getPushToken = async (to) => {
-    let rows, getPushTokenQuery;
-    switch(to){
-        case 'all':
-            getPushTokenQuery="SELECT * FROM `push_subscribe`";
-            break;
-        case 'meal':
-            getPushTokenQuery="SELECT * FROM `push_subscribe` WHERE `meal`=1 AND `member_code`=1";
-            break;
-        default:
-            return null;
-    }
+const getPushToken = async (type) => {
     try{
         [rows] = await pool.query(getPushTokenQuery)
     }catch(err){
@@ -59,6 +39,5 @@ const getPushToken = async (to) => {
     return result;
 }
 module.exports = {
-    push:push,
-    register:register
+    push,
 }

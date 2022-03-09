@@ -133,9 +133,9 @@ module.exports = {
     islogin:islogin,
     signUp:signUp,
     view:view,
-    profileUpload:profileUpload,
-    validCode:validCode,
-    pwResetMail:pwResetMail,
-    pwEdit:pwEdit,
-    token:token
+    profileUpload,
+    validCode,
+    pwResetMail,
+    pwEdit,
+    token
 }
