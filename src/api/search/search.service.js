@@ -1,17 +1,23 @@
-const pool = require('../../util/db')
+const { NotFoundException } = require('../../util/exceptions');
+const repository = require('./search.repository');
 
 const getBoard = async (searchType, searchStr) => {
-    let rows
-    const searchQuery="SELECT * FROM ?? WHERE MATCH(post_title, post_content) AGAINST(? IN BOOLEAN MODE) AND `post_deleted`=0 ORDER BY `post_no` DESC"
-    try{
-        [rows] = await pool.query(searchQuery, [searchType, searchStr])
-    }catch(err){
-        console.error(err)
-        return null;
+    const searchResult = await repository.getBoard(searchType, searchStr);
+    if(searchResult === null){
+        throw new NotFoundException();
     }
-    return rows
+    return {
+        SearchResult: searchResult.map(item => {
+            return {
+                postNo:item.post_no,
+                postTitle:item.post_title,
+                memberNickname:item.member_nickname,
+                postDate:item.post_date
+            }
+        })
+    }
 }
 
 module.exports = {
-    getBoard:getBoard,
+    getBoard,
 }

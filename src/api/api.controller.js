@@ -69,7 +69,7 @@ router.post('/account/profileUpload', loginCheck, profileUpload.single('file'), 
 
 router.post('/meal/register', pushController.register)
 
-router.get('/version/:app/:os', versionController.get)
+router.get('/version/:app/:os', versionController.getVersion)
 
 router.get('/search/:searchType/:searchStr', searchController.get)
 

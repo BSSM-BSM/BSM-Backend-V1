@@ -1,7 +1,7 @@
 const service = require('./meal.service');
 
 const get = async (req, res, next) =>{
-    try {
+    try{
         res.send(JSON.stringify(
             await service.getMeal(req.params.mealDate)
         ));

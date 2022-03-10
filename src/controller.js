@@ -6,7 +6,7 @@ const apiRouter = require('./api/api.controller')
 const viewRouter = require('./view/view.controller')
 
 const versionController = require('./api/version/version.controller')
-router.post('/database', versionController.getLegacy)// 업데이트 확인 url 하위호환
+router.post('/database', versionController.getVersionLegacy)// 업데이트 확인 url 하위호환
 
 
 router.use('/api', apiRouter)
