@@ -1,10 +1,10 @@
 const { InternalServerException } = require('../../../util/exceptions');
 const pool = require('../../../util/db');
 
-const getMeal = async mealDate => {
-    const getMealQuery="SELECT * FROM `food` WHERE `food_date`=?"
+const getTimetable = async (grade, classNo) => {
+    const getTimetableQuery="SELECT * FROM `timetable` WHERE `grade`=? AND `classNo`=?"
     try{
-        const [rows] = await pool.query(getMealQuery, [mealDate]);
+        const [rows] = await pool.query(getTimetableQuery, [grade, classNo]);
         if(rows.length)
             return rows[0];
         else
@@ -16,5 +16,5 @@ const getMeal = async mealDate => {
 }
 
 module.exports = {
-    getMeal
+    getTimetable
 }

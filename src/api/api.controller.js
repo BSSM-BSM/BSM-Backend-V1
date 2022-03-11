@@ -75,7 +75,7 @@ router.get('/search/:searchType/:searchStr', searchController.get)
 
 router.get('/meal/:mealDate', mealController.get)
 
-router.get('/timetable/:grade/:classNo', timetableController.get)
+router.get('/timetable/:grade/:classNo', timetableController.getTimetable)
 
 router.post('/meister/point/:grade/:classNo/:studentNo', meisterController.getPoint)
 router.get('/meister/score/:grade/:classNo/:studentNo', meisterController.getScore)
