@@ -41,14 +41,14 @@ const login = async (res, memberId, memberPw) => {
         studentNo:memberInfo.member_studentNo
     }, '1h');
     res.cookie('token', jwtToken.token, {
-        // domain:'.bssm.kro.kr',
+        domain:'.bssm.kro.kr',
         path:'/',
         httpOnly:true,
         secure:true,
         maxAge:1000*60*60// 1시간 동안 저장 1000ms*60초*60분
     });
     res.cookie('refreshToken', jwtToken.refreshToken, {
-        // domain:'.bssm.kro.kr',
+        domain:'.bssm.kro.kr',
         path:'/',
         httpOnly:true,
         secure:true,

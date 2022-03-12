@@ -1,5 +1,6 @@
 class HttpError extends Error {
-    constructor(message) {
+    code: number;
+    constructor(message?: string) {
         super();
         this.code = 500;
         this.message = 'Internal Server Error';
@@ -40,7 +41,7 @@ class NotFoundException extends HttpError {}
 class ConflictException extends HttpError {}
 class InternalServerException extends HttpError {}
 
-module.exports = {
+export {
     BadRequestException,
     UnAuthorizedException,
     ForbiddenException,

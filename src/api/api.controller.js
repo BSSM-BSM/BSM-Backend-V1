@@ -82,10 +82,10 @@ router.get('/meister/score/:grade/:classNo/:studentNo', meisterController.getSco
 
 router.get('/board/:boardType', boardController.view)
 
-router.get('/post/:boardType/:postNo', postController.view)
-router.post('/post/:boardType', postController.write)
-router.put('/post/:boardType/:postNo', postController.update)
-router.delete('/post/:boardType/:postNo', postController.del)
+router.get('/post/:boardType/:postNo', postController.viewPost)
+router.post('/post/:boardType', postController.writePost)
+router.put('/post/:boardType/:postNo', postController.updatePost)
+router.delete('/post/:boardType/:postNo', postController.deletePost)
 
 router.get('/comment/:boardType/:postNo', commentController.view)
 router.post('/comment/:boardType/:postNo/:depth/:parentIdx', commentController.write)

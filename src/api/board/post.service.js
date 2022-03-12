@@ -1,128 +1,180 @@
-const pool = require('../../util/db')
-
-let result=new Array()
-
-const view = async (memberCode, memberLevel, boardType, likeBoardType, postNo, isAnonymous) => {
-    let rows
-    result=new Array()
-    const postQuery="SELECT * FROM ?? WHERE `post_no`=?"
-    try{
-        [rows] = await pool.query(postQuery, [boardType, postNo])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
+const { NotFoundException, UnAuthorizedException, ForbiddenException } = require('../../util/exceptions');
+const repository = require('./repository/post.repository');
+const likeRepository = require('./repository/like.repository');
+const pool = require('../../util/db');
+const webpush = require('../../util/push');
+const js_xss = require('xss');
+const xss = new js_xss.FilterXSS({
+    onIgnoreTagAttr:(tag, name, value, isWhiteAttr) => {
+        if(name.substr(0, 5) === "style") {
+            return name + '="' + js_xss.escapeAttrValue(value) + '"';
+        }
+        if(tag.substr(0, 3)==="img"){
+            if(name.substr(0, 4) === "e_id") {
+                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            }
+            if(name.substr(0, 5) === "e_idx") {
+                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            }
+            if(name.substr(0, 6) === "e_type") {
+                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            }
+        }
+    },
+    onIgnoreTag:(tag, html, options) => {
+        if(tag.substr(0, 6) === "iframe") {
+            return html;
+        }
     }
-    if(!rows.length) return {status:3,subStatus:6}
-    rows=rows[0]
-    if(rows.post_deleted) return {status:3,subStatus:6}
-    if(memberCode>0 && rows.member_code===memberCode || memberLevel>=3){
-        rows.permission=true;
+});
+
+const boardTypeList = {
+    board:{
+        anonymous:false,
+        public:false,
+        level:0
+    },
+    anonymous:{
+        anonymous:true,
+        public:true,
+        level:0
+    },
+    notice:{
+        anonymous:false,
+        public:true,
+        level:3
+    }
+}
+const viewPost = async (
+    memberCode,
+    memberLevel,
+    boardType,
+    postNo
+) => {
+    if(typeof boardTypeList[boardType] === 'undefined'){
+        throw new NotFoundException();
+    }
+    if(boardTypeList[boardType].public == false && memberCode === null){
+        throw new UnAuthorizedException();
+    }
+    const isAnonymous = boardTypeList[boardType].anonymous;
+
+    const [postInfo, likeInfo] = await Promise.all([
+        repository.getPostByCode(boardType, postNo),
+        likeRepository.getLikeByMemberCode(boardType, postNo, memberCode)
+    ]);
+    if(postInfo === null){
+        throw new NotFoundException();
+    }
+    if(postInfo.post_deleted){
+        throw new NotFoundException();
+    }
+
+    repository.updatePostHit(boardType, postNo);
+    const result = {
+        postTitle:postInfo.post_title,
+        postComments:postInfo.post_comments,
+        postContent:postInfo.post_content,
+        memberCode:postInfo.member_code,
+        memberNickname:postInfo.member_nickname,
+        postDate:postInfo.post_date,
+        postHit:postInfo.post_hit,
+        postLike:postInfo.like,
+        permission:false,
+        like:false
+    }
+    if(likeInfo !== null){
+        result.like = likeInfo.like;
+    }
+    if(memberCode>0 && postInfo.member_code===memberCode || memberLevel>=3){
+        result.permission=true;
     }else{
-        rows.permission=false;
+        result.permission=false;
     }
     if(isAnonymous){
-        rows.member_code=-1
-        rows.member_level=0
-        rows.member_nickname='ㅇㅇ'
+        result.memberCode=-1;
+        result.memberNickname='ㅇㅇ';
     }
-    result={
-        status:1,
-        subStatus:0,
-        postTitle:rows.post_title,
-        postComments:rows.post_comments,
-        postContent:rows.post_content,
-        memberCode:rows.member_code,
-        memberNickname:rows.member_nickname,
-        postDate:rows.post_date,
-        postHit:rows.post_hit,
-        postLike:rows.like,
-        permission:rows.permission,
+    return {
+        post:result
     }
-    const likeCheckQuery="SELECT `like` FROM ?? WHERE `post_no`= ? AND `member_code`=?"
-    try{
-        [rows] = await pool.query(likeCheckQuery, [likeBoardType, postNo, memberCode])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
-    }
-    if(rows.length){
-        result['like']=rows[0].like
-    }else{
-        result['like']=0
-    }
-    const postHitQuery="UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?"
-    try{
-        await pool.query(postHitQuery, [boardType, postNo])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
-    }
-    return result
 }
-const write = async (memberCode, memberNickname, boardType, postTitle, postContent) => {
-	const postQuery="INSERT INTO ?? (member_code, member_nickname, post_title, post_content, post_date) values(?, ?, ?, ?, now())"
-    try{
-        await pool.query(postQuery, [boardType, memberCode, memberNickname, postTitle, postContent])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
+
+const writePost = async (
+    memberCode,
+    memberLevel,
+    memberNickname,
+    boardType,
+    postTitle,
+    postContent
+) => {
+    if(memberCode === null){
+        throw new UnAuthorizedException();
     }
-    return {status:1,subStatus:0}
+    if(typeof boardTypeList[boardType] === 'undefined'){
+        throw new NotFoundException('Board not Found');
+    }
+    if(boardTypeList[boardType].level > memberLevel){
+        throw new ForbiddenException();
+    }
+
+	await repository.insertPost(boardType, memberCode, memberNickname, postTitle, xss.process(postContent));
+    if(boardType == 'notice'){
+        const payload = JSON.stringify({
+            title:"새로운 공지사항이 있습니다",
+            body:postTitle,
+            link:"/board/notice"
+        })
+        webpush.push(payload, 'all');
+    }
 }
-const update = async (memberCode, memberLevel, boardType, postNo, postTitle, postContent) => {
-    let rows
-    result=new Array()
-    const postCheckQuery="SELECT `member_code` FROM ?? WHERE `post_no`=?"
-    try{
-        [rows] = await pool.query(postCheckQuery, [boardType, postNo])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
+
+const updatePost = async (
+    memberCode,
+    memberLevel,
+    boardType,
+    postNo,
+    postTitle,
+    postContent
+) => {
+    if(memberCode === null){
+        throw new UnAuthorizedException();
     }
-    if(rows[0]==null){
-        return {status:3,subStatus:6}
+    if(typeof boardTypeList[boardType] === 'undefined'){
+        throw new NotFoundException('Board not Found');
     }
-    if(!(rows[0].member_code==memberCode || memberLevel>=3)){
-        return {status:3,subStatus:7}
+    const postMemberCode = await repository.getMemberCodeFromPost(boardType, postNo);
+    if(postMemberCode === null){
+        throw new NotFoundException('Post not Found');
     }
-    const postUpdateQuery="UPDATE ?? SET `post_title`=?, `post_content`=? WHERE `post_no`=?"
-    try{
-        await pool.query(postUpdateQuery, [boardType, postTitle, postContent, postNo])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
+    if(!(postMemberCode == memberCode || memberLevel>=3)){
+        throw new ForbiddenException();
     }
-    return {status:1,subStatus:0}
+    
+    await repository.updatePost(boardType, postTitle, xss.process(postContent), postNo);
 }
-const del = async (memberCode, memberLevel, boardType, postNo) => {
-    let rows
-    result=new Array()
-    const postCheckQuery="SELECT `member_code` FROM ?? WHERE `post_no`=?"
-    try{
-        [rows] = await pool.query(postCheckQuery, [boardType, postNo])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
+
+const deletePost = async (memberCode, memberLevel, boardType, postNo) => {
+    if(memberCode === null){
+        throw new UnAuthorizedException();
     }
-    if(rows[0]==null){
-        return {status:3,subStatus:6}
+    if(typeof boardTypeList[boardType] === 'undefined'){
+        throw new NotFoundException('Board not Found');
     }
-    if(!(rows[0].member_code==memberCode || memberLevel>=3)){
-        return {status:3,subStatus:7}
+    const postMemberCode = await repository.getMemberCodeFromPost(boardType, postNo);
+    if(postMemberCode === null){
+        throw new NotFoundException('Post not Found');
     }
-    const postDeleteQuery="UPDATE ?? SET `post_deleted`=1 WHERE `post_no`=?"
-    try{
-        await pool.query(postDeleteQuery, [boardType, postNo])
-    }catch(err){
-        console.error(err)
-        return {status:2,subStatus:0};
+    if(!(postMemberCode == memberCode || memberLevel>=3)){
+        throw new ForbiddenException();
     }
-    return {status:1,subStatus:0}
+
+    await repository.deletePost(boardType, postNo);
 }
 
 module.exports = {
-    view:view,
-    write:write,
-    update,update,
-    del:del,
+    viewPost,
+    writePost,
+    updatePost,
+    deletePost,
 }
