@@ -1,59 +1,78 @@
-const pool = require('../../util/db')
+const { NotFoundException, UnAuthorizedException } = require('../../util/exceptions');
+const repository = require('./repository/board.repository');
 
+const boardTypeList = {
+    board:{
+        anonymous:false,
+        public:false,
+        level:0
+    },
+    anonymous:{
+        anonymous:true,
+        public:true,
+        level:0
+    },
+    notice:{
+        anonymous:false,
+        public:true,
+        level:3
+    }
+}
 
-let result=new Object();
+const viewBoard = async (memberCode, boardType, page, limitPost) => {
+    if(typeof boardTypeList[boardType] === 'undefined'){
+        throw new NotFoundException();
+    }
+    if(boardTypeList[boardType].public == false && memberCode === null){
+        throw new UnAuthorizedException();
+    }
+    const isAnonymous = boardTypeList[boardType].anonymous;
 
-const view = async (boardType, page, limit, isAnonymous) => {
-    let rows
+    if(parseInt(page)>=1){
+        page=parseInt(page);
+    }else{
+        page=1;
+    }
+    if(parseInt(limitPost)>=5){
+        limitPost=parseInt(limitPost);
+    }else{
+        limitPost=15;
+    }
+
     // 총 게시물 갯수
-    const totalPostQuery="SELECT COUNT(`post_no`) FROM ?? WHERE `post_deleted`=0"
-    try{
-        [rows] = await pool.query(totalPostQuery, [boardType])
-    }catch(err){
-        console.error(err)
-        return null;
+    const totalPosts = await repository.getTotalPosts(boardType);
+    if(totalPosts === null){
+        throw new NotFoundException();
     }
-    result=new Object();
-    // 게시판 페이지 수 계산
-    let totalPage, startPost, limitPost=limit;
-    startPost = (page-1)*limitPost;
-    totalPage=Math.ceil(rows[0]["COUNT(`post_no`)"]/limitPost);
-    result.pages=totalPage;
 
-    const boardQuery="SELECT `post_no`, `post_title`, `post_comments`, `member_code`, `member_nickname`, `post_date`, `post_hit`, `like` FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC LIMIT ?, ?"
-    try{
-        [rows] = await pool.query(boardQuery, [boardType, startPost, limitPost])
-    }catch(err){
-        console.error(err)
-        return null;
+    // 게시판 페이지 수 계산
+    const startPost = (page-1)*limitPost;
+    const totalPage = Math.ceil(totalPosts/limitPost);
+
+    const posts = await repository.getPostsByPage(boardType, startPost, limitPost);
+    if(posts === null){
+        throw new NotFoundException();
     }
-    let n = rows.length;
-    if(!n) result.arrBoard=null;
-    else{
-        result.arrBoard=new Array()
-        for(let i=0;i<n;i++){
-            if(isAnonymous){
-                rows[i].member_code=-1
-                rows[i].member_level=0
-                rows[i].member_nickname='ㅇㅇ'
-            }
-            result.arrBoard[i]={
-                boardType:boardType,
-                postNo:rows[i].post_no,
-                postTitle:rows[i].post_title,
-                postComments:rows[i].post_comments,
-                memberCode:rows[i].member_code,
-                memberNickname:rows[i].member_nickname,
-                memberLevel:rows[i].member_level,
-                postDate:rows[i].post_date,
-                postHit:rows[i].post_hit,
-                postLike:rows[i].like,
-            };
+
+    const result = posts.map(e => {
+        return {
+            postNo:e.post_no,
+            postTitle:e.post_title,
+            postComments:e.post_comments,
+            memberCode:isAnonymous? -1: e.member_code,
+            memberNickname:isAnonymous? 'ㅇㅇ': e.member_nickname,
+            postDate:e.post_date,
+            postHit:e.post_hit,
+            postLike:e.like,
         }
+    })
+
+    return {
+        board: result,
+        pages: totalPage
     }
-    return result
 }
 
 module.exports = {
-    view:view,
+    viewBoard,
 }

@@ -33,7 +33,12 @@ const controller = require('./controller');
 app.use('/', controller);
 
 app.use(function (err, req, res, next) {
-    res.status(err.code).send(JSON.stringify({'statusCode':err.code,'message':err.message}))
+    if(err.code){
+        res.status(err.code).send(JSON.stringify({'statusCode':err.code,'message':err.message}))
+    }else{
+        console.error(err);
+        res.status(500).send();
+    }
 });
 
 if(processName=="primary"){

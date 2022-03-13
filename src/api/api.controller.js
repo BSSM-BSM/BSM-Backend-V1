@@ -80,7 +80,7 @@ router.get('/timetable/:grade/:classNo', timetableController.getTimetable)
 router.post('/meister/point/:grade/:classNo/:studentNo', meisterController.getPoint)
 router.get('/meister/score/:grade/:classNo/:studentNo', meisterController.getScore)
 
-router.get('/board/:boardType', boardController.view)
+router.get('/board/:boardType', boardController.viewBoard)
 
 router.get('/post/:boardType/:postNo', postController.viewPost)
 router.post('/post/:boardType', postController.writePost)

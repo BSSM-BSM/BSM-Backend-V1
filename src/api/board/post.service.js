@@ -1,7 +1,6 @@
 const { NotFoundException, UnAuthorizedException, ForbiddenException } = require('../../util/exceptions');
 const repository = require('./repository/post.repository');
 const likeRepository = require('./repository/like.repository');
-const pool = require('../../util/db');
 const webpush = require('../../util/push');
 const js_xss = require('xss');
 const xss = new js_xss.FilterXSS({
