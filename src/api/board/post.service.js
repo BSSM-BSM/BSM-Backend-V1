@@ -60,7 +60,7 @@ const viewPost = async (
 
     const [postInfo, likeInfo] = await Promise.all([
         repository.getPostByCode(boardType, postNo),
-        likeRepository.getLikeByMemberCode(boardType, postNo, memberCode)
+        likeRepository.getPostLikeByMemberCode(boardType, postNo, memberCode)
     ]);
     if(postInfo === null){
         throw new NotFoundException();
@@ -83,7 +83,7 @@ const viewPost = async (
         like:false
     }
     if(likeInfo !== null){
-        result.like = likeInfo.like;
+        result.like = likeInfo;
     }
     if(memberCode>0 && postInfo.member_code===memberCode || memberLevel>=3){
         result.permission=true;
@@ -175,5 +175,5 @@ module.exports = {
     viewPost,
     writePost,
     updatePost,
-    deletePost,
+    deletePost
 }

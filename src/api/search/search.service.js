@@ -19,5 +19,5 @@ const getBoard = async (searchType, searchStr) => {
 }
 
 module.exports = {
-    getBoard,
+    getBoard
 }

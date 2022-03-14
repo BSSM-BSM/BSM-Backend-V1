@@ -11,6 +11,6 @@ const get = async (req:express.Request, res:express.Response, next:express.NextF
     }
 }
 
-module.exports = {
+export {
     get
 }

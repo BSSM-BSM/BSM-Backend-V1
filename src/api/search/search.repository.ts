@@ -15,6 +15,6 @@ const getBoard = async (searchType: string, searchStr:string) => {
     }
 }
 
-module.exports = {
-    getBoard,
+export {
+    getBoard
 }

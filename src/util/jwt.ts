@@ -161,7 +161,7 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     });
     return res.send(JSON.stringify({status:4,subStatus:4,token:token}));
 }
-module.exports = {
+export {
     sign,
     login,
     verify,

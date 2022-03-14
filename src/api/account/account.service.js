@@ -287,12 +287,12 @@ const token = async (refreshToken) => {
 }
 
 module.exports = {
-    login:login,
-    viewUser:viewUser,
-    signUp:signUp,
-    profileUpload:profileUpload,
-    validCodeMail:validCodeMail,
-    pwResetMail:pwResetMail,
-    pwEdit:pwEdit,
-    token:token
+    login,
+    viewUser,
+    signUp,
+    profileUpload,
+    validCodeMail,
+    pwResetMail,
+    pwEdit,
+    token
 }

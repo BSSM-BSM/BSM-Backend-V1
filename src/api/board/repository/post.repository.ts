@@ -92,11 +92,37 @@ const deletePost = async (
     }
 }
 
-export {
+const getPostTotalLike = async (boardType: string, postNo: number) => {
+    const getPostLikeQuery='SELECT `like` FROM ?? WHERE `post_no`=?';
+    try{
+        const [rows] = await pool.query(getPostLikeQuery, [boardType, postNo]);
+        if(rows.length)
+            return rows[0].like;
+        else
+            return null;
+    }catch(err){
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
+const updatePostTotalLike = async (boardType: string, postNo: number, like: number) => {
+    const updaetPostTotalLikeQuery='UPDATE ?? SET `like`=`like`+? WHERE `post_no`=?';
+    try{
+        await pool.query(updaetPostTotalLikeQuery, [boardType, like, postNo]);
+    }catch(err){
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
+module.exports = {
     getPostByCode,
     getMemberCodeFromPost,
     insertPost,
     updatePost,
     updatePostHit,
-    deletePost
+    deletePost,
+    getPostTotalLike,
+    updatePostTotalLike
 }

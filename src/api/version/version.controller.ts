@@ -19,7 +19,7 @@ const getVersionLegacy = async (req:express.Request, res:express.Response) =>{
         versionName:'1.0.0\n안드로이드 네이티브 앱은 지원이 종료되었습니다\n웹 앱을 다운 받아주세요'
     }))
 }
-module.exports = {
+export {
     getVersion,
     getVersionLegacy
 }

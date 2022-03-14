@@ -9,5 +9,5 @@ const register = async (endpoint, auth, p256dh, memberCode) => {
 }
 
 module.exports = {
-    register,
+    register
 }

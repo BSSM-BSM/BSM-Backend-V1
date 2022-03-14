@@ -1,5 +1,5 @@
 const { InternalServerException } = require('./exceptions');
-const nodemailer = require("nodemailer")
+const nodemailer = require("nodemailer");
 
 const send = (to, subject, html) => {
     const transport = nodemailer.createTransport({
@@ -23,5 +23,5 @@ const send = (to, subject, html) => {
     })
 }
 module.exports = {
-    send:send
+    send
 }

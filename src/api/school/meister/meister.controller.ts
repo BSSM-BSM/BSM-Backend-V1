@@ -21,7 +21,7 @@ const getScore = async (req:express.Request, res:express.Response, next:express.
     }
 }
 
-module.exports = {
+export {
     getPoint,
     getScore
 }

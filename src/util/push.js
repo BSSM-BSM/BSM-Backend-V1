@@ -1,5 +1,5 @@
-const webpush = require('web-push')
-const pool = require('./db')
+const webpush = require('web-push');
+const pool = require('./db');
 webpush.setVapidDetails(
     "mailto:BSM@bssm.kro.kr",
     process.env.PUSH_PUBLIC_KEY,
@@ -39,5 +39,5 @@ const getPushToken = async (type) => {
     return result;
 }
 module.exports = {
-    push,
+    push
 }

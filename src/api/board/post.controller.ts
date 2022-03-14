@@ -71,5 +71,5 @@ export {
     viewPost,
     writePost,
     updatePost,
-    deletePost,
+    deletePost
 }

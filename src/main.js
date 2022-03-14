@@ -33,11 +33,11 @@ const controller = require('./controller');
 app.use('/', controller);
 
 app.use(function (err, req, res, next) {
-    if(err.code){
-        res.status(err.code).send(JSON.stringify({'statusCode':err.code,'message':err.message}))
+    if(err.httpCode){
+        res.status(err.httpCode).send(JSON.stringify({'statusCode':err.httpCode,'message':err.message}))
     }else{
         console.error(err);
-        res.status(500).send();
+        res.status(500).send('Internal Server Error');
     }
 });
 

@@ -165,14 +165,14 @@ const getToken = async (token) => {
 }
 
 module.exports = {
-    getMemberById:getMemberById,
-    getMemberByCode:getMemberByCode,
-    getMemberByNickname:getMemberByNickname,
-    getMember:getMember,
-    getMemberFromCode:getMemberFromCode,
-    signUp:signUp,
-    getStudentInfoByCode:getStudentInfoByCode,
-    updateCodeAvailable:updateCodeAvailable,
-    updatePWByCode:updatePWByCode,
-    getToken:getToken
+    getMemberById,
+    getMemberByCode,
+    getMemberByNickname,
+    getMember,
+    getMemberFromCode,
+    signUp,
+    getStudentInfoByCode,
+    updateCodeAvailable,
+    updatePWByCode,
+    getToken
 }

@@ -16,5 +16,5 @@ const getMeal = async (mealDate) => {
 }
 
 module.exports = {
-    getMeal,
+    getMeal
 }

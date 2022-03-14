@@ -128,11 +128,11 @@ const token = async (req, res, next) => {
 }
 
 module.exports = {
-    login:login,
-    logout:logout,
-    islogin:islogin,
-    signUp:signUp,
-    view:view,
+    login,
+    logout,
+    islogin,
+    signUp,
+    view,
     profileUpload,
     validCode,
     pwResetMail,
