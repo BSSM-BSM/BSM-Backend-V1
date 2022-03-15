@@ -87,10 +87,10 @@ router.post('/post/:boardType', postController.writePost)
 router.put('/post/:boardType/:postNo', postController.updatePost)
 router.delete('/post/:boardType/:postNo', postController.deletePost)
 
-router.get('/comment/:boardType/:postNo', commentController.view)
-router.post('/comment/:boardType/:postNo/:depth/:parentIdx', commentController.write)
-router.post('/comment/:boardType/:postNo', commentController.write)
-router.delete('/comment/:boardType/:postNo/:commentIdx', commentController.del)
+router.get('/comment/:boardType/:postNo', commentController.viewComment)
+router.post('/comment/:boardType/:postNo/:depth/:parentIdx', commentController.writeComment)
+router.post('/comment/:boardType/:postNo', commentController.writeComment)
+router.delete('/comment/:boardType/:postNo/:commentIdx', commentController.deleteComment)
 
 router.post('/like/:boardType/:postNo', likeController.like)
 

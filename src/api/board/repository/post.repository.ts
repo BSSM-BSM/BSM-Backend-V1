@@ -79,6 +79,20 @@ const updatePostHit = (
     }
 }
 
+const updatePostComments = (
+    boardType: string,
+    postNo: number,
+    commentCount: number
+) => {
+    const updatePostQuery='UPDATE ?? SET `post_comments`=`post_comments`+? WHERE `post_no`=?';
+    try{
+        pool.query(updatePostQuery, [boardType, postNo, commentCount]);
+    }catch(err){
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const deletePost = async (
     boardType: string,
     postNo: number
@@ -122,6 +136,7 @@ module.exports = {
     insertPost,
     updatePost,
     updatePostHit,
+    updatePostComments,
     deletePost,
     getPostTotalLike,
     updatePostTotalLike
