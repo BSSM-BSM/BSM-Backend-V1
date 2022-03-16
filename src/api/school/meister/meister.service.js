@@ -3,21 +3,37 @@ const repository = require('./meister.repository');
 const request = require('request').defaults({jar: true});
 const iconv = require('iconv-lite');
 
-let options
+const getPoint = async (grade, classNo, studentNo, pw, defaultPW) =>{
+    let options, hakgwa;
+    if (grade == 1) {
+        hakgwa = '공통과정';
+    } else {
+        if(classNo <= 2) {
+            hakgwa = '소프트웨어개발과';
+        } else {
+            hakgwa = '임베디드소프트웨어과';
+        }
+    }
+    if (defaultPW) {
+        const studentInfo = await repository.getMeisterNo(grade, classNo, studentNo);
+        if(studentInfo === null){
+            throw new NotFoundException();
+        }
+        pw = studentInfo.uniq_no;
+    }
 
-const getPoint = async (grade, classNo, studentNo, pw) =>{
     options = {
         uri:'https://bssm.meistergo.co.kr/inc/common_json.php', 
         method:'POST',
         encoding:null,
         form:{
             'caseBy':'login',
-            'pw':""+grade,
+            'pw':pw,
             'lgtype':'S',
-            'hakgwa':'공통과정',
-            'hak':""+grade,
-            'ban':""+classNo,
-            'bun':""+studentNo
+            'hakgwa':hakgwa,
+            'hak':grade,
+            'ban':classNo,
+            'bun':studentNo
         }
     }
     if(iconv.decode(await getHttp(options), 'euc-kr')!='true'){
@@ -48,7 +64,7 @@ const getScore = async (grade, classNo, studentNo) =>{
     if(studentInfo === null){
         throw new NotFoundException();
     }
-    options = {
+    const options = {
         uri:'https://bssm.meistergo.co.kr/_suCert/bssm/B002/jnv_201j.php',
         method:'POST',
         encoding:null,

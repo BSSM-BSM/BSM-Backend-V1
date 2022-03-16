@@ -4,7 +4,13 @@ const service = require('./meister.service');
 const getPoint = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
     try{
         res.send(JSON.stringify(
-            await service.getPoint(req.params.grade, req.params.classNo, req.params.studentNo, req.body.pw)
+            await service.getPoint(
+                req.params.grade,
+                req.params.classNo,
+                req.params.studentNo,
+                req.body.pw,
+                req.body.defaultPW
+            )
         ));
     }catch(err){
         next(err);
@@ -14,7 +20,11 @@ const getPoint = async (req:express.Request, res:express.Response, next:express.
 const getScore = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
     try{
         res.send(JSON.stringify(
-            await service.getScore(req.params.grade, req.params.classNo, req.params.studentNo)
+            await service.getScore(
+                req.params.grade,
+                req.params.classNo,
+                req.params.studentNo
+            )
         ));
     }catch(err){
         next(err);
