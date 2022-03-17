@@ -1,82 +1,65 @@
-const pool = require('../../util/db')
+const { NotFoundException } = require('../../util/exceptions');
+const emoticonRepository = require('./repository/emoticon.repository');
 
 const getemoticon = async (id) => {
-    let result = {}
-    let rows
-    const getEmoticonQuery = "SELECT `name`, `description`, `created` FROM `emoticon` WHERE `id`=?"
-    try{
-        [rows] = await pool.query(getEmoticonQuery, [id])
-    }catch(err){
-        console.error(err)
-        return null;
+    const emoticonInfo = await emoticonRepository.getEmoticonById(id);
+    if (emoticonInfo === null) {
+        throw new NotFoundException();
     }
-    if(!rows.length) return null;
-    result = {
-        id:id,
-        name:rows[0].name,
-        created:rows[0].created,
-        description:rows[0].description,
-        e:[]
+
+    const emoticons = await emoticonRepository.getEmoticonsById(id);
+    if (emoticons === null) {
+        throw new NotFoundException();
     }
-    let n
-    const getEmoticonsQuery = "SELECT `id`, `idx`, `type` FROM `emoticons` WHERE `id`=?"
-    try{
-        [rows] = await pool.query(getEmoticonsQuery, [id])
-        n = rows.length
-    }catch(err){
-        console.error(err)
-        return null;
-    }
-    if(!n) return null;
-    for(let i=0;i<n;i++){
-        result.e[i] = {
-            idx:rows[i].idx,
-            type:rows[i].type
+
+    return {
+        emoticon: {
+            id,
+            name:emoticonInfo.name,
+            created:emoticonInfo.created,
+            description:emoticonInfo.description,
+            e:emoticons.map(e => {
+                return {
+                    idx: e.idx,
+                    type: e.type
+                }
+            })
         }
     }
-    return result
 }
 
 const getemoticons = async () => {
-    let result = []
-    let rows, n
-    const getEmoticonQuery = "SELECT `id`, `name` FROM `emoticon`"
-    try{
-        [rows] = await pool.query(getEmoticonQuery)
-        n = rows.length
-    }catch(err){
-        console.error(err)
-        return null;
+    const emoticonInfo = await emoticonRepository.getEmoticon();
+    if (emoticonInfo === null) {
+        throw new NotFoundException();
     }
-    if(!n) return null;
-    for(let i=0;i<n;i++){
-        result[i]={
-            id:rows[i].id,
-            alt:rows[i].name,
-            e:[]
+    
+    let result = emoticonInfo.map(e => {
+        return {
+            id: e.id,
+            alt: e.name,
+            e: []
         }
+    })
+    const emoticons = await emoticonRepository.getEmoticons();
+    if (emoticons === null) {
+        throw new NotFoundException();
     }
-    const getEmoticonsQuery = "SELECT `id`, `idx`, `type` FROM `emoticons`"
-    try{
-        [rows] = await pool.query(getEmoticonsQuery)
-        n = rows.length
-    }catch(err){
-        console.error(err)
-        return null;
-    }
-    if(!n) return null;
-    let map = []
-    for(let i=0, j=-1;i<n;i++){
-        if(map[rows[i].id]===undefined){
+
+    let map = [];
+    for (let i=0,j=-1; i<emoticons.length; i++) {
+        if (map[emoticons[i].id] === undefined) {
             j++;
-            map[rows[i].id]=j;
+            map[emoticons[i].id]=j;
         }
         result[j].e.push({
-            idx:rows[i].idx,
-            type:rows[i].type
-        })
+            idx:emoticons[i].idx,
+            type:emoticons[i].type
+        });
     }
-    return result
+    return {
+        emoticon: result
+    }
 }
 
 const uploadEmoticonInfo = async (name, description, memberCode) => {
@@ -88,14 +71,14 @@ const uploadEmoticonInfo = async (name, description, memberCode) => {
     AND table_schema = DATABASE()`
     try{
         [rows] = await pool.query(getIndexQuery)
-    }catch(err){
+    }catch(err) {
         console.error(err)
         return null;
     }
     const insertEmoticonsQuery = "INSERT INTO emoticon values(?, ?, ?, now(), ?)"
     try{
         pool.query(insertEmoticonsQuery, [rows[0].AUTO_INCREMENT, name, description, memberCode])
-    }catch(err){
+    }catch(err) {
         console.error(err)
         return null;
     }
@@ -112,7 +95,7 @@ const uploadEmoticons = (id, emoticonList) => {
     const insertEmoticonsQuery = `INSERT INTO emoticons values ${temp.join(',')}`;
     try{
         pool.query(insertEmoticonsQuery, params)
-    }catch(err){
+    }catch(err) {
         console.error(err)
         return null;
     }

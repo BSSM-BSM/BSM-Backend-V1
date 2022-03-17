@@ -4,23 +4,23 @@ const multer = require('multer')
 const fs = require('fs');
 
 let result, dbResult;
-const getemoticon = async (req, res) => {
-    dbResult = await service.getemoticon(req.params.id)
-    result = {
-        status:1,
-        subStatus:0,
-        emoticon:dbResult
+const getemoticon = async (req, res, next) => {
+    try{
+        res.send(JSON.stringify(
+            await service.getemoticon(req.params.id)
+        ));
+    }catch(err){
+        next(err);
     }
-    res.send(JSON.stringify(result))
 }
-const getemoticons = async (req, res) => {
-    dbResult = await service.getemoticons()
-    result = {
-        status:1,
-        subStatus:0,
-        emoticon:dbResult
+const getemoticons = async (req, res, next) => {
+    try{
+        res.send(JSON.stringify(
+            await service.getemoticons()
+        ));
+    }catch(err){
+        next(err);
     }
-    res.send(JSON.stringify(result))
 }
 const uploadProcessing = multer({
     fileFilter:(req, file, cb) => {
