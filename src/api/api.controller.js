@@ -96,8 +96,8 @@ router.post('/like/:boardType/:postNo', likeController.like)
 
 router.post('/imageUpload', loginCheck, imageUpload.single('file'), imageUploadController.upload)
 
-router.get('/emoticon/:id', loginCheck, emoticonController.getemoticon)
-router.get('/emoticon', loginCheck, emoticonController.getemoticons)
-router.post('/emoticon', loginCheck, emoticonController.uploadProcessing.fields([{name:'file'},{name:'files'}]), emoticonController.uploadCheck)
+router.get('/emoticon/:id', emoticonController.getemoticon)
+router.get('/emoticon', emoticonController.getemoticons)
+router.post('/emoticon', emoticonController.uploadProcessing.fields([{name:'file'},{name:'files'}]), emoticonController.uploadEmoticon)
 
 module.exports = router

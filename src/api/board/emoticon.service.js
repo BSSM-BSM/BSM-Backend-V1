@@ -1,5 +1,6 @@
-const { NotFoundException } = require('../../util/exceptions');
+const { NotFoundException, InternalServerException, UnAuthorizedException, BadRequestException } = require('../../util/exceptions');
 const emoticonRepository = require('./repository/emoticon.repository');
+const fs = require('fs');
 
 const getemoticon = async (id) => {
     const emoticonInfo = await emoticonRepository.getEmoticonById(id);
@@ -62,48 +63,77 @@ const getemoticons = async () => {
     }
 }
 
-const uploadEmoticonInfo = async (name, description, memberCode) => {
-    let rows
-    const getIndexQuery = `
-    SELECT AUTO_INCREMENT 
-    FROM information_schema.tables 
-    WHERE table_name = 'emoticon' 
-    AND table_schema = DATABASE()`
-    try{
-        [rows] = await pool.query(getIndexQuery)
-    }catch(err) {
-        console.error(err)
-        return null;
+const uploadEmoticon = async (memberCode, name, description, emoticons, files) => {
+    if (memberCode === null) {
+        throw new UnAuthorizedException();
     }
-    const insertEmoticonsQuery = "INSERT INTO emoticon values(?, ?, ?, now(), ?)"
-    try{
-        pool.query(insertEmoticonsQuery, [rows[0].AUTO_INCREMENT, name, description, memberCode])
-    }catch(err) {
-        console.error(err)
-        return null;
+    // 업로드 데이터 체크
+    if (!name || !description || !files.file || !files.files || !emoticons) {
+        throw new BadRequestException();
     }
-    return rows[0].AUTO_INCREMENT
-}
-const uploadEmoticons = (id, emoticonList) => {
-    let temp = []
-    let params = []
-    // 한 번에 insert 하기 위해
-    emoticonList.forEach(e => {
-        params.push(id, e.idx, e.type);
-        temp.push('(?,?,?)')
-    });
-    const insertEmoticonsQuery = `INSERT INTO emoticons values ${temp.join(',')}`;
-    try{
-        pool.query(insertEmoticonsQuery, params)
-    }catch(err) {
-        console.error(err)
-        return null;
+    if (name.length < 2) {
+        throw new BadRequestException();
     }
-    return true
+    if (description.length < 2) {
+        throw new BadRequestException();
+    }
+    if (files.files.length < 4) {
+        throw new BadRequestException();
+    }
+    
+    if (files.files.length !== (Object.keys(emoticons).length)) {
+        throw new BadRequestException();
+    }
+    let emoticonList = [];
+    for (let i=0; i<files.files.length; i++){
+        const e = files.files[i];
+        if (!emoticons[e.name]) {
+            throw new BadRequestException();
+        }
+        // 같은 확장자인지, 번호가 숫자가 맞는지 체크
+        if (e.ext != emoticons[e.name].type || !(/^\d+$/.test(emoticons[e.name].idx))) {
+            throw new BadRequestException();
+        }
+        emoticonList.push({
+            idx:emoticons[e.name].idx,
+            type:emoticons[e.name].type
+        });
+    }
+
+    const emoticonId = await emoticonRepository.getAutoIncrement();
+    if (emoticonId === null) {
+        console.error('Emoticon get AUTO_INCREMENT error');
+        throw new InternalServerException();
+    }
+
+    // 이모티콘 정보 저장 및 폴더 생성
+    try {
+        await Promise.all([
+            emoticonRepository.insertEmoticonInfo(emoticonId, name, description, memberCode),
+            emoticonRepository.insertEmoticons(emoticonId, emoticonList),
+            fs.promises.mkdir(`public/resource/board/emoticon/${emoticonId}`)
+        ])
+    } catch (err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+
+    try{
+        // 복사할 파일 리스트 생성
+        let copyList = [];
+        copyList = files.files.map(e=>{
+            return fs.promises.copyFile(e.path, `public/resource/board/emoticon/${emoticonId}/${emoticons[e.name].idx}.${emoticons[e.name].type}`)
+        })
+        copyList.push(fs.promises.copyFile(files.file[0].path, `public/resource/board/emoticon/${emoticonId}.png`))
+        // 파일 복사 프로미스
+        await Promise.all(copyList);
+    }catch(err){
+        console.error(err)
+        throw new InternalServerException();
+    }
 }
 module.exports = {
-    getemoticon:getemoticon,
-    getemoticons:getemoticons,
-    uploadEmoticonInfo:uploadEmoticonInfo,
-    uploadEmoticons:uploadEmoticons
+    getemoticon,
+    getemoticons,
+    uploadEmoticon
 }
