@@ -1,37 +1,33 @@
-const express = require('express')
-const router = express.Router()
-const jwt = require('../util/jwt')
-const multer = require('multer')
+const express = require('express');
+const router = express.Router();
+const jwt = require('../util/jwt');
+const multer = require('multer');
 
 const loginCheck = (req, res, next) => {
   const jwtValue = jwt.check(req.cookies.token);
   if(!jwtValue.isLogin){
-    return res.send(JSON.stringify(jwtValue.msg));
+    next(new UnAuthorizedException());
   }
   next();
 }
 const imageUpload = multer({
   storage:multer.diskStorage({
     destination:(req, file, cb) => {
-      const jwtValue = jwt.check(req.cookies.token);
-      if(!jwtValue.isLogin) return;
-      cb(null, 'public/resource/board/upload_images/')
+      cb(null, 'public/resource/board/upload_images/');
     },
     filename:(req, file, cb) => {
-      cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
+      cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1]);
     }
   })
 })
 const profileUpload = multer({
   storage:multer.diskStorage({
     destination:(req, file, cb) => {
-      const jwtValue = jwt.check(req.cookies.token);
-      if(!jwtValue.isLogin) return;
-      cb(null, 'public/resource/member/profile_images/')
+      cb(null, 'public/resource/member/profile_images/');
     },
     filename:(req, file, cb) => {
       const jwtValue = jwt.check(req.cookies.token);
-      cb(null, 'temp-profile_'+jwtValue.memberCode+'.'+file.originalname.split('.')[file.originalname.split('.').length-1])
+      cb(null, 'temp-profile_'+jwtValue.memberCode+'.'+file.originalname.split('.')[file.originalname.split('.').length-1]);
     }
   })
 })
@@ -52,6 +48,7 @@ const commentController = require('./board/comment.controller')
 const likeController = require('./board/like.controller')
 const imageUploadController = require('./board/imageUpload.controller')
 const emoticonController = require('./board/emoticon.controller')
+const { UnAuthorizedException } = require('../util/exceptions')
 
 router.post('/account/login', accountController.login)
 router.delete('/account/logout', accountController.logout)

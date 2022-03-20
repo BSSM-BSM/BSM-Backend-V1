@@ -150,20 +150,6 @@ const updatePWByCode = async (memberCode, memberPw) => {
     return salt;
 }
 
-const getToken = async (token) => {
-    const getTokenQuery="SELECT * FROM `tokens` WHERE `token`=? AND `valid`=1";
-    try{
-        const [rows] = await pool.query(getTokenQuery, [token]);
-        if(rows.length)
-            return rows[0];
-        else
-            return null;
-    }catch(err){
-        console.error(err);
-        throw new InternalServerException();
-    }
-}
-
 module.exports = {
     getMemberById,
     getMemberByCode,
@@ -174,5 +160,4 @@ module.exports = {
     getStudentInfoByCode,
     updateCodeAvailable,
     updatePWByCode,
-    getToken
 }

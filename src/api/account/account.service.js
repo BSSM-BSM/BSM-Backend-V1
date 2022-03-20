@@ -1,5 +1,6 @@
 const { NotFoundException, BadRequestException, UnAuthorizedException, ConflictException, InternalServerException } = require('../../util/exceptions');
 const repository = require('./account.repository');
+const tokenRepository = require('./token.repository');
 const jwt = require('../../util/jwt');
 const crypto = require('crypto');
 const sharp = require('sharp');
@@ -258,7 +259,7 @@ const token = async (refreshToken) => {
         throw new UnAuthorizedException();
     }
     // db에서 리프레시 토큰 사용이 가능한지 확인
-    const tokenInfo = await repository.getToken(result.token);
+    const tokenInfo = await tokenRepository.getToken(result.token);
     // 리프레시 토큰이 db에서 사용불가 되었으면
     if(tokenInfo === null){
         throw new UnAuthorizedException();

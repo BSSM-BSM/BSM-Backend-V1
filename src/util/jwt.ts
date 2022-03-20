@@ -1,8 +1,9 @@
 import express from "express";
+import { UnAuthorizedException } from "./exceptions";
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const pool = require('./db');
 const accountRepository = require('../api/account/account.repository');
+const tokenRepository = require('../api/account/token.repository');
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -25,8 +26,9 @@ const login = async (
         grade:number,
         classNo:number,
         studentNo:number
-    }, expire:string) => {
-    const token = crypto.randomBytes(64).toString('hex')
+    }, expire:string
+) => {
+    const token = crypto.randomBytes(64).toString('hex');
     const result = {
         token: jwt.sign(payload, secretKey, {
             algorithm:'HS256',
@@ -37,15 +39,10 @@ const login = async (
             expiresIn:'60d'
         }),
     };
-    const insertTokenQuery="INSERT INTO `tokens` VALUES(?, 1, ?, now())"
-    try{
-        await pool.query(insertTokenQuery, [token, payload.memberCode])
-    }catch(err){
-        console.error(err)
-        return null;
-    }
+    await tokenRepository.insertToken(token, payload.memberCode);
     return result;
 }
+
 const verify = (token:String) => {
     let decoded;
     try {
@@ -61,30 +58,25 @@ const verify = (token:String) => {
     }
     return decoded;
 }
+
 const check = (token:String|undefined) => {
     if(token){
         const result = verify(token);
         if(result=='EXPIRED' || result=='INVALID'){
             return {
-                isLogin:false,
-                msg:{
-                    status:4,subStatus:1
-                }
+                isLogin:false
             };
         }else{
             if(!result.isLogin){
-                result.msg={
-                    status:4,subStatus:1
-                }
+                return {
+                    isLogin:false
+                };
             }
-            return result
+            return result;
         }
     }else{
         return {
-            isLogin:false,
-            msg:{
-                status:4,subStatus:1
-            }
+            isLogin:false
         };
     }
 }
@@ -100,6 +92,7 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
             return next();
         }
     }
+
     const result = verify(req.cookies.refreshToken);
     // 리프레시 토큰이 유효하지 않으면 무시하고 넘어감
     if(result=='INVALID'){
@@ -107,45 +100,96 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
             domain:'.bssm.kro.kr',
             path:'/',
         });
+        res.clearCookie('refreshToken', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
         return next();
     }
+
     // 리프레시 토큰이 만료되었으면 로그인을 요청
     if(result=='EXPIRED'){
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
         });
-        return res.send(JSON.stringify({status:4,subStatus:5}));
+        res.clearCookie('refreshToken', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        throw new UnAuthorizedException('Need to relogin');
     }
+
     // db에서 리프레시 토큰 사용이 가능한지 확인
-    let rows
-    const getTokenQuery="SELECT * FROM `tokens` WHERE `token`=? AND `valid`=1";
-    try{
-        [rows] = await pool.query(getTokenQuery, [result.token]);
-    }catch(err){
-        console.error(err)
-        return res.send(JSON.stringify({status:2,subStatus:0}));
-    }
-    if(!rows[0]){
-        // 리프레시 토큰이 db에서 사용불가 되었으면 로그인을 요청
+    const tokenInfo = await tokenRepository.getToken(result.token);
+    // 리프레시 토큰이 db에서 사용불가 되었으면 로그인을 요청
+    if(tokenInfo === null){
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
         });
-        return res.send(JSON.stringify({status:4,subStatus:5}));
+        res.clearCookie('refreshToken', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        throw new UnAuthorizedException('Need to relogin');
     }
-    rows = rows[0]
+
     // 유저 정보를 가져옴
-    const dbResult = await accountRepository.getMemberByCode(rows.member_code);
+    const memberInfo = await accountRepository.getMemberByCode(tokenInfo.member_code);
+    if(memberInfo === null){
+        res.clearCookie('refreshToken', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('refreshToken', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'.bssm.kro.kr',
+            path:'/',
+        });
+        res.clearCookie('token', {
+            domain:'bssm.kro.kr',
+            path:'/',
+        });
+        throw new UnAuthorizedException('Need to relogin');
+    }
+
     const payload = {
         isLogin:true,
-        memberCode:dbResult.member_code,
-        memberId:dbResult.member_id,
-        memberNickname:dbResult.member_nickname,
-        memberLevel:dbResult.member_level,
-        grade:dbResult.member_grade,
-        classNo:dbResult.member_class,
-        studentNo:dbResult.member_studentNo
+        memberCode:memberInfo.member_code,
+        memberId:memberInfo.member_id,
+        memberNickname:memberInfo.member_nickname,
+        memberLevel:memberInfo.member_level,
+        grade:memberInfo.member_grade,
+        classNo:memberInfo.member_class,
+        studentNo:memberInfo.member_studentNo
     }
     // 액세스 토큰 재발행
     const token = jwt.sign(payload, secretKey, {
@@ -159,8 +203,13 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
         secure:true,
         maxAge:1000*60*60// 1시간 동안 저장 1000ms*60초*60분
     });
-    return res.send(JSON.stringify({status:4,subStatus:4,token:token}));
+    return res.status(401).send(JSON.stringify({
+        statusCode:401,
+        message:'token updated',
+        token
+    }));
 }
+
 export {
     sign,
     login,
