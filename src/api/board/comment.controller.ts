@@ -1,10 +1,11 @@
 import express from "express";
+const router = express.Router();
 const service = require('./comment.service');
 const jwt = require('../../util/jwt');
 
-const viewComment = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
+router.get('/comment/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const jwtValue = await jwt.check(req.cookies.token);
-    try{
+    try {
         res.send(JSON.stringify(
             await service.viewComment(
                 jwtValue.isLogin? jwtValue.memberCode: null,
@@ -13,13 +14,14 @@ const viewComment = async (req:express.Request, res:express.Response, next:expre
                 req.params.postNo
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
-const writeComment = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
+})
+
+router.post('/comment/:boardType/:postNo/:depth?/:parentIdx?', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const jwtValue = await jwt.check(req.cookies.token);
-    try{
+    try {
         res.send(JSON.stringify(
             await service.writeComment(
                 jwtValue.isLogin? jwtValue.memberCode: null,
@@ -31,13 +33,14 @@ const writeComment = async (req:express.Request, res:express.Response, next:expr
                 req.params.parentIdx
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
-const deleteComment = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
+})
+
+router.delete('/comment/:boardType/:postNo/:commentIdx', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const jwtValue = await jwt.check(req.cookies.token);
-    try{
+    try {
         res.send(JSON.stringify(
             await service.deleteComment(
                 jwtValue.isLogin? jwtValue.memberCode: null,
@@ -47,13 +50,9 @@ const deleteComment = async (req:express.Request, res:express.Response, next:exp
                 req.params.commentIdx
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
+})
 
-export {
-    viewComment,
-    writeComment,
-    deleteComment
-}
+export = router;

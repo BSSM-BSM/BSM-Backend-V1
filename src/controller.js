@@ -5,8 +5,14 @@ const apiRouter = require('./api/api.controller');
 const viewRouter = require('./view/view.controller');
 
 // 업데이트 확인 url 하위호환
-const versionController = require('./api/version/version.controller');
-router.post('/database', versionController.getVersionLegacy);
+router.post('/database', (req, res) => {
+    res.send(JSON.stringify({
+        status:1,
+        subStatus:0,
+        versionCode:8,
+        versionName:'1.0.0\n안드로이드 네이티브 앱은 지원이 종료되었습니다\n웹 앱을 다운 받아주세요'
+    }))
+});
 
 router.use('/api', apiRouter);
 router.use('/', viewRouter);

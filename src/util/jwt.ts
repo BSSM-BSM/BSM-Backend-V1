@@ -60,14 +60,14 @@ const verify = (token:String) => {
 }
 
 const check = (token:String|undefined) => {
-    if(token){
+    if (token) {
         const result = verify(token);
-        if(result=='EXPIRED' || result=='INVALID'){
+        if (result == 'EXPIRED' || result == 'INVALID') {
             return {
                 isLogin:false
             };
         }else{
-            if(!result.isLogin){
+            if (!result.isLogin) {
                 return {
                     isLogin:false
                 };
@@ -82,20 +82,20 @@ const check = (token:String|undefined) => {
 }
 const refreshToken = async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     // 리프레시 토큰이 없으면 무시하고 넘어감
-    if(!req.cookies.refreshToken){
+    if (!req.cookies.refreshToken) {
         return next();
     }
-    if(req.cookies.token){
+    if (req.cookies.token) {
         const result = verify(req.cookies.token);
         // 액세스 토큰이 사용가능하면 무시하고 넘어감
-        if(!(result=='EXPIRED' || result=='INVALID')){
+        if (!(result == 'EXPIRED' || result == 'INVALID')) {
             return next();
         }
     }
 
     const result = verify(req.cookies.refreshToken);
     // 리프레시 토큰이 유효하지 않으면 무시하고 넘어감
-    if(result=='INVALID'){
+    if (result == 'INVALID') {
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
@@ -116,7 +116,7 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     }
 
     // 리프레시 토큰이 만료되었으면 로그인을 요청
-    if(result=='EXPIRED'){
+    if (result == 'EXPIRED') {
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
@@ -133,13 +133,13 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
             domain:'bssm.kro.kr',
             path:'/',
         });
-        throw new UnAuthorizedException('Need to relogin');
+        return next(new UnAuthorizedException('Need to relogin'));
     }
 
     // db에서 리프레시 토큰 사용이 가능한지 확인
     const tokenInfo = await tokenRepository.getToken(result.token);
     // 리프레시 토큰이 db에서 사용불가 되었으면 로그인을 요청
-    if(tokenInfo === null){
+    if (tokenInfo === null) {
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
@@ -156,12 +156,12 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
             domain:'bssm.kro.kr',
             path:'/',
         });
-        throw new UnAuthorizedException('Need to relogin');
+        return next(new UnAuthorizedException('Need to relogin'));
     }
 
     // 유저 정보를 가져옴
     const memberInfo = await accountRepository.getMemberByCode(tokenInfo.member_code);
-    if(memberInfo === null){
+    if (memberInfo === null) {
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
@@ -178,7 +178,7 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
             domain:'bssm.kro.kr',
             path:'/',
         });
-        throw new UnAuthorizedException('Need to relogin');
+        return next(new UnAuthorizedException('Need to relogin'));
     }
 
     const payload = {

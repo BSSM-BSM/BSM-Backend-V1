@@ -25,16 +25,16 @@ const boardTypeList = {
 }
 
 const viewComment = async (memberCode, memberLevel, boardType, postNo) => {
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException();
     }
-    if(boardTypeList[boardType].public == false && memberCode === null){
+    if (boardTypeList[boardType].public == false && memberCode === null) {
         throw new UnAuthorizedException();
     }
     const isAnonymous = boardTypeList[boardType].anonymous;
 
     const comments = await commentRepository.getComments(boardType, postNo);
-    if(comments === null){
+    if (comments === null) {
         return {
             comments: null
         }
@@ -49,16 +49,16 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
     let comment = {}
     commentList.forEach(e => {
         // 대댓글의 깊이가 불러오려는 현재 깊이와 같은지 확인
-        if(e.depth!=depth){
+        if (e.depth!=depth) {
             return;
         }
-        if(e.comment_deleted==0){
-            if(memberCode>0 && e.member_code===memberCode || memberLevel>=3){// 자신의 댓글인지 확인
+        if (e.comment_deleted==0) {
+            if (memberCode>0 && e.member_code===memberCode || memberLevel>=3) {// 자신의 댓글인지 확인
                 e.permission=true;
-            }else{
+            } else {
                 e.permission=false;
             }
-            if(isAnonymous){// 익명 댓글인지 확인
+            if (isAnonymous) {// 익명 댓글인지 확인
                 e.member_code=-1
                 e.member_level=0
                 e.member_nickname='ㅇㅇ'
@@ -74,7 +74,7 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                 permission:e.permission,
                 deleted:false
             }
-        }else{
+        } else {
             comment = {
                 idx:e.comment_index,
                 memberCode:-1,
@@ -87,12 +87,12 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                 deleted:true,
             }
         }
-        if(e.parent==1){// 만약 대댓글이 더 있다면
+        if (e.parent==1) {// 만약 대댓글이 더 있다면
             let childList = []
             commentList.forEach(child => {// 불러오려는 대댓글들만 배열에 넣음
-                if(
+                if (
                     child.depth!=depth &&// 현재 깊이의 댓글이 아니고
-                    !(child.depth==depth+1 && child.parent_idx!=e.comment_index)){
+                    !(child.depth==depth+1 && child.parent_idx!=e.comment_index)) {
                     /*
                     자신의 자식 댓글들만 불러오기위한 조건문
                     만약 댓글의 깊이가 바로 밑이고 대댓글의 부모가 현재 댓글과 같다면
@@ -105,12 +105,12 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
                     !(0 && 1) -> !(0) -> 1
                     
                     밑의 코드로도 표현가능
-                    if(child.depth!=depth){// 현재 깊이의 댓글이 아니고
-                        if(child.depth==depth+1){// 만약 댓글의 깊이가 바로 밑이라면
-                            if(child.parent_idx==e.comment_index){// 대댓글의 부모가 현재 댓글과 같다면
+                    if (child.depth!=depth) {// 현재 깊이의 댓글이 아니고
+                        if (child.depth==depth+1) {// 만약 댓글의 깊이가 바로 밑이라면
+                            if (child.parent_idx==e.comment_index) {// 대댓글의 부모가 현재 댓글과 같다면
                                 childList.push(child);
                             }
-                        }else{//아니면 바로 넣음
+                        } else {//아니면 바로 넣음
                             childList.push(child);
                         }
                     }
@@ -125,39 +125,39 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
     return result;
 }
 const writeComment = async (memberCode, memberNickname, boardType, postNo, comment, depth, parentIdx) => {
-    if(memberCode === null){
+    if (memberCode === null) {
         throw new UnAuthorizedException();
     }
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
     
-    if(comment == undefined || comment.length < 1){
+    if (comment == undefined || comment.length < 1) {
         throw new BadRequestException();
     }
-    if(parseInt(depth)>0){
+    if (parseInt(depth)>0) {
         depth=parseInt(depth);
-    }else{
+    } else {
         depth=0;
     }
-    if(parseInt(parentIdx)>0){
+    if (parseInt(parentIdx)>0) {
         parentIdx=parseInt(parentIdx);
-    }else{
+    } else {
         parentIdx=null;
     }
 
-    if(await postRepository.getMemberCodeFromPost(boardType, postNo) === null){
+    if (await postRepository.getMemberCodeFromPost(boardType, postNo) === null) {
         throw new NotFoundException();
     }
-    if(depth>0){
+    if (depth>0) {
         const parentComment = await commentRepository.getComment(boardType, postNo, parentIdx);
-        if(parentComment === null){
+        if (parentComment === null) {
             throw new NotFoundException();
         }
-        if(parentComment.depth != depth-1){
+        if (parentComment.depth != depth-1) {
             throw new NotFoundException(depth);
         }
-        if(parentComment.parent == 0){
+        if (parentComment.parent == 0) {
             commentRepository.updateParentComment(boardType, parentIdx);
         }
     }
@@ -177,10 +177,10 @@ const writeComment = async (memberCode, memberNickname, boardType, postNo, comme
 }
 const deleteComment = async (memberCode, memberLevel, boardType, postNo, commentIdx) => {
     const commentInfo = await commentRepository.getComment(boardType, postNo, commentIdx);
-    if(commentInfo === null){
+    if (commentInfo === null) {
         throw new NotFoundException();
     }
-    if(!(commentInfo.member_code == memberCode || memberLevel>=3)){
+    if (!(commentInfo.member_code == memberCode || memberLevel>=3)) {
         throw new ForbiddenException();
     }
     

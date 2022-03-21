@@ -6,13 +6,13 @@ const getPostByCode = async (
     postNo: number
 ) => {
     const getPostQuery='SELECT * FROM ?? WHERE `post_no`=?';
-    try{
+    try {
         const [rows] = await pool.query(getPostQuery, [boardType, postNo]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -23,13 +23,13 @@ const getMemberCodeFromPost = async (
     postNo: number
 ) => {
     const getPostQuery='SELECT `member_code` FROM ?? WHERE `post_no`=?';
-    try{
+    try {
         const [rows] = await pool.query(getPostQuery, [boardType, postNo]);
-        if(rows.length)
+        if (rows.length)
             return rows[0].member_code;
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -43,9 +43,9 @@ const insertPost = async (
     postContent: string
 ) => {
     const insertPostQuery="INSERT INTO ?? (member_code, member_nickname, post_title, post_content, post_date) values(?, ?, ?, ?, now())";
-    try{
+    try {
         await pool.query(insertPostQuery, [boardType, memberCode, memberNickname, postTitle, postContent]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -58,9 +58,9 @@ const updatePost = async (
     postNo: number
 ) => {
     const updatePostQuery="UPDATE ?? SET `post_title`=?, `post_content`=? WHERE `post_no`=?";
-    try{
+    try {
         await pool.query(updatePostQuery, [boardType, postTitle, postContent, postNo]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -71,9 +71,9 @@ const updatePostHit = (
     postNo: number
 ) => {
     const updatePostQuery='UPDATE ?? SET `post_hit`=`post_hit`+1 WHERE `post_no`=?';
-    try{
+    try {
         pool.query(updatePostQuery, [boardType, postNo]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -85,9 +85,9 @@ const updatePostComments = (
     commentCount: number
 ) => {
     const updatePostQuery='UPDATE ?? SET `post_comments`=`post_comments`+? WHERE `post_no`=?';
-    try{
+    try {
         pool.query(updatePostQuery, [boardType, postNo, commentCount]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -98,9 +98,9 @@ const deletePost = async (
     postNo: number
 ) => {
     const deletePostQuery="UPDATE ?? SET `post_deleted`=1 WHERE `post_no`=?";
-    try{
+    try {
         await pool.query(deletePostQuery, [boardType, postNo]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -108,13 +108,13 @@ const deletePost = async (
 
 const getPostTotalLike = async (boardType: string, postNo: number) => {
     const getPostLikeQuery='SELECT `like` FROM ?? WHERE `post_no`=?';
-    try{
+    try {
         const [rows] = await pool.query(getPostLikeQuery, [boardType, postNo]);
-        if(rows.length)
+        if (rows.length)
             return rows[0].like;
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -122,9 +122,9 @@ const getPostTotalLike = async (boardType: string, postNo: number) => {
 
 const updatePostTotalLike = async (boardType: string, postNo: number, like: number) => {
     const updaetPostTotalLikeQuery='UPDATE ?? SET `like`=`like`+? WHERE `post_no`=?';
-    try{
+    try {
         await pool.query(updaetPostTotalLikeQuery, [boardType, like, postNo]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }

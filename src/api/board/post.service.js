@@ -5,23 +5,23 @@ const webpush = require('../../util/push');
 const js_xss = require('xss');
 const xss = new js_xss.FilterXSS({
     onIgnoreTagAttr:(tag, name, value, isWhiteAttr) => {
-        if(name.substr(0, 5) === "style") {
+        if (name.substr(0, 5) === "style") {
             return name + '="' + js_xss.escapeAttrValue(value) + '"';
         }
-        if(tag.substr(0, 3)==="img"){
-            if(name.substr(0, 4) === "e_id") {
+        if (tag.substr(0, 3)==="img") {
+            if (name.substr(0, 4) === "e_id") {
                 return name + '="' + js_xss.escapeAttrValue(value) + '"';
             }
-            if(name.substr(0, 5) === "e_idx") {
+            if (name.substr(0, 5) === "e_idx") {
                 return name + '="' + js_xss.escapeAttrValue(value) + '"';
             }
-            if(name.substr(0, 6) === "e_type") {
+            if (name.substr(0, 6) === "e_type") {
                 return name + '="' + js_xss.escapeAttrValue(value) + '"';
             }
         }
     },
     onIgnoreTag:(tag, html, options) => {
-        if(tag.substr(0, 6) === "iframe") {
+        if (tag.substr(0, 6) === "iframe") {
             return html;
         }
     }
@@ -50,10 +50,10 @@ const viewPost = async (
     boardType,
     postNo
 ) => {
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException();
     }
-    if(boardTypeList[boardType].public == false && memberCode === null){
+    if (boardTypeList[boardType].public == false && memberCode === null) {
         throw new UnAuthorizedException();
     }
     const isAnonymous = boardTypeList[boardType].anonymous;
@@ -62,10 +62,10 @@ const viewPost = async (
         repository.getPostByCode(boardType, postNo),
         likeRepository.getPostLikeByMemberCode(boardType, postNo, memberCode)
     ]);
-    if(postInfo === null){
+    if (postInfo === null) {
         throw new NotFoundException();
     }
-    if(postInfo.post_deleted){
+    if (postInfo.post_deleted) {
         throw new NotFoundException();
     }
 
@@ -82,15 +82,15 @@ const viewPost = async (
         permission:false,
         like:false
     }
-    if(likeInfo !== null){
+    if (likeInfo !== null) {
         result.like = likeInfo;
     }
-    if(memberCode>0 && postInfo.member_code===memberCode || memberLevel>=3){
+    if (memberCode>0 && postInfo.member_code===memberCode || memberLevel>=3) {
         result.permission=true;
-    }else{
+    } else {
         result.permission=false;
     }
-    if(isAnonymous){
+    if (isAnonymous) {
         result.memberCode=-1;
         result.memberNickname='ㅇㅇ';
     }
@@ -107,18 +107,18 @@ const writePost = async (
     postTitle,
     postContent
 ) => {
-    if(memberCode === null){
+    if (memberCode === null) {
         throw new UnAuthorizedException();
     }
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
-    if(boardTypeList[boardType].level > memberLevel){
+    if (boardTypeList[boardType].level > memberLevel) {
         throw new ForbiddenException();
     }
 
 	await repository.insertPost(boardType, memberCode, memberNickname, postTitle, xss.process(postContent));
-    if(boardType == 'notice'){
+    if (boardType == 'notice') {
         const payload = JSON.stringify({
             title:"새로운 공지사항이 있습니다",
             body:postTitle,
@@ -136,17 +136,17 @@ const updatePost = async (
     postTitle,
     postContent
 ) => {
-    if(memberCode === null){
+    if (memberCode === null) {
         throw new UnAuthorizedException();
     }
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
     const postMemberCode = await repository.getMemberCodeFromPost(boardType, postNo);
-    if(postMemberCode === null){
+    if (postMemberCode === null) {
         throw new NotFoundException('Post not Found');
     }
-    if(!(postMemberCode == memberCode || memberLevel>=3)){
+    if (!(postMemberCode == memberCode || memberLevel>=3)) {
         throw new ForbiddenException();
     }
     
@@ -154,17 +154,17 @@ const updatePost = async (
 }
 
 const deletePost = async (memberCode, memberLevel, boardType, postNo) => {
-    if(memberCode === null){
+    if (memberCode === null) {
         throw new UnAuthorizedException();
     }
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
     const postMemberCode = await repository.getMemberCodeFromPost(boardType, postNo);
-    if(postMemberCode === null){
+    if (postMemberCode === null) {
         throw new NotFoundException('Post not Found');
     }
-    if(!(postMemberCode == memberCode || memberLevel>=3)){
+    if (!(postMemberCode == memberCode || memberLevel>=3)) {
         throw new ForbiddenException();
     }
 

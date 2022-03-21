@@ -27,10 +27,10 @@ router.get('/meister', (req ,res) => {
 
 router.get('/pwReset', (req ,res) => {
     const jwtValue = jwt.verify(req.query.token);
-    if(jwtValue=='EXPIRED'){
+    if (jwtValue=='EXPIRED') {
         return res.send("토큰 유효기간이 만료되었습니다");
     }
-    if(!jwtValue.pwEdit){
+    if (!jwtValue.pwEdit) {
         return res.send("정상적인 접근이 아닙니다");
     }
     res.cookie('token', req.query.token, {

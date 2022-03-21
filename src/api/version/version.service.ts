@@ -1,14 +1,14 @@
 const { NotFoundException } = require('../../util/exceptions');
 
-const getVersion = async (isApp: string, os:string) => {
-    switch(isApp){
+const getVersion = (isApp: string, os:string) => {
+    switch (isApp) {
         case 'web':
             return {
-                versionCode:3,
-                versionName:'1.3.0'
+                versionCode:4,
+                versionName:'1.4.0'
             }
         case 'app':
-            switch(os){
+            switch (os) {
                 case 'android':
                     return {
                         versionCode:8,

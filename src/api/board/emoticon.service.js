@@ -118,16 +118,16 @@ const uploadEmoticon = async (memberCode, name, description, emoticons, files) =
         throw new InternalServerException();
     }
 
-    try{
+    try {
         // 복사할 파일 리스트 생성
         let copyList = [];
-        copyList = files.files.map(e=>{
+        copyList = files.files.map(e => {
             return fs.promises.copyFile(e.path, `public/resource/board/emoticon/${emoticonId}/${emoticons[e.name].idx}.${emoticons[e.name].type}`)
         })
         copyList.push(fs.promises.copyFile(files.file[0].path, `public/resource/board/emoticon/${emoticonId}.png`))
         // 파일 복사 프로미스
         await Promise.all(copyList);
-    }catch(err){
+    } catch(err) {
         console.error(err)
         throw new InternalServerException();
     }

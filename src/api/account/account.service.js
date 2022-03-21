@@ -8,12 +8,12 @@ const mail = require('../../util/mail');
 
 const login = async (res, memberId, memberPw) => {
     const memberInfo = await repository.getMemberById(memberId);
-    if(memberInfo === null){
+    if (memberInfo === null) {
         throw new BadRequestException();
     }
 
-    if(memberInfo.member_salt===''){
-        if(memberInfo.member_pw===crypto.createHash('sha3-256').update(memberPw).digest('hex')){
+    if (memberInfo.member_salt === '') {
+        if (memberInfo.member_pw === crypto.createHash('sha3-256').update(memberPw).digest('hex')) {
             const jwtToken = jwt.sign({
                 isLogin:false,
                 pwEdit:memberInfo.member_code
@@ -28,7 +28,7 @@ const login = async (res, memberId, memberPw) => {
             throw new UnAuthorizedException('Need to change password');
         }
     }
-    if(memberInfo.member_pw != crypto.createHash('sha3-256').update(memberInfo.member_salt+memberPw).digest('hex')){
+    if (memberInfo.member_pw != crypto.createHash('sha3-256').update(memberInfo.member_salt+memberPw).digest('hex')) {
         throw new BadRequestException();
     }
     const jwtToken = await jwt.login({
@@ -64,14 +64,14 @@ const login = async (res, memberId, memberPw) => {
 const viewUser = async (memberCode, viewMemberCode) => {
     const memberInfo = await repository.getMemberByCode(viewMemberCode);
     let member = {};
-    if(memberInfo === null){
-        if(memberCode==0){
+    if (memberInfo === null) {
+        if (memberCode == 0) {
             member.memberType = "deleted";
             member.memberCode = memberCode;
-        }else if(memberCode==-1){
+        } else if (memberCode == -1) {
             member.memberType = "anonymous";
             member.memberCode = memberCode;
-        }else{
+        } else {
             member.memberType = "none";
             member.memberCode = memberCode;
         }
@@ -87,28 +87,28 @@ const viewUser = async (memberCode, viewMemberCode) => {
     member.memberClass = memberInfo.member_class;
     member.memberStudentNo = memberInfo.member_studentNo;
     member.memberName = memberInfo.member_name;
-    if(memberCode>0 && memberInfo.member_code == memberCode){
+    if (memberCode>0 && memberInfo.member_code == memberCode) {
         member.permission=true;
-    }else{
+    } else {
         member.permission=false;
     }
     return member;
 }
 
 const signUp = async (memberId, memberPw, memberPwCheck, memberNickname, code) => {
-    if(memberPw != memberPwCheck){
+    if (memberPw != memberPwCheck) {
         throw new BadRequestException('Password not match');
     }
-    if(await repository.getMemberById(memberId)){
+    if (await repository.getMemberById(memberId)) {
         throw new ConflictException('Existing id');
     }
-    if(await repository.getMemberByNickname(memberNickname)){
+    if (await repository.getMemberByNickname(memberNickname)) {
         throw new ConflictException('Existing nickname');
     }
 
     //인증코드로 유저정보를 가져옴
     const studentInfo = await repository.getStudentInfoByCode(code);
-    if(studentInfo === null){
+    if (studentInfo === null) {
         throw new NotFoundException('Code not found');
     }
 
@@ -135,7 +135,7 @@ const profileUpload = async (filename) => {
     .resize({width:128,height:128})
     .png()
     .toFile(fileDir+filename.split('.')[0].split('-')[1]+'.png', (error, info) => {
-        if(error){
+        if (error) {
             throw new InternalServerException('Failed to upload profile');
         }
     })
@@ -143,7 +143,7 @@ const profileUpload = async (filename) => {
 
 const validCodeMail = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
     const memberInfo = await repository.getMemberFromCode(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
-    if(memberInfo === null){
+    if (memberInfo === null) {
         throw new NotFoundException('User not found');
     }
 
@@ -181,7 +181,7 @@ const validCodeMail = async (studentEnrolled, studentGrade, studentClass, studen
 
 const pwResetMail = async (memberId) => {
     const memberInfo = await repository.getMemberById(memberId);
-    if(memberInfo === null){
+    if (memberInfo === null) {
         throw new NotFoundException('User not found');
     }
 
@@ -222,7 +222,7 @@ const pwResetMail = async (memberId) => {
 }
 
 const pwEdit = async (res, memberCode, memberPw, memberPwCheck) => {
-    if(memberPw != memberPwCheck){
+    if (memberPw != memberPwCheck) {
         throw new BadRequestException('Password not match');
     }
     await repository.updatePWByCode(memberCode, memberPw);
@@ -246,27 +246,27 @@ const pwEdit = async (res, memberCode, memberPw, memberPwCheck) => {
 
 const token = async (refreshToken) => {
     // 리프레시 토큰이 없으면
-    if(!refreshToken){
+    if (!refreshToken) {
         throw new BadRequestException();
     }
     const result = jwt.verify(refreshToken);
     // 리프레시 토큰이 유효하지 않으면
-    if(result=='INVALID'){
+    if (result=='INVALID') {
         throw new BadRequestException();
     }
     // 리프레시 토큰이 만료되었으면
-    if(result=='EXPIRED'){
+    if (result=='EXPIRED') {
         throw new UnAuthorizedException();
     }
     // db에서 리프레시 토큰 사용이 가능한지 확인
     const tokenInfo = await tokenRepository.getToken(result.token);
     // 리프레시 토큰이 db에서 사용불가 되었으면
-    if(tokenInfo === null){
+    if (tokenInfo === null) {
         throw new UnAuthorizedException();
     }
     // 유저 정보를 가져옴
     const memberInfo = await repository.getMemberByCode(tokenInfo.member_code);
-    if(memberInfo === null){
+    if (memberInfo === null) {
         throw new NotFoundException('User not found');
     }
     const payload = {

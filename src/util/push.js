@@ -7,14 +7,14 @@ webpush.setVapidDetails(
 );
 const push = async (payload, type) => {
     const tokenList = await getPushToken(type);
-    if(!tokenList){
+    if (!tokenList) {
         return;
     }
-    try{
+    try {
         Promise.all(tokenList.map(t => {
             webpush.sendNotification(t, payload);
         }));
-    }catch(e){
+    } catch (e) {
         console.error(e);
     }
 }
@@ -22,7 +22,7 @@ const push = async (payload, type) => {
 const getPushToken = async (type) => {
     try{
         [rows] = await pool.query(getPushTokenQuery)
-    }catch(err){
+    } catch (err) {
         console.error(err)
         return null;
     }

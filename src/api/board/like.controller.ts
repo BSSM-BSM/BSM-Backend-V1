@@ -1,10 +1,11 @@
 import express from "express";
+const router = express.Router();
 const service = require('./like.service');
 const jwt = require('../../util/jwt');
 
-const like = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
+router.post('/like/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const jwtValue = jwt.check(req.cookies.token);
-    try{
+    try {
         res.send(JSON.stringify(
             await service.like(
                 jwtValue.isLogin? jwtValue.memberCode: null,
@@ -13,11 +14,9 @@ const like = async (req:express.Request, res:express.Response, next:express.Next
                 req.body.like
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
+})
 
-export {
-    like
-}
+export = router;

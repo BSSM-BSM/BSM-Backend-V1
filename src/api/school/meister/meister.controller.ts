@@ -1,8 +1,9 @@
 import express from "express";
+const router = express.Router();
 const service = require('./meister.service');
 
-const getPoint = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
-    try{
+router.post('/meister/point/:grade/:classNo/:studentNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+    try {
         res.send(JSON.stringify(
             await service.getPoint(
                 req.params.grade,
@@ -12,13 +13,13 @@ const getPoint = async (req:express.Request, res:express.Response, next:express.
                 req.body.defaultPW
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
+})
 
-const getScore = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
-    try{
+router.get('/meister/score/:grade/:classNo/:studentNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+    try {
         res.send(JSON.stringify(
             await service.getScore(
                 req.params.grade,
@@ -26,12 +27,9 @@ const getScore = async (req:express.Request, res:express.Response, next:express.
                 req.params.studentNo
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
+})
 
-export {
-    getPoint,
-    getScore
-}
+export = router;

@@ -4,13 +4,13 @@ const crypto = require('crypto');
 
 const getMemberById = async (memberId) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_id`=?";
-    try{
+    try {
         const [rows] = await pool.query(getMemberQuery, [memberId]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -18,13 +18,13 @@ const getMemberById = async (memberId) => {
 
 const getMemberByCode = async (memberCode) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_code`=?";
-    try{
+    try {
         const [rows] = await pool.query(getMemberQuery, [memberCode]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -32,13 +32,13 @@ const getMemberByCode = async (memberCode) => {
 
 const getMemberByNickname = async (memberNickname) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_nickname`=?";
-    try{
+    try {
         const [rows] = await pool.query(getMemberQuery, [memberNickname]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -46,13 +46,13 @@ const getMemberByNickname = async (memberNickname) => {
 
 const getMember = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_enrolled`=? AND `member_grade`=? AND `member_class`=? AND `member_studentNo`=? AND `member_name`=?";
-    try{
+    try {
         const [rows] = await pool.query(getMemberQuery, [studentEnrolled, studentGrade, studentClass, studentNo, studentName]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -60,13 +60,13 @@ const getMember = async (studentEnrolled, studentGrade, studentClass, studentNo,
 
 const getMemberFromCode = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
     const getMemberQuery="SELECT * FROM `student` WHERE `member_enrolled`=? AND `member_grade`=? AND `member_class`=? AND `member_studentNo`=? AND `member_name`=?";
-    try{
+    try {
         const [rows] = await pool.query(getMemberQuery, [studentEnrolled, studentGrade, studentClass, studentNo, studentName]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -74,13 +74,13 @@ const getMemberFromCode = async (studentEnrolled, studentGrade, studentClass, st
 
 const getStudentInfoByCode = async (code) => {
     const getCodeQuery="SELECT * FROM `student` WHERE `code`=?"
-    try{
+    try {
         const [rows] = await pool.query(getCodeQuery, [code]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -88,9 +88,9 @@ const getStudentInfoByCode = async (code) => {
 
 const updateCodeAvailable = (code, flag) => {
     const updateCodeAvailableQuery="UPDATE `student` SET `code_available`=? WHERE `code`=?";
-    try{
+    try {
         pool.query(updateCodeAvailableQuery, [flag, code]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -127,9 +127,9 @@ const signUp = async (
         email,
         uniqNo
     ];
-    try{
+    try {
         await pool.query(signUpQuery, params);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -141,9 +141,9 @@ const updatePWByCode = async (memberCode, memberPw) => {
     salt=crypto.randomBytes(32).toString('hex');
     memberPw=crypto.createHash('sha3-256').update(salt+memberPw).digest('hex');
     const pwEditQuery="UPDATE `members` SET `member_pw`=?, `member_salt`=? WHERE `member_code`=?";
-    try{
+    try {
         await pool.query(pwEditQuery, [memberPw, salt, memberCode]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }

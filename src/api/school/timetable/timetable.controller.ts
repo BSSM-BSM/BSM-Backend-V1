@@ -1,16 +1,15 @@
 import express from "express"
+const router = express.Router();
 const service = require('./timetable.service');
 
-const getTimetable = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
-    try{
+router.get('/timetable/:grade/:classNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+    try {
         res.send(JSON.stringify(
             await service.getTimetable(req.params.grade, req.params.classNo)
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
+})
 
-export {
-    getTimetable
-}
+export = router;

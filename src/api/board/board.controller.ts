@@ -1,10 +1,11 @@
 import express from "express";
+const router = express.Router();
 const service = require('./board.service');
 const jwt = require('../../util/jwt');
 
-const viewBoard = async (req:express.Request, res:express.Response, next:express.NextFunction) =>{
+router.get('/board/:boardType', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const jwtValue = await jwt.check(req.cookies.token);
-    try{
+    try {
         res.send(JSON.stringify(
             await service.viewBoard(
                 jwtValue.isLogin? jwtValue.memberCode: null,
@@ -13,11 +14,9 @@ const viewBoard = async (req:express.Request, res:express.Response, next:express
                 req.query.limit
             )
         ));
-    }catch(err){
+    } catch(err) {
         next(err);
     }
-}
+})
 
-export {
-    viewBoard
-}
+export = router;

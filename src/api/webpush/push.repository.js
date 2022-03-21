@@ -3,9 +3,9 @@ const pool = require('../../util/db');
 
 const register = async (endpoint, auth, p256dh, memberCode) => {
     const pushRegisterQuery="INSERT INTO `push_subscribe` VALUES(?, ?, ?, ?, 1)";
-    try{
+    try {
         await pool.query(pushRegisterQuery, [endpoint, auth, p256dh, memberCode]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -14,7 +14,7 @@ const register = async (endpoint, auth, p256dh, memberCode) => {
 
 const getPushToken = async (type) => {
     let getPushTokenQuery;
-    switch(type){
+    switch (type) {
         case 'all':
             getPushTokenQuery="SELECT * FROM `push_subscribe`";
             break;
@@ -24,10 +24,10 @@ const getPushToken = async (type) => {
         default:
             return null;
     }
-    try{
+    try {
         const [rows] = await pool.query(getPushTokenQuery);
         return rows;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }

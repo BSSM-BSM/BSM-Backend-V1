@@ -4,31 +4,31 @@ class HttpError extends Error {
         super();
         this.httpCode = 500;
         this.message = 'Internal Server Error';
-        if(this instanceof BadRequestException){
+        if (this instanceof BadRequestException) {
             this.httpCode = 400;
             this.message = 'Bad Request';
         }
-        if(this instanceof UnAuthorizedException){
+        if (this instanceof UnAuthorizedException) {
             this.httpCode = 401;
             this.message = 'Unauthorized';
         }
-        if(this instanceof ForbiddenException){
+        if (this instanceof ForbiddenException) {
             this.httpCode = 403;
             this.message = 'Forbidden';
         }
-        if(this instanceof NotFoundException){
+        if (this instanceof NotFoundException) {
             this.httpCode = 404;
             this.message = 'Not Found';
         }
-        if(this instanceof ConflictException){
+        if (this instanceof ConflictException) {
             this.httpCode = 409;
             this.message = 'Conflict';
         }
-        if(this instanceof InternalServerException){
+        if (this instanceof InternalServerException) {
             this.httpCode = 500;
             this.message = 'Internal Server Error';
         }
-        if(typeof message != 'undefined'){
+        if (typeof message != 'undefined') {
             this.message = message;
         }
     }

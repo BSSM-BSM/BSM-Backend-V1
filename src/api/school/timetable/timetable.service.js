@@ -3,10 +3,10 @@ const repository = require('./timetable.repository');
 
 const getTimetable = async (grade, classNo) => {
     const timetableInfo = await repository.getTimetable(grade, classNo);
-    if(timetableInfo === null){
+    if (timetableInfo === null) {
         throw new NotFoundException();
     }
-    if(timetableInfo.monday+timetableInfo.tuesday+timetableInfo.wednesday+timetableInfo.thursday+timetableInfo.friday == ''){
+    if (timetableInfo.monday+timetableInfo.tuesday+timetableInfo.wednesday+timetableInfo.thursday+timetableInfo.friday == '') {
         throw new NotFoundException();
     }
     return {

@@ -32,13 +32,13 @@ app.use(express.static('public'));
 const controller = require('./controller');
 app.use('/', controller);
 
-app.use(function (err, req, res, next) {
-    if(err.httpCode){
+app.use((err, req, res, next) => {
+    if (err.httpCode) {
         res.status(err.httpCode).send(JSON.stringify({
             statusCode:err.httpCode,
             message:err.message
         }));
-    }else{
+    } else {
         console.error(err);
         res.status(500).send(JSON.stringify({
             statusCode:500,
@@ -47,7 +47,7 @@ app.use(function (err, req, res, next) {
     }
 });
 
-if(processName=="primary"){
+if (processName=="primary"){
     const schedule = {
         meal: require('./schedule/meal')
     };

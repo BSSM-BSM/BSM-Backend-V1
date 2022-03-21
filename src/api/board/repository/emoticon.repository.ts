@@ -3,13 +3,13 @@ const pool = require('../../../util/db');
 
 const getEmoticon = async () => {
     const getEmoticonQuery="SELECT * FROM `emoticon`";
-    try{
+    try {
         const [rows] = await pool.query(getEmoticonQuery);
-        if(rows.length)
+        if (rows.length)
             return rows;
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -17,13 +17,13 @@ const getEmoticon = async () => {
 
 const getEmoticonById = async (id: number) => {
     const getEmoticonQuery="SELECT * FROM `emoticon` WHERE `id`=?";
-    try{
+    try {
         const [rows] = await pool.query(getEmoticonQuery, [id]);
-        if(rows.length)
+        if (rows.length)
             return rows[0];
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -31,13 +31,13 @@ const getEmoticonById = async (id: number) => {
 
 const getEmoticons = async () => {
     const getEmoticonsQuery="SELECT * FROM `emoticons`";
-    try{
+    try {
         const [rows] = await pool.query(getEmoticonsQuery);
-        if(rows.length)
+        if (rows.length)
             return rows;
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -45,13 +45,13 @@ const getEmoticons = async () => {
 
 const getEmoticonsById = async (id: number) => {
     const getEmoticonsQuery="SELECT * FROM `emoticons` WHERE `id`=?";
-    try{
+    try {
         const [rows] = await pool.query(getEmoticonsQuery, [id]);
-        if(rows.length)
+        if (rows.length)
             return rows;
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -63,13 +63,13 @@ const getAutoIncrement = async () => {
     FROM information_schema.tables 
     WHERE table_name = 'emoticon' 
     AND table_schema = DATABASE()`;
-    try{
+    try {
         const [rows] = await pool.query(getAutoIncrementQuery);
-        if(rows.length)
+        if (rows.length)
             return rows[0].AUTO_INCREMENT;
         else
             return null;
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -77,9 +77,9 @@ const getAutoIncrement = async () => {
 
 const insertEmoticonInfo = async (id: number, name: string, description: string, memberCode: number) => {
     const insertInfoQuery="INSERT INTO emoticon values(?, ?, ?, now(), ?)";
-    try{
+    try {
         await pool.query(insertInfoQuery, [id, name, description, memberCode]);
-    }catch(err){
+    } catch(err) {
         console.error(err);
         throw new InternalServerException();
     }
@@ -100,7 +100,7 @@ const insertEmoticons = async (
         temp.push('(?,?,?)');
     });
     const insertEmoticonsQuery = `INSERT INTO emoticons VALUES ${temp.join(',')}`;
-    try{
+    try {
         await pool.query(insertEmoticonsQuery, params);
     }catch(err) {
         console.error(err)

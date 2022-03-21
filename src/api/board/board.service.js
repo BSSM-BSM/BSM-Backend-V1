@@ -20,28 +20,28 @@ const boardTypeList = {
 }
 
 const viewBoard = async (memberCode, boardType, page, limitPost) => {
-    if(typeof boardTypeList[boardType] === 'undefined'){
+    if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException();
     }
-    if(boardTypeList[boardType].public == false && memberCode === null){
+    if (boardTypeList[boardType].public == false && memberCode === null) {
         throw new UnAuthorizedException();
     }
     const isAnonymous = boardTypeList[boardType].anonymous;
 
-    if(parseInt(page)>=1){
+    if (parseInt(page)>=1) {
         page=parseInt(page);
-    }else{
+    } else {
         page=1;
     }
-    if(parseInt(limitPost)>=5){
+    if (parseInt(limitPost)>=5) {
         limitPost=parseInt(limitPost);
-    }else{
+    } else {
         limitPost=15;
     }
 
     // 총 게시물 갯수
     const totalPosts = await repository.getTotalPosts(boardType);
-    if(totalPosts === null){
+    if (totalPosts === null) {
         throw new NotFoundException();
     }
 
@@ -50,7 +50,7 @@ const viewBoard = async (memberCode, boardType, page, limitPost) => {
     const totalPage = Math.ceil(totalPosts/limitPost);
 
     const posts = await repository.getPostsByPage(boardType, startPost, limitPost);
-    if(posts === null){
+    if (posts === null) {
         throw new NotFoundException();
     }
 
@@ -74,5 +74,5 @@ const viewBoard = async (memberCode, boardType, page, limitPost) => {
 }
 
 module.exports = {
-    viewBoard,
+    viewBoard
 }

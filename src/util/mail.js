@@ -13,8 +13,8 @@ const send = (to, subject, html) => {
         html:html
     }
     return new Promise(resolve => {
-        transport.sendMail(mailOptions, (error, response) =>{
-            if(error){
+        transport.sendMail(mailOptions, (error, response) => {
+            if (error) {
                 throw new InternalServerException('Failed to send mail');
             }
             transport.close();

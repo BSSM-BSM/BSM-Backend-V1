@@ -3,14 +3,14 @@ const webpush = require('../util/push');
 const service = require('../api/school/meal/meal.service');
 
 const mealDate = {
-    morning:schedule.scheduleJob('0 30 6 * * 1-5', async () =>{
+    morning:schedule.scheduleJob('0 30 6 * * 1-5', async () => {
         // 아침 식사 1시간전 알림
         const today = new Date();
         const mealInfo = await service.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
-        if(mealInfo === null){
+        if (mealInfo === null) {
             return;
         }
-        if(mealInfo.morning == ""){
+        if (mealInfo.morning == "") {
             return;
         }
         const payload = JSON.stringify({
@@ -20,14 +20,14 @@ const mealDate = {
         })
         webpush.push(payload, 'meal');
     }),
-    lunch:schedule.scheduleJob('0 30 11 * * 1-5', async () =>{
+    lunch:schedule.scheduleJob('0 30 11 * * 1-5', async () => {
         // 점심 식사 1시간전 알림
         const today = new Date();
         const mealInfo = await service.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
-        if(mealInfo === null){
+        if (mealInfo === null) {
             return;
         }
-        if(mealInfo.lunch == ""){
+        if (mealInfo.lunch == "") {
             return;
         }
         const payload = JSON.stringify({
@@ -37,14 +37,14 @@ const mealDate = {
         })
         webpush.push(payload, 'meal');
     }),
-    dinner:schedule.scheduleJob('0 0 17 * * 1-5', async () =>{
+    dinner:schedule.scheduleJob('0 0 17 * * 1-5', async () => {
         // 저녁 식사 1시간전 알림
         const today = new Date();
         const mealInfo = await service.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
-        if(mealInfo === null){
+        if (mealInfo === null) {
             return;
         }
-        if(mealInfo.dinner == ""){
+        if (mealInfo.dinner == "") {
             return;
         }
         const payload = JSON.stringify({
