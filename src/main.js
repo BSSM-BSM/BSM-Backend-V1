@@ -22,7 +22,7 @@ app.use(helmet.referrerPolicy());
 app.use(helmet.xssFilter());
 
 app.set('etag', false);
-// app.set('trust proxy', 1);
+app.set('trust proxy', 1);
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');

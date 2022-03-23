@@ -85,7 +85,7 @@ router.delete('/post/:boardType/:postNo',
 const uploadProcessing = multer({
     storage:multer.diskStorage({
         destination:(req, file, cb) => {
-            cb(null, 'public/resource/board/upload_images/');
+            cb(null, 'public/resource/board/upload/');
         },
         filename:(req, file, cb) => {
             cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1]);
@@ -99,7 +99,7 @@ router.post('/imageUpload',
     (req:express.Request, res:express.Response, next:express.NextFunction) => {
         try {
             res.send(JSON.stringify({
-                    filePath: `/resource/board/upload_images/${req.file?.filename}`
+                    filePath: `/resource/board/upload/${req.file?.filename}`
                 }
             ));
         } catch(err) {

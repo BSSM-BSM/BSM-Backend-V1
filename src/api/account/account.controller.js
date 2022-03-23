@@ -120,11 +120,11 @@ router.post('/account/token', async (req, res, next) => {
     }
 })
 
-router.post('/profileUpload',
+router.post('/account/profile',
     multer({
         storage:multer.diskStorage({
             destination:(req, file, cb) => {
-                cb(null, 'public/resource/member/profile_images/');
+                cb(null, 'public/resource/user/profile_images/');
             },
             filename:(req, file, cb) => {
                 const jwtValue = jwt.check(req.cookies.token);

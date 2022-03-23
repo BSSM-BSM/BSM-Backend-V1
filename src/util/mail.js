@@ -18,7 +18,7 @@ const send = (to, subject, html) => {
                 throw new InternalServerException('Failed to send mail');
             }
             transport.close();
-            resolve(result);
+            resolve(response);
         })
     })
 }

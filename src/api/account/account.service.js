@@ -65,20 +65,22 @@ const viewUser = async (memberCode, viewMemberCode) => {
     const memberInfo = await repository.getMemberByCode(viewMemberCode);
     let member = {};
     if (memberInfo === null) {
-        if (memberCode == 0) {
+        if (viewMemberCode == 0) {
             member.memberType = "deleted";
-            member.memberCode = memberCode;
-        } else if (memberCode == -1) {
+            member.memberCode = viewMemberCode;
+        } else if (viewMemberCode == -1) {
             member.memberType = "anonymous";
-            member.memberCode = memberCode;
+            member.memberCode = viewMemberCode;
         } else {
             member.memberType = "none";
-            member.memberCode = memberCode;
+            member.memberCode = viewMemberCode;
         }
-        return member;
+        return {
+            user:member
+        };
     }
     member.memberType = "active";
-    member.memberCode = memberCode;
+    member.memberCode = viewMemberCode;
     member.memberNickname = memberInfo.member_nickname;
     member.memberLevel = memberInfo.member_level;
     member.memberCreated = memberInfo.member_created;
@@ -92,7 +94,9 @@ const viewUser = async (memberCode, viewMemberCode) => {
     } else {
         member.permission=false;
     }
-    return member;
+    return {
+        user:member
+    };
 }
 
 const signUp = async (memberId, memberPw, memberPwCheck, memberNickname, code) => {
@@ -130,7 +134,7 @@ const signUp = async (memberId, memberPw, memberPwCheck, memberNickname, code) =
 }
 
 const profileUpload = async (filename) => {
-    const fileDir='public/resource/member/profile_images/';
+    const fileDir='public/resource/user/profile_images/';
     await sharp(fileDir+filename)
     .resize({width:128,height:128})
     .png()

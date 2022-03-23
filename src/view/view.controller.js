@@ -7,8 +7,8 @@ router.get('/', (req ,res) => {
     res.render('index');
 })
 
-router.get('/memberinfo/:memberCode', (req ,res) => {
-    res.render('memberinfo', {
+router.get('/user/:memberCode', (req ,res) => {
+    res.render('user', {
         memberCode:req.params.memberCode
     });
 })
