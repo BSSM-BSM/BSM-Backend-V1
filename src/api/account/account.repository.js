@@ -44,6 +44,20 @@ const getMemberByNickname = async (memberNickname) => {
     }
 }
 
+const getMemberByUniqNo = async (uniqNo) => {
+    const getMemberQuery="SELECT * FROM `members` WHERE `uniq_no`=?";
+    try {
+        const [rows] = await pool.query(getMemberQuery, [uniqNo]);
+        if (rows.length)
+            return rows[0];
+        else
+            return null;
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const getMember = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
     const getMemberQuery="SELECT * FROM `members` WHERE `member_enrolled`=? AND `member_grade`=? AND `member_class`=? AND `member_studentNo`=? AND `member_name`=?";
     try {
@@ -154,6 +168,7 @@ module.exports = {
     getMemberById,
     getMemberByCode,
     getMemberByNickname,
+    getMemberByUniqNo,
     getMember,
     getMemberFromCode,
     signUp,

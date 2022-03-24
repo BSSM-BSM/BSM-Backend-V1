@@ -84,6 +84,16 @@ router.post('/account/pwResetMail', async (req, res, next) => {
     }
 })
 
+router.post('/account/findIdMail', async (req, res, next) => {
+    try {
+        res.send(JSON.stringify(
+            await service.findIdMail(req.body.student_enrolled, req.body.student_grade, req.body.student_class, req.body.student_no, req.body.student_name)
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
+
 router.post('/account/pwEdit', async (req, res, next) => {
     const jwtValue = jwt.verify(req.cookies.token);
     try {
