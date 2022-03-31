@@ -1,12 +1,12 @@
 const schedule = require('node-schedule');
 const webpush = require('../util/push');
-const service = require('../api/school/meal/meal.service');
+const mealRepository = require('../api/school/meal/meal.repository');
 
 const mealDate = {
     morning:schedule.scheduleJob('0 30 6 * * 1-5', async () => {
         // 아침 식사 1시간전 알림
         const today = new Date();
-        const mealInfo = await service.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
+        const mealInfo = await mealRepository.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
         if (mealInfo === null) {
             return;
         }
@@ -23,7 +23,7 @@ const mealDate = {
     lunch:schedule.scheduleJob('0 30 11 * * 1-5', async () => {
         // 점심 식사 1시간전 알림
         const today = new Date();
-        const mealInfo = await service.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
+        const mealInfo = await mealRepository.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
         if (mealInfo === null) {
             return;
         }
@@ -40,7 +40,7 @@ const mealDate = {
     dinner:schedule.scheduleJob('0 0 17 * * 1-5', async () => {
         // 저녁 식사 1시간전 알림
         const today = new Date();
-        const mealInfo = await service.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
+        const mealInfo = await mealRepository.getMeal(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`)
         if (mealInfo === null) {
             return;
         }

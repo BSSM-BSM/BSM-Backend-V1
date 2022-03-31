@@ -86,7 +86,7 @@ const updatePostComments = (
 ) => {
     const updatePostQuery='UPDATE ?? SET `post_comments`=`post_comments`+? WHERE `post_no`=?';
     try {
-        pool.query(updatePostQuery, [boardType, postNo, commentCount]);
+        pool.query(updatePostQuery, [boardType, commentCount, postNo]);
     } catch(err) {
         console.error(err);
         throw new InternalServerException();
