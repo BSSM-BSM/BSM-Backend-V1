@@ -1,12 +1,17 @@
 import { InternalServerException } from '../../../util/exceptions';
 const pool = require('../../../util/db');
 
-const getTotalPosts = async (boardType: string, postNo: number, memberCode: number) => {
-    const totalPostQuery="SELECT COUNT(`post_no`) FROM ?? WHERE `post_deleted`=0";
+const getTotalPosts = async (boardType: string) => {
+    const totalPostQuery='SELECT COUNT(post_no) FROM post WHERE post_deleted = 0 AND board = ?';
+    // SELECT COUNT(post_no) 
+    // FROM post 
+    // WHERE 
+    //     post_deleted = 0 AND
+    //     board = ?
     try {
-        const [rows] = await pool.query(totalPostQuery, [boardType, postNo, memberCode]);
+        const [rows] = await pool.query(totalPostQuery, [boardType]);
         if (rows.length)
-            return rows[0]["COUNT(`post_no`)"];
+            return rows[0]['COUNT(post_no)'];
         else
             return null;
     } catch(err) {
@@ -16,9 +21,27 @@ const getTotalPosts = async (boardType: string, postNo: number, memberCode: numb
 }
 
 const getPostsByPage = async (boardType: string, startPage: number, limitPage: number) => {
-    const getBoardQuery="SELECT `post_no`, `post_title`, `post_comments`, `member_code`, `member_nickname`, `post_date`, `post_hit`, `like` FROM ?? WHERE `post_deleted`=0 ORDER BY `post_no` DESC LIMIT ?, ?";
+    const getBoardQuery='SELECT post_no, post_title, post_comments, member_code, member_nickname, post_date, post_hit, `like` FROM post WHERE post_deleted = 0 AND board = ? ORDER BY post_no DESC LIMIT ?, ?';
+    // SELECT 
+    //     post_no, 
+    //     post_title, 
+    //     post_comments, 
+    //     member_code, 
+    //     member_nickname, 
+    //     post_date, 
+    //     post_hit, 
+    //     `like` 
+    // FROM post 
+    // WHERE 
+    //     post_deleted = 0 AND
+    //     board = ? 
+    // ORDER BY post_no DESC LIMIT ?, ?
     try {
-        const [rows] = await pool.query(getBoardQuery, [boardType, startPage, limitPage]);
+        const [rows] = await pool.query(getBoardQuery, [
+            boardType, 
+            startPage, 
+            limitPage
+        ]);
         if (rows.length)
             return rows;
         else
