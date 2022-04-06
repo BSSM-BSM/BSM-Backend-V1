@@ -9,6 +9,7 @@ router.post('/like/:boardType/:postNo', async (req:express.Request, res:express.
         res.send(JSON.stringify(
             await service.like(
                 jwtValue.isLogin? jwtValue.memberCode: null,
+                jwtValue.isLogin? jwtValue.memberLevel: null,
                 req.params.boardType,
                 req.params.postNo,
                 req.body.like

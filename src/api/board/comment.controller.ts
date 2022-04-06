@@ -25,6 +25,7 @@ router.post('/comment/:boardType/:postNo/:depth?/:parentIdx?', async (req:expres
         res.send(JSON.stringify(
             await service.writeComment(
                 jwtValue.isLogin? jwtValue.memberCode: null,
+                jwtValue.isLogin? jwtValue.memberLevel: null,
                 jwtValue.memberNickname,
                 req.params.boardType,
                 req.params.postNo,

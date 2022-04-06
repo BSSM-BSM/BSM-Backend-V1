@@ -1,5 +1,6 @@
 const { NotFoundException, UnAuthorizedException, ForbiddenException } = require('../../util/exceptions');
-const repository = require('./repository/post.repository');
+const boardRepository = require('./repository/board.repository');
+const postRepository = require('./repository/post.repository');
 const likeRepository = require('./repository/like.repository');
 const webpush = require('../../util/push');
 const js_xss = require('xss');
@@ -27,23 +28,19 @@ const xss = new js_xss.FilterXSS({
     }
 });
 
-const boardTypeList = {
-    board:{
-        anonymous:false,
-        public:false,
-        level:0
-    },
-    anonymous:{
-        anonymous:true,
-        public:true,
-        level:0
-    },
-    notice:{
-        anonymous:false,
-        public:true,
-        level:3
-    }
+let boardTypeList = {};
+const getBoardType = async () => {
+    const boardTypeInfo = await boardRepository.getBoardType();
+    boardTypeInfo.forEach(e => {
+        boardTypeList[e.id] = {
+            anonymous: e.post_anonymous,
+            public: e.post_public,
+            level: e.post_level
+        }
+    });
 }
+getBoardType();
+
 const viewPost = async (
     memberCode,
     memberLevel,
@@ -59,7 +56,7 @@ const viewPost = async (
     const isAnonymous = boardTypeList[boardType].anonymous;
 
     const [postInfo, likeInfo] = await Promise.all([
-        repository.getPostByCode(boardType, postNo),
+        postRepository.getPostByCode(boardType, postNo),
         likeRepository.getPostLikeByMemberCode(boardType, postNo, memberCode)
     ]);
     if (postInfo === null) {
@@ -69,7 +66,7 @@ const viewPost = async (
         throw new NotFoundException();
     }
 
-    repository.updatePostHit(boardType, postNo);
+    postRepository.updatePostHit(boardType, postNo);
     const result = {
         postTitle:postInfo.post_title,
         postComments:postInfo.post_comments,
@@ -117,7 +114,7 @@ const writePost = async (
         throw new ForbiddenException();
     }
 
-	await repository.insertPost(boardType, memberCode, memberNickname, postTitle, xss.process(postContent));
+	await postRepository.insertPost(boardType, memberCode, memberNickname, postTitle, xss.process(postContent));
     if (boardType == 'notice') {
         const payload = JSON.stringify({
             title:"새로운 공지사항이 있습니다",
@@ -142,7 +139,7 @@ const updatePost = async (
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
-    const postMemberCode = await repository.getMemberCodeFromPost(boardType, postNo);
+    const postMemberCode = await postRepository.getMemberCodeFromPost(boardType, postNo);
     if (postMemberCode === null) {
         throw new NotFoundException('Post not Found');
     }
@@ -150,7 +147,7 @@ const updatePost = async (
         throw new ForbiddenException();
     }
     
-    await repository.updatePost(boardType, postTitle, xss.process(postContent), postNo);
+    await postRepository.updatePost(boardType, postTitle, xss.process(postContent), postNo);
 }
 
 const deletePost = async (memberCode, memberLevel, boardType, postNo) => {
@@ -160,7 +157,7 @@ const deletePost = async (memberCode, memberLevel, boardType, postNo) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
-    const postMemberCode = await repository.getMemberCodeFromPost(boardType, postNo);
+    const postMemberCode = await postRepository.getMemberCodeFromPost(boardType, postNo);
     if (postMemberCode === null) {
         throw new NotFoundException('Post not Found');
     }
@@ -168,7 +165,7 @@ const deletePost = async (memberCode, memberLevel, boardType, postNo) => {
         throw new ForbiddenException();
     }
 
-    await repository.deletePost(boardType, postNo);
+    await postRepository.deletePost(boardType, postNo);
 }
 
 module.exports = {

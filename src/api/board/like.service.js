@@ -1,27 +1,36 @@
-const { NotFoundException, UnAuthorizedException } = require('../../util/exceptions');
+const { NotFoundException, UnAuthorizedException, ForbiddenException } = require('../../util/exceptions');
+const boardRepository = require('./repository/board.repository');
 const likeRepository = require('./repository/like.repository');
 const postRepository = require('./repository/post.repository');
 
-const boardTypeList = {
-    board:true,
-    anonymous:true,
-    notice:true
+let boardTypeList = {};
+const getBoardType = async () => {
+    const boardTypeInfo = await boardRepository.getBoardType();
+    boardTypeInfo.forEach(e => {
+        boardTypeList[e.id] = {
+            level: e.like_level
+        }
+    });
 }
+getBoardType();
 
-const like = async (memberCode, boardType, postNo, like) => {
+const like = async (memberCode, memberLevel, boardType, postNo, like) => {
     if (memberCode === null) {
         throw new UnAuthorizedException();
     }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException();
     }
+    if (boardTypeList[boardType].level > memberLevel) {
+        throw new ForbiddenException();
+    }
 
-    if (like>0) {
-        like=1
-    } else if (like<0) {
-        like=-1
+    if (like > 0) {
+        like = 1
+    } else if (like < 0) {
+        like =- 1
     } else {
-        like=0
+        like = 0
     }
 
     const [likeCheck, postTotalLike] = await Promise.all([

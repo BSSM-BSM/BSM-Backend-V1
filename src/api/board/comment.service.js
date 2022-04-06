@@ -1,4 +1,5 @@
 const { NotFoundException, UnAuthorizedException, BadRequestException, ForbiddenException } = require('../../util/exceptions');
+const boardRepository = require('./repository/board.repository');
 const commentRepository = require('./repository/comment.repository');
 const postRepository = require('./repository/post.repository');
 const js_xss = require('xss');
@@ -8,21 +9,18 @@ const xss = new js_xss.FilterXSS({
     },
 })
 
-
-const boardTypeList = {
-    board:{
-        anonymous:false,
-        public:false
-    },
-    anonymous:{
-        anonymous:true,
-        public:true
-    },
-    notice:{
-        anonymous:false,
-        public:true
-    }
+let boardTypeList = {};
+const getBoardType = async () => {
+    const boardTypeInfo = await boardRepository.getBoardType();
+    boardTypeInfo.forEach(e => {
+        boardTypeList[e.id] = {
+            anonymous: e.comment_anonymous,
+            public: e.comment_public,
+            level: e.comment_level
+        }
+    });
 }
+getBoardType();
 
 const viewComment = async (memberCode, memberLevel, boardType, postNo) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
@@ -124,12 +122,15 @@ const commentTree = (commentList, depth, memberCode, memberLevel, isAnonymous) =
     });
     return result;
 }
-const writeComment = async (memberCode, memberNickname, boardType, postNo, comment, depth, parentIdx) => {
+const writeComment = async (memberCode, memberLevel, memberNickname, boardType, postNo, comment, depth, parentIdx) => {
     if (memberCode === null) {
         throw new UnAuthorizedException();
     }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
+    }
+    if (boardTypeList[boardType].level > memberLevel) {
+        throw new ForbiddenException();
     }
     
     if (comment == undefined || comment.length < 1) {

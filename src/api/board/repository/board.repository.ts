@@ -1,6 +1,22 @@
 import { InternalServerException } from '../../../util/exceptions';
 const pool = require('../../../util/db');
 
+const getBoardType = async () => {
+    const getBoardTypeQuery='SELECT * FROM board';
+    // SELECT * 
+    // FROM board 
+    try {
+        const [rows] = await pool.query(getBoardTypeQuery);
+        if (rows.length)
+            return rows;
+        else
+            return null;
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const getTotalPosts = async (boardType: string) => {
     const totalPostQuery='SELECT COUNT(post_no) FROM post WHERE post_deleted = 0 AND board = ?';
     // SELECT COUNT(post_no) 
@@ -53,6 +69,7 @@ const getPostsByPage = async (boardType: string, startPage: number, limitPage: n
 }
 
 export {
+    getBoardType,
     getTotalPosts,
     getPostsByPage
 }

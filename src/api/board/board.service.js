@@ -1,23 +1,24 @@
 const { NotFoundException, UnAuthorizedException } = require('../../util/exceptions');
-const repository = require('./repository/board.repository');
+const boardRepository = require('./repository/board.repository');
 
-const boardTypeList = {
-    board:{
-        anonymous:false,
-        public:false,
-        level:0
-    },
-    anonymous:{
-        anonymous:true,
-        public:true,
-        level:0
-    },
-    notice:{
-        anonymous:false,
-        public:true,
-        level:3
-    }
+
+let boardTypeList = {};
+const getBoardType = async () => {
+    const boardTypeInfo = await boardRepository.getBoardType();
+    boardTypeInfo.forEach(e => {
+        boardTypeList[e.id] = {
+            boardName: e.name,
+            subBoard: {
+                boardType: e.sub_board_id,
+                boardName: e.sub_board_name,
+            },
+            anonymous: e.post_anonymous,
+            public: e.post_public,
+            level: e.post_level
+        }
+    });
 }
+getBoardType();
 
 const viewBoard = async (memberCode, boardType, page, limitPost) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
@@ -40,18 +41,22 @@ const viewBoard = async (memberCode, boardType, page, limitPost) => {
     }
 
     // 총 게시물 갯수
-    const totalPosts = await repository.getTotalPosts(boardType);
-    if (totalPosts === null) {
-        throw new NotFoundException();
-    }
-
+    const totalPosts = await boardRepository.getTotalPosts(boardType);
     // 게시판 페이지 수 계산
     const startPost = (page-1)*limitPost;
     const totalPage = Math.ceil(totalPosts/limitPost);
 
-    const posts = await repository.getPostsByPage(boardType, startPost, limitPost);
+    const posts = await boardRepository.getPostsByPage(boardType, startPost, limitPost);
     if (posts === null) {
-        throw new NotFoundException();
+        return {
+            board: [],
+            pages: totalPage,
+            boardName: boardTypeList[boardType].boardName,
+            subBoard: {
+                boardType: boardTypeList[boardType].subBoard.boardType,
+                boardName: boardTypeList[boardType].subBoard.boardName
+            }
+        }
     }
 
     const result = posts.map(e => {
@@ -69,7 +74,12 @@ const viewBoard = async (memberCode, boardType, page, limitPost) => {
 
     return {
         board: result,
-        pages: totalPage
+        pages: totalPage,
+        boardName: boardTypeList[boardType].boardName,
+        subBoard: {
+            boardType: boardTypeList[boardType].subBoard.boardType,
+            boardName: boardTypeList[boardType].subBoard.boardName
+        }
     }
 }
 
