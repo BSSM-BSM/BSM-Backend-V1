@@ -10,8 +10,8 @@ const push = async (payload, type) => {
     if (!tokenListInfo) {
         return;
     }
-    try {
-        Promise.all(tokenListInfo.map(e => {
+    tokenListInfo.map(e => {
+        try {
             webpush.sendNotification({
                 endpoint:e.endpoint,
                 keys:{
@@ -19,10 +19,10 @@ const push = async (payload, type) => {
                     p256dh:e.p256dh,
                 }
             }, payload);
-        }));
-    } catch (e) {
-        console.error(e);
-    }
+        } catch (err) {
+            console.error(err);
+        }
+    });
 }
 
 module.exports = {

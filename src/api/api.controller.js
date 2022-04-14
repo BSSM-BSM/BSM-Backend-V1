@@ -16,6 +16,7 @@ const postController = require('./board/post.controller');
 const commentController = require('./board/comment.controller');
 const likeController = require('./board/like.controller');
 const emoticonController = require('./board/emoticon.controller');
+const loginCheck = require('../util/loginCheck');
 
 router.use(jwt.refreshToken);
 
@@ -24,7 +25,7 @@ router.use(accountController);
 router.use(mealController);
 router.use(pushController);
 router.use(timetableController);
-router.use(meisterController);
+router.use(loginCheck, meisterController);
 router.use(boardController);
 router.use(postController);
 router.use(commentController);
