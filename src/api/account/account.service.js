@@ -103,10 +103,14 @@ const signUp = async (memberId, memberPw, memberPwCheck, memberNickname, code) =
     if (memberPw != memberPwCheck) {
         throw new BadRequestException('Password not match');
     }
-    if (await repository.getMemberById(memberId)) {
+    const [existId, existNickname] = await Promise.all([
+        repository.getMemberById(memberId),
+        repository.getMemberByNickname(memberNickname)
+    ]);
+    if (existId) {
         throw new ConflictException('Existing id');
     }
-    if (await repository.getMemberByNickname(memberNickname)) {
+    if (existNickname) {
         throw new ConflictException('Existing nickname');
     }
 
@@ -138,8 +142,8 @@ const profileUpload = async (filename) => {
     await sharp(fileDir+filename)
     .resize({width:128,height:128})
     .png()
-    .toFile(fileDir+filename.split('.')[0].split('-')[1]+'.png', (error, info) => {
-        if (error) {
+    .toFile(fileDir+filename.split('.')[0].split('-')[1]+'.png', (err) => {
+        if (err) {
             throw new InternalServerException('Failed to upload profile');
         }
     })
@@ -271,14 +275,6 @@ const pwEdit = async (res, memberCode, memberPw, memberPwCheck) => {
         throw new BadRequestException('Password not match');
     }
     await repository.updatePWByCode(memberCode, memberPw);
-    res.clearCookie('token', {
-        domain:'bssm.kro.kr',
-        path:'/',
-    });
-    res.clearCookie('refreshToken', {
-        domain:'bssm.kro.kr',
-        path:'/',
-    });
     res.clearCookie('token', {
         domain:'.bssm.kro.kr',
         path:'/',
