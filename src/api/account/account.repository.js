@@ -2,10 +2,27 @@ const { InternalServerException } = require('../../util/exceptions');
 const pool = require('../../util/db');
 const crypto = require('crypto');
 
-const getMemberById = async (memberId) => {
-    const getMemberQuery="SELECT * FROM `members` WHERE `member_id`=?";
+const getById = async (userId) => {
+    const getQuery="SELECT u.user_code 'usercode', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.member_grade 'grade', s.member_class 'classNo', s.member_studentNo 'studentNo', s.member_name 'name' FROM `user` u, `student` s WHERE u.user_id = ? AND s.uniq_no = u.uniq_no";
+    // SELECT 
+    //     u.user_code 'usercode', 
+    //     u.user_level 'level', 
+    //     u.user_id 'id', 
+    //     u.user_pw 'pw', 
+    //     u.user_pw_salt 'pwSalt', 
+    //     u.user_nickname 'nickname', 
+    //     u.user_created 'created', 
+    //     u.uniq_no 'uniqNo', 
+    //     s.student_grade 'grade', 
+    //     s.student_class 'classNo', 
+    //     s.student_no 'studentNo', 
+    //     s.student_name 'name' 
+    // FROM `user` u, `student` s 
+    // WHERE 
+    //     u.user_id = ? AND 
+    //     s.uniq_no = u.uniq_no
     try {
-        const [rows] = await pool.query(getMemberQuery, [memberId]);
+        const [rows] = await pool.query(getQuery, [userId]);
         if (rows.length)
             return rows[0];
         else
@@ -165,7 +182,7 @@ const updatePWByCode = async (memberCode, memberPw) => {
 }
 
 module.exports = {
-    getMemberById,
+    getById,
     getMemberByCode,
     getMemberByNickname,
     getMemberByUniqNo,

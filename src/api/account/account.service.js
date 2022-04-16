@@ -5,42 +5,22 @@ const jwt = require('../../util/jwt');
 const crypto = require('crypto');
 const sharp = require('sharp');
 const mail = require('../../util/mail');
+import { User } from './User';
 
-const login = async (res, memberId, memberPw) => {
-    const memberInfo = await repository.getMemberById(memberId);
-    if (memberInfo === null) {
+const login = async (res, userId, userPw) => {
+    const userInfo = await repository.getById(userId);
+    if (userInfo === null) {
         throw new BadRequestException();
     }
-
-    if (memberInfo.member_salt === '') {
-        if (memberInfo.member_pw === crypto.createHash('sha3-256').update(memberPw).digest('hex')) {
-            const jwtToken = jwt.sign({
-                isLogin:false,
-                pwEdit:memberInfo.member_code
-            }, '300s');
-            res.cookie('token', jwtToken.token, {
-                domain:'.bssm.kro.kr',
-                path:"/",
-                httpOnly:true,
-                secure:true,
-                maxAge:1000*60*5// 5분동안 1000ms*60초*5분
-            });
-            throw new UnAuthorizedException('Need to change password');
-        }
-    }
-    if (memberInfo.member_pw != crypto.createHash('sha3-256').update(memberInfo.member_salt+memberPw).digest('hex')) {
+    if (userInfo.user_pw != crypto.createHash('sha3-256').update(userInfo.user_pw_salt+userPw).digest('hex')) {
         throw new BadRequestException();
     }
-    const jwtToken = await jwt.login({
-        isLogin:true,
-        memberCode:memberInfo.member_code,
-        memberId:memberInfo.member_id,
-        memberNickname:memberInfo.member_nickname,
-        memberLevel:memberInfo.member_level,
-        grade:memberInfo.member_grade,
-        classNo:memberInfo.member_class,
-        studentNo:memberInfo.member_studentNo
-    }, '1h');
+    const user = new User(userInfo);
+    if (!user.getIsLogin()) {
+        throw new InternalServerException('Failed to login');
+    }
+
+    const jwtToken = await jwt.login(user.getUser(), '1h');
     res.cookie('token', jwtToken.token, {
         domain:'.bssm.kro.kr',
         path:'/',
@@ -253,7 +233,7 @@ const findIdMail = async (studentEnrolled, studentGrade, studentClass, studentNo
             <div style="padding:25px 0;text-align:center;margin:0 auto;border:solid 5px;border-radius:25px;font-family:-apple-system,BlinkMacSystemFont,\'Malgun Gothic\',\'맑은고딕\',helvetica,\'Apple SD Gothic Neo\',sans-serif;background-color:#202124; color:#e8eaed; width:400px;">
                 <img src="https://bssm.kro.kr/icons/logo.png" alt="로고" style="height:35px; padding-top:12px;">
                 <h1 style="font-size:28px;margin-left:25px;margin-right:25px;">BSM ID 복구 메일입니다</h1>
-                <h2 style="display:inline-block;font-size:20px;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">${userInfo.member_id}</h2>
+                <h2 style="display:inline-block;font-size:20px;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">${userInfo.user_id}</h2>
                 <br><br><br>
                 <div style="background-color:rgba(192, 192, 192, 0.2);padding:10px;text-align:left;font-size:14px;">
                     <p style="margin:0;">- 본 이메일은 발신전용 이메일입니다.</p>
