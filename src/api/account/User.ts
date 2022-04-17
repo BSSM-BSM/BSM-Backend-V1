@@ -1,19 +1,21 @@
 export class User {
-    isLogin: boolean = false;
-    user: {
-        usercode: number | null,
+    private isLogin: boolean = false;
+    private user: {
+        code: number | null,
         level: number | null,
         id: string | null,
         nickname: string | null,
+        enrolled: number | null,
         grade: number | null,
         classNo: number | null,
         studentNo: number | null,
         name: string | null
     } = {
-        usercode: null,
+        code: null,
         level: null,
         id: null,
         nickname: null,
+        enrolled: null,
         grade: null,
         classNo: null,
         studentNo: null,
@@ -21,10 +23,11 @@ export class User {
     };
 
     constructor(user : {
-        usercode: number | null,
+        code: number | null,
         level: number | null,
         id: string | null,
         nickname: string | null,
+        enrolled: number | null,
         grade: number | null,
         classNo: number | null,
         studentNo: number | null,
@@ -32,10 +35,11 @@ export class User {
     }) {
         this.user = user;
         if (
-            typeof this.user.usercode != 'number' ||
+            typeof this.user.code != 'number' ||
             typeof this.user.level != 'number' ||
             typeof this.user.id != 'string' ||
             typeof this.user.nickname != 'string' ||
+            typeof this.user.grade != 'number' ||
             typeof this.user.grade != 'number' ||
             typeof this.user.classNo != 'number' ||
             typeof this.user.studentNo != 'number' ||

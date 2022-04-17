@@ -1,5 +1,6 @@
-const { NotFoundException, BadRequestException, UnAuthorizedException, ConflictException, InternalServerException } = require('../../util/exceptions');
-const repository = require('./account.repository');
+import { NotFoundException, BadRequestException, UnAuthorizedException, ConflictException, InternalServerException } from '../../util/exceptions';
+import express from 'express';
+import * as accountRepository from './account.repository';
 const tokenRepository = require('./token.repository');
 const jwt = require('../../util/jwt');
 const crypto = require('crypto');
@@ -7,12 +8,16 @@ const sharp = require('sharp');
 const mail = require('../../util/mail');
 import { User } from './User';
 
-const login = async (res, userId, userPw) => {
-    const userInfo = await repository.getById(userId);
+const login = async (
+    res: express.Response,
+    userId: string,
+    userPw: string
+) => {
+    const userInfo = await accountRepository.getById(userId);
     if (userInfo === null) {
         throw new BadRequestException();
     }
-    if (userInfo.user_pw != crypto.createHash('sha3-256').update(userInfo.user_pw_salt+userPw).digest('hex')) {
+    if (userInfo.pw != crypto.createHash('sha3-256').update(userInfo.pwSalt + userPw).digest('hex')) {
         throw new BadRequestException();
     }
     const user = new User(userInfo);
@@ -41,51 +46,71 @@ const login = async (res, userId, userPw) => {
     }
 }
 
-const viewUser = async (memberCode, viewMemberCode) => {
-    const memberInfo = await repository.getMemberByCode(viewMemberCode);
-    let member = {};
-    if (memberInfo === null) {
-        if (viewMemberCode == 0) {
-            member.memberType = "deleted";
-            member.memberCode = viewMemberCode;
-        } else if (viewMemberCode == -1) {
-            member.memberType = "anonymous";
-            member.memberCode = viewMemberCode;
+const viewUser = async (
+    usercode: number,
+    viewUsercode: number
+) => {
+    const userInfo = await accountRepository.getByUsercode(viewUsercode);
+    let user: {
+        userType: string,
+        usercode: number,
+        nickname?: string,
+        level?: number,
+        created?: string;
+        enrolled?: number;
+        grade?: number;
+        classNo?: number;
+        studentNo?: number;
+        name?: string;
+        permission?: boolean
+    } = {
+        userType: 'none',
+        usercode: viewUsercode
+    };
+    if (userInfo === null) {
+        if (viewUsercode == 0) {
+            user.userType = "deleted";
+        } else if (viewUsercode == -1) {
+            user.userType = "anonymous";
         } else {
-            member.memberType = "none";
-            member.memberCode = viewMemberCode;
+            user.userType = "none";
         }
         return {
-            user:member
+            user
         };
     }
-    member.memberType = "active";
-    member.memberCode = viewMemberCode;
-    member.memberNickname = memberInfo.member_nickname;
-    member.memberLevel = memberInfo.member_level;
-    member.memberCreated = memberInfo.member_created;
-    member.memberEnrolled = memberInfo.member_enrolled;
-    member.memberGrade = memberInfo.member_grade;
-    member.memberClass = memberInfo.member_class;
-    member.memberStudentNo = memberInfo.member_studentNo;
-    member.memberName = memberInfo.member_name;
-    if (memberCode>0 && memberInfo.member_code == memberCode) {
-        member.permission=true;
+    user.userType = "active";
+    user.nickname = userInfo.nickname;
+    user.level = userInfo.level;
+    user.created = userInfo.created;
+    user.enrolled = userInfo.enrolled;
+    user.grade = userInfo.grade;
+    user.classNo = userInfo.classNo;
+    user.studentNo = userInfo.studentNo;
+    user.name = userInfo.name;
+    if (usercode>0 && userInfo.code == usercode) {
+        user.permission = true;
     } else {
-        member.permission=false;
+        user.permission = false;
     }
     return {
-        user:member
+        user
     };
 }
 
-const signUp = async (memberId, memberPw, memberPwCheck, memberNickname, code) => {
-    if (memberPw != memberPwCheck) {
+const signUp = async (
+    userId: string,
+    userPw: string,
+    userPwCheck: string,
+    userNickname: string,
+    code: string
+) => {
+    if (userPw != userPwCheck) {
         throw new BadRequestException('Password not match');
     }
     const [existId, existNickname] = await Promise.all([
-        repository.getMemberById(memberId),
-        repository.getMemberByNickname(memberNickname)
+        accountRepository.getById(userId),
+        accountRepository.getByNickname(userNickname)
     ]);
     if (existId) {
         throw new ConflictException('Existing id');
@@ -95,29 +120,23 @@ const signUp = async (memberId, memberPw, memberPwCheck, memberNickname, code) =
     }
 
     //인증코드로 유저정보를 가져옴
-    const studentInfo = await repository.getStudentInfoByCode(code);
+    const studentInfo = await accountRepository.getStudentByCode(code);
     if (studentInfo === null) {
         throw new NotFoundException('Code not found');
     }
 
-    await repository.signUp(
-        studentInfo.member_level,
-        memberId,
-        memberPw,
-        memberNickname,
-        studentInfo.member_enrolled,
-        studentInfo.member_grade,
-        studentInfo.member_class,
-        studentInfo.member_studentNo,
-        studentInfo.member_name,
-        studentInfo.email,
-        studentInfo.uniq_no,
+    await accountRepository.signUp(
+        studentInfo.level,
+        userId,
+        userPw,
+        userNickname,
+        studentInfo.uniqNo,
     )
 
-    repository.updateCodeAvailable(code, false);
+    accountRepository.updateCodeAvailable(code, false);
 }
 
-const profileUpload = async (filename) => {
+const profileUpload = async (filename: string) => {
     const fileDir='public/resource/user/profile_images/';
     await sharp(fileDir+filename)
     .resize({width:128,height:128})
@@ -129,13 +148,19 @@ const profileUpload = async (filename) => {
     })
 }
 
-const validCodeMail = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
-    const memberInfo = await repository.getMemberFromCode(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
-    if (memberInfo === null) {
+const validCodeMail = async (
+    studentEnrolled: number,
+    studentGrade: number,
+    studentClass: number,
+    studentNo: number,
+    studentName: string
+) => {
+    const userInfo = await accountRepository.getStudent(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
+    if (userInfo === null) {
         throw new NotFoundException('User not found');
     }
 
-    const userMail = memberInfo.email;
+    const userMail = userInfo.email;
     const subject = 'BSM 회원가입 인증 코드입니다';
     const content = `
     <!DOCTYPE HTML>
