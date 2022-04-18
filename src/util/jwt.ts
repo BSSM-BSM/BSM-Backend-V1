@@ -1,14 +1,17 @@
 import express from "express";
-import { UnAuthorizedException } from "./exceptions";
+import { User } from "../api/account/User";
+import { InternalServerException, UnAuthorizedException } from "./exceptions";
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const accountRepository = require('../api/account/account.repository');
-const tokenRepository = require('../api/account/token.repository');
+import * as accountRepository from '../api/account/account.repository';
+import * as tokenRepository from '../api/account/token.repository';
 
 const secretKey = process.env.SECRET_KEY;
 
 const sign = (
-    payload:object, expire:string) => {
+    payload: object,
+    expire: string
+) => {
     return {
         token:jwt.sign(payload, secretKey, {
             algorithm:'HS256',
@@ -16,38 +19,37 @@ const sign = (
         })
     };
 }
+
 const login = async (
-    payload:{
-        isLogin:boolean,
-        memberCode:number,
-        memberId:number,
-        memberNickname:string,
-        memberLevel:number,
-        grade:number,
-        classNo:number,
-        studentNo:number
-    }, expire:string
+    user: User,
+    expire: string
 ) => {
+    if (!user.getIsLogin()) {
+        throw new InternalServerException('Failed to login');
+    }
+
     const token = crypto.randomBytes(64).toString('hex');
     const result = {
-        token: jwt.sign(payload, secretKey, {
+        token: jwt.sign(user.getUser(), secretKey, {
             algorithm:'HS256',
             expiresIn:expire
         }),
-        refreshToken: jwt.sign({token:token}, secretKey, {
+        refreshToken: jwt.sign({token}, secretKey, {
             algorithm:'HS256',
             expiresIn:'60d'
         }),
     };
-    await tokenRepository.insertToken(token, payload.memberCode);
+    await tokenRepository.insertToken(token, user.getUser().code);
     return result;
 }
 
-const verify = (token:String) => {
+const verify = (
+    token: string
+) => {
     let decoded;
     try {
         decoded = jwt.verify(token, secretKey);
-    } catch (err:{message:String}|any) {
+    } catch (err: {message:string} | any) {
         if (err.message === 'jwt expired') {
             return 'EXPIRED';
         } else if (err.message === 'invalid token') {
@@ -59,14 +61,14 @@ const verify = (token:String) => {
     return decoded;
 }
 
-const check = (token:String|undefined) => {
+const check = (token: string | undefined) => {
     if (token) {
         const result = verify(token);
         if (result == 'EXPIRED' || result == 'INVALID') {
             return {
                 isLogin:false
             };
-        }else{
+        } else {
             if (!result.isLogin) {
                 return {
                     isLogin:false
@@ -74,7 +76,7 @@ const check = (token:String|undefined) => {
             }
             return result;
         }
-    }else{
+    } else {
         return {
             isLogin:false
         };
@@ -160,8 +162,8 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     }
 
     // 유저 정보를 가져옴
-    const memberInfo = await accountRepository.getMemberByCode(tokenInfo.member_code);
-    if (memberInfo === null) {
+    const userInfo = await accountRepository.getByUsercode(tokenInfo.usercode);
+    if (userInfo === null) {
         res.clearCookie('refreshToken', {
             domain:'.bssm.kro.kr',
             path:'/',
@@ -181,16 +183,12 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
         return next(new UnAuthorizedException('Need to relogin'));
     }
 
-    const payload = {
-        isLogin:true,
-        memberCode:memberInfo.member_code,
-        memberId:memberInfo.member_id,
-        memberNickname:memberInfo.member_nickname,
-        memberLevel:memberInfo.member_level,
-        grade:memberInfo.member_grade,
-        classNo:memberInfo.member_class,
-        studentNo:memberInfo.member_studentNo
+    const user = new User(userInfo);
+    if (!user.getIsLogin()) {
+        throw new InternalServerException('Failed to refresh');
     }
+    const payload = user.getUser();
+
     // 액세스 토큰 재발행
     const token = jwt.sign(payload, secretKey, {
         algorithm:'HS256',

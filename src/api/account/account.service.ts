@@ -1,7 +1,7 @@
 import { NotFoundException, BadRequestException, UnAuthorizedException, ConflictException, InternalServerException } from '../../util/exceptions';
 import express from 'express';
 import * as accountRepository from './account.repository';
-const tokenRepository = require('./token.repository');
+import * as tokenRepository from './token.repository';
 const jwt = require('../../util/jwt');
 const crypto = require('crypto');
 const sharp = require('sharp');
@@ -25,7 +25,7 @@ const login = async (
         throw new InternalServerException('Failed to login');
     }
 
-    const jwtToken = await jwt.login(user.getUser(), '1h');
+    const jwtToken = await jwt.login(user, '1h');
     res.cookie('token', jwtToken.token, {
         domain:'.bssm.kro.kr',
         path:'/',
@@ -124,24 +124,28 @@ const signUp = async (
     if (studentInfo === null) {
         throw new NotFoundException('Code not found');
     }
-
+    if (!studentInfo.codeAvailable) {
+        throw new BadRequestException('Code already used');
+    }
+    
+    await accountRepository.updateCodeAvailable(code, false);
     await accountRepository.signUp(
         studentInfo.level,
         userId,
         userPw,
         userNickname,
         studentInfo.uniqNo,
-    )
-
-    accountRepository.updateCodeAvailable(code, false);
+    );
 }
 
-const profileUpload = async (filename: string) => {
+const profileUpload = async (
+    filename: string
+) => {
     const fileDir='public/resource/user/profile_images/';
     await sharp(fileDir+filename)
     .resize({width:128,height:128})
     .png()
-    .toFile(fileDir+filename.split('.')[0].split('-')[1]+'.png', (err) => {
+    .toFile(fileDir+filename.split('.')[0].split('-')[1]+'.png', (err: any) => {
         if (err) {
             throw new InternalServerException('Failed to upload profile');
         }
@@ -155,12 +159,12 @@ const validCodeMail = async (
     studentNo: number,
     studentName: string
 ) => {
-    const userInfo = await accountRepository.getStudent(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
-    if (userInfo === null) {
+    const studentInfo = await accountRepository.getStudent(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
+    if (studentInfo === null) {
         throw new NotFoundException('User not found');
     }
 
-    const userMail = userInfo.email;
+    const userMail = studentInfo.email;
     const subject = 'BSM 회원가입 인증 코드입니다';
     const content = `
     <!DOCTYPE HTML>
@@ -174,7 +178,7 @@ const validCodeMail = async (
             <div style="padding:25px 0;text-align:center;margin:0 auto;border:solid 5px;border-radius:25px;font-family:-apple-system,BlinkMacSystemFont,\'Malgun Gothic\',\'맑은고딕\',helvetica,\'Apple SD Gothic Neo\',sans-serif;background-color:#202124; color:#e8eaed;">
                 <img src="https://bssm.kro.kr/icons/logo.png" alt="로고" style="height:35px; padding-top:12px;">
                 <h1 style="font-size:28px;margin-left:25px;margin-right:25px;">BSM 회원가입 인증 코드입니다.</h1>
-                <h2 style="display:inline-block;font-size:20px;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">${memberInfo.code}</h2>
+                <h2 style="display:inline-block;font-size:20px;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">${studentInfo.authCode}</h2>
                 <br><br><br>
                 <div style="background-color:rgba(192, 192, 192, 0.2);padding:10px;text-align:left;font-size:14px;">
                     <p style="margin:0;">- 본 이메일은 발신전용 이메일입니다.</p>
@@ -192,17 +196,19 @@ const validCodeMail = async (
     await mail.send(userMail, subject, content);
 }
 
-const pwResetMail = async (memberId) => {
-    const memberInfo = await repository.getMemberById(memberId);
-    if (memberInfo === null) {
+const pwResetMail = async (
+    userId: string
+) => {
+    const userInfo = await accountRepository.getById(userId);
+    if (userInfo === null) {
         throw new NotFoundException('User not found');
     }
 
     const jwtToken = jwt.sign({
-        isLogin:false,
-        pwEdit:memberInfo.member_code
+        isLogin: false,
+        pwEdit: userInfo.code
     }, '300s');
-    const userMail = memberInfo.email;
+    const userMail = userInfo.email;
     const subject = 'BSM 비밀번호 재설정 링크입니다';
     const content = `
     <!DOCTYPE HTML>
@@ -234,12 +240,14 @@ const pwResetMail = async (memberId) => {
     await mail.send(userMail, subject, content);
 }
 
-const findIdMail = async (studentEnrolled, studentGrade, studentClass, studentNo, studentName) => {
-    const studentInfo = await repository.getMemberFromCode(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
-    if (studentInfo === null) {
-        throw new NotFoundException('User not found');
-    }
-    const userInfo = await repository.getMemberByUniqNo(studentInfo.uniq_no);
+const findIdMail = async (
+    studentEnrolled: number,
+    studentGrade: number,
+    studentClass: number,
+    studentNo: number,
+    studentName: string
+) => {
+    const userInfo = await accountRepository.getUser(studentEnrolled, studentGrade, studentClass, studentNo, studentName);
     if (userInfo === null) {
         throw new NotFoundException('User not found');
     }
@@ -258,7 +266,7 @@ const findIdMail = async (studentEnrolled, studentGrade, studentClass, studentNo
             <div style="padding:25px 0;text-align:center;margin:0 auto;border:solid 5px;border-radius:25px;font-family:-apple-system,BlinkMacSystemFont,\'Malgun Gothic\',\'맑은고딕\',helvetica,\'Apple SD Gothic Neo\',sans-serif;background-color:#202124; color:#e8eaed; width:400px;">
                 <img src="https://bssm.kro.kr/icons/logo.png" alt="로고" style="height:35px; padding-top:12px;">
                 <h1 style="font-size:28px;margin-left:25px;margin-right:25px;">BSM ID 복구 메일입니다</h1>
-                <h2 style="display:inline-block;font-size:20px;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">${userInfo.user_id}</h2>
+                <h2 style="display:inline-block;font-size:20px;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">${userInfo.id}</h2>
                 <br><br><br>
                 <div style="background-color:rgba(192, 192, 192, 0.2);padding:10px;text-align:left;font-size:14px;">
                     <p style="margin:0;">- 본 이메일은 발신전용 이메일입니다.</p>
@@ -275,11 +283,16 @@ const findIdMail = async (studentEnrolled, studentGrade, studentClass, studentNo
     await mail.send(userMail, subject, content);
 }
 
-const pwEdit = async (res, memberCode, memberPw, memberPwCheck) => {
-    if (memberPw != memberPwCheck) {
+const pwEdit = async (
+    res: express.Response, 
+    usercode: number, 
+    userPw: string, 
+    userPwCheck: string
+) => {
+    if (userPw != userPwCheck) {
         throw new BadRequestException('Password not match');
     }
-    await repository.updatePWByCode(memberCode, memberPw);
+    await accountRepository.updatePWByCode(usercode, userPw);
     res.clearCookie('token', {
         domain:'.bssm.kro.kr',
         path:'/',
@@ -290,7 +303,9 @@ const pwEdit = async (res, memberCode, memberPw, memberPwCheck) => {
     });
 }
 
-const token = async (refreshToken) => {
+const token = async (
+    refreshToken: string
+) => {
     // 리프레시 토큰이 없으면
     if (!refreshToken) {
         throw new BadRequestException();
@@ -311,20 +326,15 @@ const token = async (refreshToken) => {
         throw new UnAuthorizedException();
     }
     // 유저 정보를 가져옴
-    const memberInfo = await repository.getMemberByCode(tokenInfo.member_code);
-    if (memberInfo === null) {
+    const userInfo = await accountRepository.getByUsercode(tokenInfo.usercode);
+    if (userInfo === null) {
         throw new NotFoundException('User not found');
     }
-    const payload = {
-        isLogin:true,
-        memberCode:memberInfo.member_code,
-        memberId:memberInfo.member_id,
-        memberNickname:memberInfo.member_nickname,
-        memberLevel:memberInfo.member_level,
-        grade:memberInfo.member_grade,
-        classNo:memberInfo.member_class,
-        studentNo:memberInfo.member_studentNo
+    const user = new User(userInfo);
+    if (!user.getIsLogin()) {
+        throw new InternalServerException('Failed to refresh');
     }
+    const payload = user.getUser();
     // 액세스 토큰 재발행
     const jwtToken = jwt.sign(payload, '1h');
     return {

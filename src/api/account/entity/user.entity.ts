@@ -12,4 +12,5 @@ export interface UserEntity {
     classNo: number;
     studentNo: number;
     name: string;
+    email: string;
 }

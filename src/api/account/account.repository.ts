@@ -8,7 +8,7 @@ import { StudentEntity } from './entity/student.entity';
 const getById = async (
     id: string
 ): Promise<UserEntity | null> => {
-    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled', s.member_grade 'grade', s.member_class 'classNo', s.member_studentNo 'studentNo', s.member_name 'name' FROM `user` u, `student` s WHERE u.user_id = ? AND s.uniq_no = u.uniq_no";
+    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled',s.student_grade 'grade', s.student_class 'classNo', s.student_no 'studentNo', s.student_name 'name', s.email FROM `user` u, `student` s WHERE u.user_id = ? AND s.uniq_no = u.uniq_no";
     // SELECT 
     //     u.user_code 'code', 
     //     u.user_level 'level', 
@@ -22,7 +22,8 @@ const getById = async (
     //     s.student_grade 'grade', 
     //     s.student_class 'classNo', 
     //     s.student_no 'studentNo', 
-    //     s.student_name 'name' 
+    //     s.student_name 'name', 
+    //     s.email 
     // FROM `user` u, `student` s 
     // WHERE 
     //     u.user_id = ? AND 
@@ -42,7 +43,7 @@ const getById = async (
 const getByUsercode = async (
     code: number
 ): Promise<UserEntity | null> => {
-    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled', s.member_grade 'grade', s.member_class 'classNo', s.member_studentNo 'studentNo', s.member_name 'name' FROM `user` u, `student` s WHERE u.user_id = ? AND s.uniq_no = u.uniq_no";
+    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled',s.student_grade 'grade', s.student_class 'classNo', s.student_no 'studentNo', s.student_name 'name', s.email FROM `user` u, `student` s WHERE u.user_code = ? AND s.uniq_no = u.uniq_no";
     // SELECT 
     //     u.user_code 'code', 
     //     u.user_level 'level', 
@@ -56,10 +57,11 @@ const getByUsercode = async (
     //     s.student_grade 'grade', 
     //     s.student_class 'classNo', 
     //     s.student_no 'studentNo', 
-    //     s.student_name 'name' 
+    //     s.student_name 'name', 
+    //     s.email 
     // FROM `user` u, `student` s 
     // WHERE 
-    //     u.user_co = ? AND 
+    //     u.user_code = ? AND 
     //     s.uniq_no = u.uniq_no
     try {
         const [rows] = await pool.query(getQuery, [code]);
@@ -76,9 +78,28 @@ const getByUsercode = async (
 const getByNickname = async (
     nickname: string
 ): Promise<UserEntity | null> => {
-    const getMemberQuery="SELECT * FROM `members` WHERE `member_nickname`=?";
+    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled',s.student_grade 'grade', s.student_class 'classNo', s.student_no 'studentNo', s.student_name 'name', s.email FROM `user` u, `student` s WHERE u.user_nickname = ? AND s.uniq_no = u.uniq_no";
+    // SELECT 
+    //     u.user_code 'code', 
+    //     u.user_level 'level', 
+    //     u.user_id 'id', 
+    //     u.user_pw 'pw', 
+    //     u.user_pw_salt 'pwSalt', 
+    //     u.user_nickname 'nickname', 
+    //     u.user_created 'created', 
+    //     u.uniq_no 'uniqNo', 
+    //     s.student_enrolled 'enrolled',
+    //     s.student_grade 'grade', 
+    //     s.student_class 'classNo', 
+    //     s.student_no 'studentNo', 
+    //     s.student_name 'name', 
+    //     s.email 
+    // FROM `user` u, `student` s 
+    // WHERE 
+    //     u.user_nickname = ? AND 
+    //     s.uniq_no = u.uniq_no
     try {
-        const [rows] = await pool.query(getMemberQuery, [nickname]);
+        const [rows] = await pool.query(getQuery, [nickname]);
         if (rows.length)
             return rows[0];
         else
@@ -92,9 +113,28 @@ const getByNickname = async (
 const getByUniqNo = async (
     uniqNo: string
 ): Promise<UserEntity | null> => {
-    const getMemberQuery="SELECT * FROM `members` WHERE `uniq_no`=?";
+    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled',s.student_grade 'grade', s.student_class 'classNo', s.student_no 'studentNo', s.student_name 'name', s.email FROM `user` u, `student` s WHERE u.uniq_no = ? AND s.uniq_no = u.uniq_no";
+    // SELECT 
+    //     u.user_code 'code', 
+    //     u.user_level 'level', 
+    //     u.user_id 'id', 
+    //     u.user_pw 'pw', 
+    //     u.user_pw_salt 'pwSalt', 
+    //     u.user_nickname 'nickname', 
+    //     u.user_created 'created', 
+    //     u.uniq_no 'uniqNo', 
+    //     s.student_enrolled 'enrolled',
+    //     s.student_grade 'grade', 
+    //     s.student_class 'classNo', 
+    //     s.student_no 'studentNo', 
+    //     s.student_name 'name', 
+    //     s.email 
+    // FROM `user` u, `student` s 
+    // WHERE 
+    //     u.uniq_no = ? AND 
+    //     s.uniq_no = u.uniq_no
     try {
-        const [rows] = await pool.query(getMemberQuery, [uniqNo]);
+        const [rows] = await pool.query(getQuery, [uniqNo]);
         if (rows.length)
             return rows[0];
         else
@@ -112,18 +152,30 @@ const getUser = async (
     studentNo: number, 
     studentName: string
 ): Promise<UserEntity | null> => {
-    const getQuery="SELECT * FROM `user` WHERE uniq_no IN (SELECT uniq_no FROM student WHERE student_enrolled = ? AND student_grade = ? AND student_class = ? AND student_no = ? AND student_name = ?)";
-    // SELECT * 
-    // FROM `user` 
-    // WHERE uniq_no IN (
-    //     SELECT uniq_no 
-    //     FROM student 
-    //     WHERE 
-    //         student_enrolled = ? AND 
-    //         student_grade = ? AND 
-    //         student_class = ? AND 
-    //         student_no = ? AND 
-    //         student_name = ?)
+    const getQuery="SELECT u.user_code 'code', u.user_level 'level', u.user_id 'id', u.user_pw 'pw', u.user_pw_salt 'pwSalt', u.user_nickname 'nickname', u.user_created 'created', u.uniq_no 'uniqNo', s.student_enrolled 'enrolled',s.student_grade 'grade', s.student_class 'classNo', s.student_no 'studentNo', s.student_name 'name', s.email FROM `user` u, `student` s WHERE s.uniq_no = u.uniq_no AND s.student_enrolled = ? AND s.student_grade = ? AND s.student_class = ? AND s.student_no = ? AND s.student_name = ?";
+    // SELECT 
+    //     u.user_code 'code', 
+    //     u.user_level 'level', 
+    //     u.user_id 'id', 
+    //     u.user_pw 'pw', 
+    //     u.user_pw_salt 'pwSalt', 
+    //     u.user_nickname 'nickname', 
+    //     u.user_created 'created', 
+    //     u.uniq_no 'uniqNo', 
+    //     s.student_enrolled 'enrolled', 
+    //     s.student_grade 'grade', 
+    //     s.student_class 'classNo', 
+    //     s.student_no 'studentNo', 
+    //     s.student_name 'name', 
+    //     s.email 
+    // FROM `user` u, `student` s 
+    // WHERE 
+    //     s.uniq_no = u.uniq_no AND
+    //     s.student_enrolled = ? AND 
+    //     s.student_grade = ? AND 
+    //     s.student_class = ? AND 
+    //     s.student_no = ? AND 
+    //     s.student_name = ?
     try {
         const [rows] = await pool.query(getQuery, [
             studentEnrolled, 
@@ -142,11 +194,23 @@ const getUser = async (
 }
 
 const getStudentByCode = async (
-    code: string
+    authCode: string
 ): Promise<StudentEntity | null> => {
-    const getCodeQuery="SELECT * FROM `student` WHERE `code`=?"
+    const getQuery="SELECT code_available codeAvailable,auth_code authCode, level, student_enrolled enrolled, student_grade grade, student_class class, student_no studentNo, email, uniq_no uniqNo FROM `student` WHERE auth_code = ?"
+    // SELECT 
+    //     code_available codeAvailable,
+    //     auth_code authCode, 
+    //     level, 
+    //     student_enrolled enrolled, 
+    //     student_grade grade, 
+    //     student_class class, 
+    //     student_no studentNo, 
+    //     email, 
+    //     uniq_no uniqNo 
+    // FROM `student` 
+    // WHERE auth_code = ?
     try {
-        const [rows] = await pool.query(getCodeQuery, [code]);
+        const [rows] = await pool.query(getQuery, [authCode]);
         if (rows.length)
             return rows[0];
         else
@@ -164,9 +228,25 @@ const getStudent = async (
     studentNo: number,
     studentName: string
 ): Promise<StudentEntity | null> => {
-    const getCodeQuery="SELECT * FROM `student` WHERE `member_enrolled`=? AND `member_grade`=? AND `member_class`=? AND `member_studentNo`=? AND `member_name`=?"
+    const getQuery="SELECT auth_code authCode, student_level level, student_enrolled enrolled, student_grade grade, student_class class, student_no studentNo, email, uniq_no uniqNo FROM `student` WHERE student_enrolled = ? AND student_grade = ? AND student_class = ? AND student_studentNo = ? AND student_name = ?"
+    // SELECT 
+    //     auth_code authCode, 
+    //     level, 
+    //     student_enrolled enrolled, 
+    //     student_grade grade, 
+    //     student_class class, 
+    //     student_no studentNo, 
+    //     email, 
+    //     uniq_no uniqNo 
+    // FROM `student` 
+    // WHERE 
+    //     student_enrolled = ? AND 
+    //     student_grade = ? AND 
+    //     student_class = ? AND 
+    //     student_studentNo = ? AND 
+    //     student_name = ?
     try {
-        const [rows] = await pool.query(getCodeQuery, [
+        const [rows] = await pool.query(getQuery, [
             studentEnrolled,
             studentGrade,
             studentClass,
@@ -182,18 +262,6 @@ const getStudent = async (
         throw new InternalServerException();
     }
 }
-const updateCodeAvailable = (
-    code: string,
-    flag: boolean
-) => {
-    const updateCodeAvailableQuery="UPDATE `student` SET `code_available`=? WHERE `code`=?";
-    try {
-        pool.query(updateCodeAvailableQuery, [flag, code]);
-    } catch(err) {
-        console.error(err);
-        throw new InternalServerException();
-    }
-}
 
 const signUp = async (
     level: number,
@@ -202,7 +270,7 @@ const signUp = async (
     nickname: string,
     uniqNo: string
 ) => {
-    const signUpQuery="INSERT INTO `user` (user_code, user_level, user_id, user_pw, user_pw_salt, user_nickname, user_created, uniq_no) VALUES(1, 0, ?, ?, ?, ?, now(), ?)"
+    const signUpQuery="INSERT INTO `user` (user_level, user_id, user_pw, user_pw_salt, user_nickname, user_created, uniq_no) VALUES(?, ?, ?, ?, ?, now(), ?)"
     // INSERT INTO `user` (
     //     user_level, 
     //     user_id, 
@@ -240,6 +308,19 @@ const signUp = async (
     return true;
 }
 
+const updateCodeAvailable = (
+    code: string,
+    flag: boolean
+) => {
+    const updateCodeAvailableQuery="UPDATE `student` SET `code_available`=? WHERE `auth_code`=?";
+    try {
+        pool.query(updateCodeAvailableQuery, [flag, code]);
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const updatePWByCode = async (
     usercode: number, 
     pw: string
@@ -263,9 +344,9 @@ export {
     getByNickname,
     getByUniqNo,
     getUser,
-    signUp,
     getStudentByCode,
     getStudent,
+    signUp,
     updateCodeAvailable,
     updatePWByCode,
 }

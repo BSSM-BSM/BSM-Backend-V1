@@ -3,10 +3,17 @@ const pool = require('../../util/db');
 
 const getToken = async (
     token: string,
-) => {
-    const getTokenQuery="SELECT * FROM `tokens` WHERE `token`=? AND `valid`=1";
+): Promise<{usercode: number, created: string} | null> => {
+    const getQuery="SELECT user_code usercode, created FROM tokens WHERE token = ? AND valid = 1";
+    // SELECT 
+    //     user_code usercode, 
+    //     created 
+    // FROM tokens 
+    // WHERE 
+    //     token = ? AND 
+    //     valid = 1
     try {
-        const [rows] = await pool.query(getTokenQuery, [token]);
+        const [rows] = await pool.query(getQuery, [token]);
         if (rows.length)
             return rows[0];
         else
@@ -19,11 +26,11 @@ const getToken = async (
 
 const insertToken = async (
     token: string,
-    memberCode: number
+    usercode: number
 ) => {
-    const insertTokenQuery="INSERT INTO `tokens` VALUES(?, 1, ?, now())";
+    const insertQuery="INSERT INTO `tokens` VALUES(?, 1, ?, now())";
     try {
-        await pool.query(insertTokenQuery, [token, memberCode]);
+        await pool.query(insertQuery, [token, usercode]);
     } catch(err) {
         console.error(err);
         throw new InternalServerException();

@@ -1,5 +1,5 @@
 export interface StudentEntity {
-    code: number;
+    codeAvailable: boolean;
     level: number;
     enrolled: number;
     grade: number;
@@ -8,4 +8,5 @@ export interface StudentEntity {
     name: string;
     email: string;
     uniqNo: string;
+    authCode: string;
 }
