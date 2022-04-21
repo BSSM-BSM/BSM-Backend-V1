@@ -61,27 +61,6 @@ const verify = (
     return decoded;
 }
 
-const check = (token: string | undefined) => {
-    if (token) {
-        const result = verify(token);
-        if (result == 'EXPIRED' || result == 'INVALID') {
-            return {
-                isLogin:false
-            };
-        } else {
-            if (!result.isLogin) {
-                return {
-                    isLogin:false
-                };
-            }
-            return result;
-        }
-    } else {
-        return {
-            isLogin:false
-        };
-    }
-}
 const refreshToken = async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     // 리프레시 토큰이 없으면 무시하고 넘어감
     if (!req.cookies.refreshToken) {
@@ -212,6 +191,5 @@ export {
     sign,
     login,
     verify,
-    check,
     refreshToken
 }

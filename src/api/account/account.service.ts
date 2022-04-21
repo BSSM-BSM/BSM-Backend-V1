@@ -47,11 +47,11 @@ const login = async (
 }
 
 const viewUser = async (
-    usercode: number,
+    user: User,
     viewUsercode: number
 ) => {
     const userInfo = await accountRepository.getByUsercode(viewUsercode);
-    let user: {
+    let viewUser: {
         userType: string,
         usercode: number,
         nickname?: string,
@@ -69,29 +69,29 @@ const viewUser = async (
     };
     if (userInfo === null) {
         if (viewUsercode == 0) {
-            user.userType = "deleted";
+            viewUser.userType = "deleted";
         } else if (viewUsercode == -1) {
-            user.userType = "anonymous";
+            viewUser.userType = "anonymous";
         } else {
-            user.userType = "none";
+            viewUser.userType = "none";
         }
         return {
             user
         };
     }
-    user.userType = "active";
-    user.nickname = userInfo.nickname;
-    user.level = userInfo.level;
-    user.created = userInfo.created;
-    user.enrolled = userInfo.enrolled;
-    user.grade = userInfo.grade;
-    user.classNo = userInfo.classNo;
-    user.studentNo = userInfo.studentNo;
-    user.name = userInfo.name;
-    if (usercode>0 && userInfo.code == usercode) {
-        user.permission = true;
+    viewUser.userType = "active";
+    viewUser.nickname = userInfo.nickname;
+    viewUser.level = userInfo.level;
+    viewUser.created = userInfo.created;
+    viewUser.enrolled = userInfo.enrolled;
+    viewUser.grade = userInfo.grade;
+    viewUser.classNo = userInfo.classNo;
+    viewUser.studentNo = userInfo.studentNo;
+    viewUser.name = userInfo.name;
+    if (user.getUser().code>0 && userInfo.code == user.getUser().code) {
+        viewUser.permission = true;
     } else {
-        user.permission = false;
+        viewUser.permission = false;
     }
     return {
         user
@@ -284,11 +284,22 @@ const findIdMail = async (
 }
 
 const pwEdit = async (
-    res: express.Response, 
-    usercode: number, 
-    userPw: string, 
+    res: express.Response,
+    token: string,
+    userPw: string,
     userPwCheck: string
 ) => {
+    const jwtValue = jwt.verify(token);
+    const user = new User(jwtValue);
+
+    if (jwtValue=='EXPIRED') {
+        throw new UnAuthorizedException('Token expired');
+    }
+    if (!(jwtValue.pwEdit || user.getIsLogin())) {
+        throw new BadRequestException();
+    }
+    const usercode = user.getIsLogin()? user.getUser().code: jwtValue.pwEdit;
+
     if (userPw != userPwCheck) {
         throw new BadRequestException('Password not match');
     }
@@ -342,8 +353,7 @@ const token = async (
         user:payload
     }
 }
-
-module.exports = {
+export {
     login,
     viewUser,
     signUp,

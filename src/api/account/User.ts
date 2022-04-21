@@ -55,6 +55,20 @@ export class User {
         return this.isLogin;
     }
     getUser() {
-        return this.user;
+        if (this.isLogin) {
+            return this.user;
+        } else {
+            return {
+                code: 0,
+                level: -1,
+                id: '',
+                nickname: '',
+                enrolled: 0,
+                grade: 0,
+                classNo: 0,
+                studentNo: 0,
+                name: ''
+            }
+        }
     }
 };
