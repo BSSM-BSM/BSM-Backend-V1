@@ -103,7 +103,7 @@ const signUp = async (
     userPw: string,
     userPwCheck: string,
     userNickname: string,
-    code: string
+    authcode: string
 ) => {
     if (userPw != userPwCheck) {
         throw new BadRequestException('Password not match');
@@ -120,7 +120,7 @@ const signUp = async (
     }
 
     //인증코드로 유저정보를 가져옴
-    const studentInfo = await accountRepository.getStudentByCode(code);
+    const studentInfo = await accountRepository.getStudentByCode(authcode);
     if (studentInfo === null) {
         throw new NotFoundException('Code not found');
     }
@@ -128,7 +128,7 @@ const signUp = async (
         throw new BadRequestException('Code already used');
     }
     
-    await accountRepository.updateCodeAvailable(code, false);
+    await accountRepository.updateCodeAvailable(authcode, false);
     await accountRepository.signUp(
         studentInfo.level,
         userId,
@@ -152,7 +152,7 @@ const profileUpload = async (
     })
 }
 
-const validCodeMail = async (
+const authcodeMail = async (
     studentEnrolled: number,
     studentGrade: number,
     studentClass: number,
@@ -358,7 +358,7 @@ export {
     viewUser,
     signUp,
     profileUpload,
-    validCodeMail,
+    authcodeMail,
     pwResetMail,
     findIdMail,
     pwEdit,

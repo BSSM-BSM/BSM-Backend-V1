@@ -1,17 +1,19 @@
 import express from "express";
 const router = express.Router();
-const service = require('./board.service');
-const jwt = require('../../util/jwt');
+import * as service from './board.service';
+import * as jwt from '../../util/jwt';
+import { User } from "../account/User";
 
 router.get('/board/:boardType', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-    const jwtValue = await jwt.check(req.cookies.token);
+    const user = new User(jwt.verify(req.cookies.token));
+
     try {
         res.send(JSON.stringify(
             await service.viewBoard(
-                jwtValue.isLogin? jwtValue.memberCode: null,
+                user,
                 req.params.boardType,
-                req.query.page,
-                req.query.limit
+                Number(req.query.page),
+                Number(req.query.limit)
             )
         ));
     } catch(err) {

@@ -1,10 +1,32 @@
 import { InternalServerException } from '../../../util/exceptions';
 const pool = require('../../../util/db');
 
-const getBoardType = async () => {
-    const getBoardTypeQuery='SELECT * FROM board';
-    // SELECT * 
-    // FROM board 
+const getBoardType = async (): Promise<[{
+    id: string,
+    name: string,
+    sub_board_id: string,
+    sub_board_name: string,
+    post_level: string,
+    post_public: string,
+    post_anonymous: string,
+    comment_level: string,
+    comment_public: string,
+    comment_anonymous: string
+}] | null> => {
+    const getBoardTypeQuery="SELECT id, name, sub_board_id, sub_board_name, post_level, post_public, post_anonymous, comment_level, comment_public, comment_anonymous, like_level FROM board";
+    // SELECT 
+    //     id, 
+    //     name, 
+    //     sub_board_id, 
+    //     sub_board_name, 
+    //     post_level, 
+    //     post_public, 
+    //     post_anonymous, 
+    //     comment_level, 
+    //     comment_public, 
+    //     comment_anonymous, 
+    //     like_level 
+    // FROM board
     try {
         const [rows] = await pool.query(getBoardTypeQuery);
         if (rows.length)
@@ -17,7 +39,7 @@ const getBoardType = async () => {
     }
 }
 
-const getTotalPosts = async (boardType: string) => {
+const getTotalPosts = async (boardType: string): Promise<number | null> => {
     const totalPostQuery='SELECT COUNT(post_no) FROM post WHERE post_deleted = 0 AND board = ?';
     // SELECT COUNT(post_no) 
     // FROM post 
@@ -36,21 +58,35 @@ const getTotalPosts = async (boardType: string) => {
     }
 }
 
-const getPostsByPage = async (boardType: string, startPage: number, limitPage: number) => {
-    const getBoardQuery='SELECT post_no, post_title, post_comments, member_code, member_nickname, post_date, post_hit, `like` FROM post WHERE post_deleted = 0 AND board = ? ORDER BY post_no DESC LIMIT ?, ?';
+const getPostsByPage = async (
+    boardType: string,
+    startPage: number,
+    limitPage: number
+): Promise<[{
+    postNo: number,
+    title: string,
+    comments: number,
+    usercode: number,
+    nickname: string,
+    date: string,
+    hit: number,
+    like: number
+}] | null> => {
+    const getBoardQuery="SELECT p.post_no postNo, p.post_title title, p.post_comments comments, p.user_code usercode, u.user_nickname nickname, p.post_date date, p.post_hit hit, p.`like` FROM `post` p, `user` u WHERE p.post_deleted = 0 AND p.board = ? AND p.user_code = u.user_code ORDER BY post_no DESC LIMIT ?, ?";
     // SELECT 
-    //     post_no, 
-    //     post_title, 
-    //     post_comments, 
-    //     member_code, 
-    //     member_nickname, 
-    //     post_date, 
-    //     post_hit, 
-    //     `like` 
-    // FROM post 
+    //     p.post_no postNo, 
+    //     p.post_title title, 
+    //     p.post_comments comments, 
+    //     p.user_code usercode, 
+    //     u.user_nickname nickname, 
+    //     p.post_date date, 
+    //     p.post_hit hit, 
+    //     p.`like` 
+    // FROM `post` p, `user` u 
     // WHERE 
-    //     post_deleted = 0 AND
-    //     board = ? 
+    //     p.post_deleted = 0 AND 
+    //     p.board = ? AND 
+    //     p.user_code = u.user_code 
     // ORDER BY post_no DESC LIMIT ?, ?
     try {
         const [rows] = await pool.query(getBoardQuery, [

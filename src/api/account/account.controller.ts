@@ -1,5 +1,5 @@
 import express from 'express';
-import { BadRequestException, InternalServerException, UnAuthorizedException } from '../../util/exceptions';
+import { InternalServerException } from '../../util/exceptions';
 import * as jwt from '../../util/jwt';
 import * as service from './account.service';
 import { User } from './User';
@@ -46,7 +46,7 @@ router.get('/account/islogin', (req: express.Request, res: express.Response) => 
     }
 })
 
-router.post('/account/signUp', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/account', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.signUp(
@@ -54,7 +54,7 @@ router.post('/account/signUp', async (req: express.Request, res: express.Respons
                 req.body.pw,
                 req.body.pw_check,
                 req.body.nickname,
-                req.body.auth_code
+                req.body.authcode
             )
         ));
     } catch(err) {
@@ -73,10 +73,16 @@ router.get('/account/:usercode', async (req: express.Request, res: express.Respo
     }
 })
 
-router.post('/account/authcode', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/account/mail/authcode', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
-            await service.validCodeMail(req.body.student_enrolled, req.body.student_grade, req.body.student_class, req.body.student_no, req.body.student_name)
+            await service.authcodeMail(
+                req.body.student_enrolled,
+                req.body.student_grade,
+                req.body.student_class,
+                req.body.student_no,
+                req.body.student_name
+            )
         ));
     } catch(err) {
         next(err);
@@ -96,7 +102,13 @@ router.post('/account/mail/pw', async (req: express.Request, res: express.Respon
 router.post('/account/mail/id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
-            await service.findIdMail(req.body.student_enrolled, req.body.student_grade, req.body.student_class, req.body.student_no, req.body.student_name)
+            await service.findIdMail(
+                req.body.student_enrolled,
+                req.body.student_grade,
+                req.body.student_class,
+                req.body.student_no,
+                req.body.student_name
+            )
         ));
     } catch(err) {
         next(err);
@@ -106,7 +118,12 @@ router.post('/account/mail/id', async (req: express.Request, res: express.Respon
 router.put('/account/pw', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
-            await service.pwEdit(res, req.cookies.token, req.body.pw, req.body.pw_check)
+            await service.pwEdit(
+                res,
+                req.cookies.token,
+                req.body.pw,
+                req.body.pw_check
+            )
         ));
     } catch(err) {
         next(err);
@@ -149,4 +166,4 @@ router.post('/account/profile',
     }
 )
 
-export default router;
+export = router;
