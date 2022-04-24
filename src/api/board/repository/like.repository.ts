@@ -1,22 +1,26 @@
 import { InternalServerException } from '../../../util/exceptions';
 const pool = require('../../../util/db');
 
-const getPostLikeByMemberCode = async (boardType: string, postNo: number, memberCode: number) => {
-    const getLikeQuery='SELECT `like` FROM post_like WHERE post_no = ? AND member_code = ? AND board = ?';
+const getByUsercode = async (
+    boardType: string,
+    postNo: number,
+    usercode: number
+): Promise<boolean | null> => {
+    const getQuery="SELECT `like` FROM post_like WHERE post_no = ? AND usercode = ? AND board = ?";
     // SELECT `like` 
     // FROM post_like 
     // WHERE 
     //     post_no = ? AND 
-    //     member_code = ? AND 
+    //     usercode = ? AND 
     //     board = ?
     try {
-        const [rows] = await pool.query(getLikeQuery, [
+        const [rows] = await pool.query(getQuery, [
             postNo, 
-            memberCode, 
+            usercode, 
             boardType
         ]);
         if (rows.length)
-            return rows[0].like;
+            return Boolean(rows[0].like);
         else
             return null;
     } catch(err) {
@@ -25,23 +29,28 @@ const getPostLikeByMemberCode = async (boardType: string, postNo: number, member
     }
 }
 
-const insertPostLike = async (boardType: string, postNo: number, like: number, memberCode: number) => {
-    const insertPostLikeQuery='INSERT INTO post_like (board, post_no, `like`, member_code) values (?, ?, ?, ?)';
+const insertPostLike = async (
+    boardType: string,
+    postNo: number,
+    like: number,
+    usercode: number
+) => {
+    const insertQuery="INSERT INTO post_like (board, post_no, `like`, usercode) values (?, ?, ?, ?)";
     // INSERT INTO post_like (
     //     board, 
     //     post_no, 
     //     `like`, 
-    //     member_code) 
+    //     usercode) 
     // values (
     //     ?, 
     //     ?, 
     //     ?)
     try {
-        await pool.query(insertPostLikeQuery, [
+        await pool.query(insertQuery, [
             boardType, 
             postNo, 
             like, 
-            memberCode
+            usercode
         ]);
     } catch(err) {
         console.error(err);
@@ -49,18 +58,23 @@ const insertPostLike = async (boardType: string, postNo: number, like: number, m
     }
 }
 
-const updatePostLike = async (boardType: string, postNo: number, like: number, memberCode: number) => {
-    const updatePostLikeQuery='UPDATE post_like SET `like`=? WHERE post_no = ? AND member_code = ? AND board = ?';
+const updatePostLike = async (
+    boardType: string,
+    postNo: number,
+    like: number,
+    usercode: number
+) => {
+    const updateQuery="UPDATE post_like SET `like`=? WHERE post_no = ? AND usercode = ? AND board = ?";
     // UPDATE ?? 
     // SET `like` = ? 
     // WHERE post_no = ? AND 
-    // member_code = ? AND 
+    // usercode = ? AND 
     // board = ?
     try {
-        await pool.query(updatePostLikeQuery, [
+        await pool.query(updateQuery, [
             like, 
             postNo, 
-            memberCode, 
+            usercode, 
             boardType
         ]);
     } catch(err) {
@@ -69,8 +83,8 @@ const updatePostLike = async (boardType: string, postNo: number, like: number, m
     }
 }
 
-module.exports = {
-    getPostLikeByMemberCode,
+export {
+    getByUsercode,
     insertPostLike,
     updatePostLike
 }

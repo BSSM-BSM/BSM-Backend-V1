@@ -1,23 +1,25 @@
-const { NotFoundException, UnAuthorizedException, ForbiddenException } = require('../../util/exceptions');
-const boardRepository = require('./repository/board.repository');
-const postRepository = require('./repository/post.repository');
-const likeRepository = require('./repository/like.repository');
+import { NotFoundException, UnAuthorizedException, ForbiddenException } from '../../util/exceptions';
+import { User } from '../account/User';
+import * as boardRepository from './repository/board.repository';
+import * as postRepository from './repository/post.repository';
+import * as likeRepository from './repository/like.repository';
+
 const webpush = require('../../util/push');
-const js_xss = require('xss');
-const xss = new js_xss.FilterXSS({
+import { escapeAttrValue, FilterXSS } from 'xss';
+const xss = new FilterXSS({
     onIgnoreTagAttr:(tag, name, value, isWhiteAttr) => {
         if (name.substr(0, 5) === "style") {
-            return name + '="' + js_xss.escapeAttrValue(value) + '"';
+            return name + '="' + escapeAttrValue(value) + '"';
         }
         if (tag.substr(0, 3)==="img") {
             if (name.substr(0, 4) === "e_id") {
-                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+                return name + '="' + escapeAttrValue(value) + '"';
             }
             if (name.substr(0, 5) === "e_idx") {
-                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+                return name + '="' + escapeAttrValue(value) + '"';
             }
             if (name.substr(0, 6) === "e_type") {
-                return name + '="' + js_xss.escapeAttrValue(value) + '"';
+                return name + '="' + escapeAttrValue(value) + '"';
             }
         }
     },
@@ -28,68 +30,77 @@ const xss = new js_xss.FilterXSS({
     }
 });
 
-let boardTypeList = {};
+let boardTypeList: {
+    [index: string]: {
+        anonymous: boolean,
+        public: boolean,
+        level: number
+    }
+} = {};
 const getBoardType = async () => {
     const boardTypeInfo = await boardRepository.getBoardType();
+    if (boardTypeInfo === null) {
+        return;
+    }
     boardTypeInfo.forEach(e => {
         boardTypeList[e.id] = {
-            anonymous: e.post_anonymous,
-            public: e.post_public,
-            level: e.post_level
+            anonymous: Boolean(e.post_anonymous),
+            public: Boolean(e.post_public),
+            level: Number(e.post_level)
         }
     });
 }
 getBoardType();
 
 const viewPost = async (
-    memberCode,
-    memberLevel,
-    boardType,
-    postNo
+    user: User,
+    boardType: string,
+    postNo: number
 ) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException();
     }
-    if (boardTypeList[boardType].public == false && memberCode === null) {
+    if (boardTypeList[boardType].public == false && !user.getIsLogin()) {
         throw new UnAuthorizedException();
     }
     const isAnonymous = boardTypeList[boardType].anonymous;
 
     const [postInfo, likeInfo] = await Promise.all([
-        postRepository.getPostByCode(boardType, postNo),
-        likeRepository.getPostLikeByMemberCode(boardType, postNo, memberCode)
+        postRepository.getPost(boardType, postNo),
+        user.getIsLogin()? likeRepository.getByUsercode(boardType, postNo, user.getUser().code): null
     ]);
-    if (postInfo === null) {
-        throw new NotFoundException();
-    }
-    if (postInfo.post_deleted) {
+    if (postInfo === null || postInfo.deleted) {
         throw new NotFoundException();
     }
 
     postRepository.updatePostHit(boardType, postNo);
-    const result = {
-        postTitle:postInfo.post_title,
-        postComments:postInfo.post_comments,
-        postContent:postInfo.post_content,
-        memberCode:postInfo.member_code,
-        memberNickname:postInfo.member_nickname,
-        postDate:postInfo.post_date,
-        postHit:postInfo.post_hit,
-        postLike:postInfo.like,
+    let result: {
+        usercode: number,
+        nickname: string,
+        title: string,
+        content: string,
+        date: string,
+        hit: number,
+        comments: number,
+        totalLike: number,
+        permission: boolean,
+        like: boolean
+    } = {
+        ...postInfo,
         permission:false,
         like:false
     }
     if (likeInfo !== null) {
         result.like = likeInfo;
     }
-    if (memberCode>0 && postInfo.member_code===memberCode || memberLevel>=3) {
-        result.permission=true;
+    if (user.getIsLogin() && postInfo.usercode == user.getUser().code || user.getUser().level >= 3) {
+        result.permission = true;
     } else {
-        result.permission=false;
+        result.permission = false;
     }
     if (isAnonymous) {
-        result.memberCode=-1;
-        result.memberNickname='ㅇㅇ';
+        result.usercode = -1;
+        result.nickname = 'ㅇㅇ';
     }
     return {
         post:result
@@ -147,7 +158,7 @@ const updatePost = async (
         throw new ForbiddenException();
     }
     
-    await postRepository.updatePost(boardType, postTitle, xss.process(postContent), postNo);
+    await postRepository.updatePost(boardType, postNo, postTitle, xss.process(postContent));
 }
 
 const deletePost = async (memberCode, memberLevel, boardType, postNo) => {

@@ -40,11 +40,11 @@ const getBoardType = async (): Promise<[{
 }
 
 const getTotalPosts = async (boardType: string): Promise<number | null> => {
-    const totalPostQuery='SELECT COUNT(post_no) FROM post WHERE post_deleted = 0 AND board = ?';
+    const totalPostQuery='SELECT COUNT(post_no) FROM post WHERE deleted = 0 AND board = ?';
     // SELECT COUNT(post_no) 
     // FROM post 
     // WHERE 
-    //     post_deleted = 0 AND
+    //     deleted = 0 AND
     //     board = ?
     try {
         const [rows] = await pool.query(totalPostQuery, [boardType]);
@@ -70,23 +70,23 @@ const getPostsByPage = async (
     nickname: string,
     date: string,
     hit: number,
-    like: number
+    totalLike: number
 }] | null> => {
-    const getBoardQuery="SELECT p.post_no postNo, p.post_title title, p.post_comments comments, p.user_code usercode, u.user_nickname nickname, p.post_date date, p.post_hit hit, p.`like` FROM `post` p, `user` u WHERE p.post_deleted = 0 AND p.board = ? AND p.user_code = u.user_code ORDER BY post_no DESC LIMIT ?, ?";
+    const getBoardQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
     // SELECT 
     //     p.post_no postNo, 
-    //     p.post_title title, 
-    //     p.post_comments comments, 
-    //     p.user_code usercode, 
-    //     u.user_nickname nickname, 
-    //     p.post_date date, 
-    //     p.post_hit hit, 
-    //     p.`like` 
-    // FROM `post` p, `user` u 
+    //     p.title, 
+    //     p.comments, 
+    //     p.usercode, 
+    //     u.nickname, 
+    //     p.date, 
+    //     p.hit, 
+    //     p.total_like totalLike 
+    // FROM post p, user u 
     // WHERE 
-    //     p.post_deleted = 0 AND 
+    //     p.deleted = 0 AND 
     //     p.board = ? AND 
-    //     p.user_code = u.user_code 
+    //     p.usercode = u.usercode 
     // ORDER BY post_no DESC LIMIT ?, ?
     try {
         const [rows] = await pool.query(getBoardQuery, [

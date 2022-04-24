@@ -1,16 +1,36 @@
 import { InternalServerException } from '../../../util/exceptions';
 const pool = require('../../../util/db');
 
-const getPostByCode = async (
+const getPost = async (
     boardType: string,
     postNo: number
-) => {
-    const getPostQuery='SELECT * FROM post WHERE post_no = ? AND board = ?';
-    // SELECT * 
-    // FROM post 
+): Promise<{
+    deleted: Boolean,
+    usercode: number,
+    nickname: string,
+    title: string,
+    content: string,
+    date: string,
+    hit: number,
+    comments: number,
+    totalLike: number
+} | null> => {
+    const getPostQuery="SELECT p.deleted, p.user_code usercode, u.user_nickname nickname, p.title, p.content, p.date, p.hit, p.comments, p.total_like totalLike FROM post p, user u WHERE p.post_no = ? AND p.board = ? AND p.user_code = u.user_code";
+    // SELECT 
+    //     p.deleted, 
+    //     p.user_code usercode, 
+    //     u.user_nickname nickname, 
+    //     p.title, 
+    //     p.content, 
+    //     p.date, 
+    //     p.hit, 
+    //     p.comments, 
+    //     p.total_like totalLike 
+    // FROM post p, user u 
     // WHERE 
-    //     post_no = ? AND
-    //     board = ?
+    //     p.post_no = ? AND 
+    //     p.board = ? AND 
+    //     p.user_code = u.user_code
     try {
         const [rows] = await pool.query(getPostQuery, [
             postNo,
@@ -26,23 +46,23 @@ const getPostByCode = async (
     }
 }
 
-const getMemberCodeFromPost = async (
+const getUsercode = async (
     boardType: string,
     postNo: number
-) => {
-    const getPostQuery='SELECT member_code FROM post WHERE post_no = ? AND board = ?';
-    // SELECT member_code 
+): Promise<number | null> => {
+    const getQuery='SELECT user_code usercode FROM post WHERE post_no = ? AND board = ?';
+    // SELECT user_code usercode 
     // FROM post 
     // WHERE 
     //     post_no = ? AND
     //     board = ?
     try {
-        const [rows] = await pool.query(getPostQuery, [
+        const [rows] = await pool.query(getPost, [
             postNo,
             boardType
         ]);
         if (rows.length)
-            return rows[0].member_code;
+            return Number(rows[0].usercode);
         else
             return null;
     } catch(err) {
@@ -53,37 +73,33 @@ const getMemberCodeFromPost = async (
 
 const insertPost = async (
     boardType: string,
-    memberCode: number,
-    memberNickname: string,
-    postTitle :string,
-    postContent: string
+    usercode: number,
+    title :string,
+    content: string
 ) => {
-    const insertPostQuery='INSERT INTO post (board, post_no, member_code, member_nickname, post_title, post_content, post_date) SELECT ?, COUNT(post_no)+1, ?, ?, ?, ?, now() FROM post WHERE board = ?';
+    const insertQuery="INSERT INTO post (board,post_no, user_code, title, content, date) SELECT ?, COUNT(post_no)+1, ?, ?, ?, now() FROM post WHERE board = ?";
     // INSERT INTO post (
     //     board,
     //     post_no, 
-    //     member_code, 
-    //     member_nickname, 
-    //     post_title, 
-    //     post_content, 
-    //     post_date) 
+    //     user_code, 
+    //     title, 
+    //     content, 
+    //     date) 
     // SELECT 
     //     ?, 
     //     COUNT(post_no)+1, 
     //     ?, 
     //     ?, 
     //     ?, 
-    //     ?, 
-    //     now()
-    // FROM post
+    //     now() 
+    // FROM post 
     // WHERE board = ?
     try {
-        await pool.query(insertPostQuery, [
+        await pool.query(insertQuery, [
             boardType,
-            memberCode,
-            memberNickname,
-            postTitle,
-            postContent,
+            usercode,
+            title,
+            content,
             boardType
         ]);
     } catch(err) {
@@ -94,22 +110,22 @@ const insertPost = async (
 
 const updatePost = async (
     boardType: string,
-    postTitle :string,
-    postContent: string,
-    postNo: number
+    postNo: number,
+    title :string,
+    content: string
 ) => {
-    const updatePostQuery='UPDATE post SET post_title = ?, post_content = ? WHERE post_no = ? AND board = ?';
+    const updateQuery="UPDATE post SET title = ?, content = ? WHERE post_no = ? AND board = ?";
     // UPDATE post 
     // SET 
-    //     post_title = ?, 
-    //     post_content = ? 
+    //     title = ?, 
+    //     content = ? 
     // WHERE 
     //     post_no = ? AND 
     //     board = ?
     try {
-        await pool.query(updatePostQuery, [
-            postTitle,
-            postContent,
+        await pool.query(updateQuery, [
+            title,
+            content,
             postNo,
             boardType
         ]);
@@ -123,13 +139,13 @@ const updatePostHit = (
     boardType: string,
     postNo: number
 ) => {
-    const updatePostQuery='UPDATE post SET post_hit = post_hit+1 WHERE post_no=? AND board = ?';
+    const updateQuery="UPDATE post SET hit = hit+1 WHERE post_no = ? AND board = ?";
     // UPDATE post 
-    // SET post_hit = post_hit+1 
-    // WHERE post_no=? AND
+    // SET hit = hit+1 
+    // WHERE post_no = ? AND 
     // board = ?
     try {
-        pool.query(updatePostQuery, [
+        pool.query(updateQuery, [
             postNo,
             boardType
         ]);
@@ -144,13 +160,13 @@ const updatePostComments = (
     postNo: number,
     commentCount: number
 ) => {
-    const updatePostQuery='UPDATE post SET post_comments = post_comments+? WHERE post_no = ? AND board = ?';
+    const updateQuery='UPDATE post SET comments = comments+? WHERE post_no = ? AND board = ?';
     // UPDATE post 
-    // SET post_comments = post_comments+? 
-    // WHERE post_no = ? AND
+    // SET comments = comments+? 
+    // WHERE post_no = ? AND 
     // board = ?
     try {
-        pool.query(updatePostQuery, [
+        pool.query(updateQuery, [
             commentCount, 
             postNo,
             boardType
@@ -165,13 +181,13 @@ const deletePost = async (
     boardType: string,
     postNo: number
 ) => {
-    const deletePostQuery='UPDATE post SET post_deleted = 1 WHERE post_no = ? AND board = ?';
+    const deleteQuery='UPDATE post SET deleted = 1 WHERE post_no = ? AND board = ?';
     // UPDATE post 
-    // SET post_deleted = 1 
+    // SET deleted = 1 
     // WHERE post_no = ? AND
     // board = ?
     try {
-        await pool.query(deletePostQuery, [
+        await pool.query(deleteQuery, [
             postNo,
             boardType
         ]);
@@ -181,9 +197,12 @@ const deletePost = async (
     }
 }
 
-const getPostTotalLike = async (boardType: string, postNo: number) => {
-    const getPostLikeQuery='SELECT `like` FROM post WHERE post_no = ? AND board = ?';
-    // SELECT `like` 
+const getPostTotalLike = async (
+    boardType: string,
+    postNo: number
+): Promise<number | null> => {
+    const getPostLikeQuery='SELECT total_like totalLike FROM post WHERE post_no = ? AND board = ?';
+    // SELECT total_like totalLike 
     // FROM post 
     // WHERE post_no = ? AND
     // board = ?
@@ -193,7 +212,7 @@ const getPostTotalLike = async (boardType: string, postNo: number) => {
             boardType
         ]);
         if (rows.length)
-            return rows[0].like;
+            return rows[0].totalLike;
         else
             return null;
     } catch(err) {
@@ -202,15 +221,19 @@ const getPostTotalLike = async (boardType: string, postNo: number) => {
     }
 }
 
-const updatePostTotalLike = async (boardType: string, postNo: number, like: number) => {
-    const updaetPostTotalLikeQuery='UPDATE post SET `like`=`like`+? WHERE `post_no`=? AND board = ?';
+const updatePostTotalLike = async (
+    boardType: string,
+    postNo: number,
+    like: number
+) => {
+    const updateQuery="UPDATE post SET total_like = total_like+? WHERE post_no = ? AND board = ?";
     // UPDATE post 
-    // SET `like`=`like`+? 
+    // SET total_like = total_like+? 
     // WHERE 
-    //     `post_no`=? 
-    //     AND board = ?
+    //     post_no = ? AND 
+    //     board = ?
     try {
-        await pool.query(updaetPostTotalLikeQuery, [
+        await pool.query(updateQuery, [
             like, 
             postNo,
             boardType
@@ -221,9 +244,9 @@ const updatePostTotalLike = async (boardType: string, postNo: number, like: numb
     }
 }
 
-module.exports = {
-    getPostByCode,
-    getMemberCodeFromPost,
+export {
+    getPost,
+    getUsercode,
     insertPost,
     updatePost,
     updatePostHit,
