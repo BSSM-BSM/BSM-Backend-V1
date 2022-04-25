@@ -8,7 +8,7 @@ import { StudentEntity } from './entity/student.entity';
 const getById = async (
     id: string
 ): Promise<UserEntity | null> => {
-    const getQuery="SELECT u.usercode code, u.level, u.id, u.pw, u.pw_salt 'pwSalt', u.nickname, u.created, u.uniq_no 'uniqNo', s.enrolled,s.grade, s.class_no 'classNo', s.student_no 'studentNo', s.name, s.email FROM `user` u, `student` s WHERE u.user_id = ? AND s.uniq_no = u.uniq_no";
+    const getQuery="SELECT u.usercode code, u.level, u.id, u.pw, u.pw_salt 'pwSalt', u.nickname, u.created, u.uniq_no 'uniqNo', s.enrolled,s.grade, s.class_no 'classNo', s.student_no 'studentNo', s.name, s.email FROM `user` u, `student` s WHERE u.id = ? AND s.uniq_no = u.uniq_no";
     // SELECT 
     //     u.usercode code, 
     //     u.level, 
@@ -26,7 +26,7 @@ const getById = async (
     //     s.email 
     // FROM `user` u, `student` s 
     // WHERE 
-    //     u.user_id = ? AND 
+    //     u.id = ? AND 
     //     s.uniq_no = u.uniq_no
     try {
         const [rows] = await pool.query(getQuery, [id]);

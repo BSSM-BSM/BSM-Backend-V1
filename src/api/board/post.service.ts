@@ -72,6 +72,7 @@ const viewPost = async (
     if (postInfo === null || postInfo.deleted) {
         throw new NotFoundException();
     }
+    delete postInfo.deleted;
 
     postRepository.updatePostHit(boardType, postNo);
     let result: {
@@ -84,11 +85,11 @@ const viewPost = async (
         comments: number,
         totalLike: number,
         permission: boolean,
-        like: boolean
+        like: number
     } = {
         ...postInfo,
-        permission:false,
-        like:false
+        permission: false,
+        like: 0
     }
     if (likeInfo !== null) {
         result.like = likeInfo;
@@ -108,78 +109,79 @@ const viewPost = async (
 }
 
 const writePost = async (
-    memberCode,
-    memberLevel,
-    memberNickname,
-    boardType,
-    postTitle,
-    postContent
+    user: User,
+    boardType: string,
+    title: string,
+    content: string
 ) => {
-    if (memberCode === null) {
+    if (!user.getIsLogin()) {
         throw new UnAuthorizedException();
     }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
-    if (boardTypeList[boardType].level > memberLevel) {
+    if (boardTypeList[boardType].level > user.getUser().level) {
         throw new ForbiddenException();
     }
 
-	await postRepository.insertPost(boardType, memberCode, memberNickname, postTitle, xss.process(postContent));
+	await postRepository.insertPost(boardType, user.getUser().code, title, xss.process(content));
     if (boardType == 'notice') {
         const payload = JSON.stringify({
-            title:"새로운 공지사항이 있습니다",
-            body:postTitle,
-            link:"/board/notice"
+            title: '새로운 공지사항이 있습니다',
+            body: title,
+            link: '/board/notice'
         })
         webpush.push(payload, 'all');
     }
 }
 
 const updatePost = async (
-    memberCode,
-    memberLevel,
-    boardType,
-    postNo,
-    postTitle,
-    postContent
+    user: User,
+    boardType: string,
+    postNo: number,
+    title: string,
+    content: string
 ) => {
-    if (memberCode === null) {
+    if (!user.getIsLogin()) {
         throw new UnAuthorizedException();
     }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
-    const postMemberCode = await postRepository.getMemberCodeFromPost(boardType, postNo);
-    if (postMemberCode === null) {
+    const postUsercode = await postRepository.getUsercode(boardType, postNo);
+    if (postUsercode === null) {
         throw new NotFoundException('Post not Found');
     }
-    if (!(postMemberCode == memberCode || memberLevel>=3)) {
+    if (!(postUsercode == user.getUser().code || user.getUser().level >= 3)) {
         throw new ForbiddenException();
     }
     
-    await postRepository.updatePost(boardType, postNo, postTitle, xss.process(postContent));
+    await postRepository.updatePost(boardType, postNo, title, xss.process(content));
 }
 
-const deletePost = async (memberCode, memberLevel, boardType, postNo) => {
-    if (memberCode === null) {
+const deletePost = async (
+    user: User,
+    boardType: string,
+    postNo: number
+) => {
+    if (!user.getIsLogin()) {
         throw new UnAuthorizedException();
     }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
-    const postMemberCode = await postRepository.getMemberCodeFromPost(boardType, postNo);
-    if (postMemberCode === null) {
+    const postUsercode = await postRepository.getUsercode(boardType, postNo);
+    if (postUsercode === null) {
         throw new NotFoundException('Post not Found');
     }
-    if (!(postMemberCode == memberCode || memberLevel>=3)) {
+    if (!(postUsercode == user.getUser().code || user.getUser().level >= 3)) {
         throw new ForbiddenException();
     }
 
     await postRepository.deletePost(boardType, postNo);
 }
 
-module.exports = {
+export {
     viewPost,
     writePost,
     updatePost,

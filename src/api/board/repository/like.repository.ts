@@ -5,7 +5,7 @@ const getByUsercode = async (
     boardType: string,
     postNo: number,
     usercode: number
-): Promise<boolean | null> => {
+): Promise<number | null> => {
     const getQuery="SELECT `like` FROM post_like WHERE post_no = ? AND usercode = ? AND board = ?";
     // SELECT `like` 
     // FROM post_like 
@@ -20,7 +20,7 @@ const getByUsercode = async (
             boardType
         ]);
         if (rows.length)
-            return Boolean(rows[0].like);
+            return rows[0].like;
         else
             return null;
     } catch(err) {

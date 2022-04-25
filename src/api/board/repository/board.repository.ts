@@ -11,7 +11,8 @@ const getBoardType = async (): Promise<[{
     post_anonymous: string,
     comment_level: string,
     comment_public: string,
-    comment_anonymous: string
+    comment_anonymous: string,
+    like_level: string
 }] | null> => {
     const getBoardTypeQuery="SELECT id, name, sub_board_id, sub_board_name, post_level, post_public, post_anonymous, comment_level, comment_public, comment_anonymous, like_level FROM board";
     // SELECT 

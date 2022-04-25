@@ -5,7 +5,7 @@ const getPost = async (
     boardType: string,
     postNo: number
 ): Promise<{
-    deleted: Boolean,
+    deleted?: Boolean,
     usercode: number,
     nickname: string,
     title: string,
@@ -15,11 +15,11 @@ const getPost = async (
     comments: number,
     totalLike: number
 } | null> => {
-    const getPostQuery="SELECT p.deleted, p.user_code usercode, u.user_nickname nickname, p.title, p.content, p.date, p.hit, p.comments, p.total_like totalLike FROM post p, user u WHERE p.post_no = ? AND p.board = ? AND p.user_code = u.user_code";
+    const getPostQuery="SELECT p.deleted, p.usercode, u.nickname, p.title, p.content, p.date, p.hit, p.comments, p.total_like totalLike FROM post p, user u WHERE p.post_no = ? AND p.board = ? AND p.usercode = u.usercode";
     // SELECT 
     //     p.deleted, 
-    //     p.user_code usercode, 
-    //     u.user_nickname nickname, 
+    //     p.usercode, 
+    //     u.nickname, 
     //     p.title, 
     //     p.content, 
     //     p.date, 
@@ -30,7 +30,7 @@ const getPost = async (
     // WHERE 
     //     p.post_no = ? AND 
     //     p.board = ? AND 
-    //     p.user_code = u.user_code
+    //     p.usercode = u.usercode
     try {
         const [rows] = await pool.query(getPostQuery, [
             postNo,
@@ -50,14 +50,14 @@ const getUsercode = async (
     boardType: string,
     postNo: number
 ): Promise<number | null> => {
-    const getQuery='SELECT user_code usercode FROM post WHERE post_no = ? AND board = ?';
-    // SELECT user_code usercode 
+    const getQuery='SELECT usercode FROM post WHERE post_no = ? AND board = ?';
+    // SELECT usercode 
     // FROM post 
     // WHERE 
     //     post_no = ? AND
     //     board = ?
     try {
-        const [rows] = await pool.query(getPost, [
+        const [rows] = await pool.query(getQuery, [
             postNo,
             boardType
         ]);
@@ -160,7 +160,7 @@ const updatePostComments = (
     postNo: number,
     commentCount: number
 ) => {
-    const updateQuery='UPDATE post SET comments = comments+? WHERE post_no = ? AND board = ?';
+    const updateQuery="UPDATE post SET comments = comments+? WHERE post_no = ? AND board = ?";
     // UPDATE post 
     // SET comments = comments+? 
     // WHERE post_no = ? AND 
@@ -181,7 +181,7 @@ const deletePost = async (
     boardType: string,
     postNo: number
 ) => {
-    const deleteQuery='UPDATE post SET deleted = 1 WHERE post_no = ? AND board = ?';
+    const deleteQuery="UPDATE post SET deleted = 1 WHERE post_no = ? AND board = ?";
     // UPDATE post 
     // SET deleted = 1 
     // WHERE post_no = ? AND
@@ -201,7 +201,7 @@ const getPostTotalLike = async (
     boardType: string,
     postNo: number
 ): Promise<number | null> => {
-    const getPostLikeQuery='SELECT total_like totalLike FROM post WHERE post_no = ? AND board = ?';
+    const getPostLikeQuery="SELECT total_like totalLike FROM post WHERE post_no = ? AND board = ?";
     // SELECT total_like totalLike 
     // FROM post 
     // WHERE post_no = ? AND
