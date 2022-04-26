@@ -3,6 +3,7 @@ import { InternalServerException } from '../../util/exceptions';
 import * as jwt from '../../util/jwt';
 import * as service from './account.service';
 import { User } from './User';
+import loginCheck from '../../util/loginCheck';
 
 const router = express.Router();
 const multer = require('multer');
@@ -62,16 +63,19 @@ router.post('/account', async (req: express.Request, res: express.Response, next
     }
 })
 
-router.get('/account/:usercode', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
-    try {
-        res.send(JSON.stringify(
-            await service.viewUser(user, Number(req.params.usercode))
-        ));
-    } catch(err) {
-        next(err);
+router.get('/account/:usercode',
+    loginCheck,
+    async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const user = new User(jwt.verify(req.cookies.token));
+        try {
+            res.send(JSON.stringify(
+                await service.viewUser(user, Number(req.params.usercode))
+            ));
+        } catch(err) {
+            next(err);
+        }
     }
-})
+)
 
 router.post('/account/mail/authcode', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
@@ -141,6 +145,7 @@ router.post('/account/token', async (req: express.Request, res: express.Response
 })
 
 router.post('/account/profile',
+    loginCheck,
     multer({
         storage:multer.diskStorage({
             destination:(req: express.Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {

@@ -114,9 +114,6 @@ const writePost = async (
     title: string,
     content: string
 ) => {
-    if (!user.getIsLogin()) {
-        throw new UnAuthorizedException();
-    }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
@@ -142,9 +139,6 @@ const updatePost = async (
     title: string,
     content: string
 ) => {
-    if (!user.getIsLogin()) {
-        throw new UnAuthorizedException();
-    }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }
@@ -164,9 +158,6 @@ const deletePost = async (
     boardType: string,
     postNo: number
 ) => {
-    if (!user.getIsLogin()) {
-        throw new UnAuthorizedException();
-    }
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
     }

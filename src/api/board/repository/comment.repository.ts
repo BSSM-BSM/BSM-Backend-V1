@@ -1,16 +1,30 @@
 import { InternalServerException } from '../../../util/exceptions';
+import { CommentEntity } from '../entity/comment.entity';
 const pool = require('../../../util/db');
 
-const getComments = async (boardType: string, postNo: number) => {
-    const getCommentsQuery='SELECT * FROM post_comment WHERE board = ? AND post_no = ? ORDER BY comment_index';
-    // SELECT * 
-    // FROM post_comment 
+const getComments = async (
+    boardType: string,
+    postNo: number
+): Promise<CommentEntity[] | null> => {
+    const getQuery="SELECT p.idx, p.usercode, u.nickname, p.`depth`, p.parent, p.parent_idx, p.deleted, p.comment, p.`date` FROM post_comment p, user u WHERE p.board = ? AND p.post_no = ? AND p.usercode = u.usercode ORDER BY p.idx";
+    // SELECT 
+    //     p.idx, 
+    //     p.usercode, 
+    //     u.nickname, 
+    //     p.`depth`, 
+    //     p.parent, 
+    //     p.parent_idx, 
+    //     p.deleted, 
+    //     p.comment, 
+    //     p.`date` 
+    // FROM post_comment p, user u 
     // WHERE 
-    //     board = ? AND
-    //     post_no = ? 
-    // ORDER BY comment_index
+    //     p.board = ? AND 
+    //     p.post_no = ? AND 
+    //     p.usercode = u.usercode 
+    // ORDER BY p.idx
     try {
-        const [rows] = await pool.query(getCommentsQuery, [
+        const [rows] = await pool.query(getQuery, [
             boardType,
             postNo
         ]);
@@ -24,15 +38,30 @@ const getComments = async (boardType: string, postNo: number) => {
     }
 }
 
-const getComment = async (boardType: string, postNo: number, idx: number) => {
-    const getCommentQuery='SELECT * FROM post_comment WHERE board = ? AND post_no = ? AND comment_index = ? AND comment_deleted = 0';
-    // SELECT * 
-    // FROM post_comment 
+const getComment = async (
+    boardType: string,
+    postNo: number,
+    idx: number
+): Promise<CommentEntity | null> => {
+    const getCommentQuery="SELECT p.idx, p.usercode, u.nickname, p.`depth`, p.parent, p.parent_idx, p.deleted, p.comment, p.`date` FROM post_comment p, user u WHERE p.board = ? AND p.post_no = ? AND p.idx = ? AND p.deleted = 0 AND p.usercode = u.usercode ORDER BY p.idx";
+    // SELECT 
+    //     p.idx, 
+    //     p.usercode, 
+    //     u.nickname, 
+    //     p.`depth`, 
+    //     p.parent, 
+    //     p.parent_idx, 
+    //     p.deleted, 
+    //     p.comment, 
+    //     p.`date` 
+    // FROM post_comment p, user u 
     // WHERE 
-    //     board = ? AND 
-    //     post_no = ? AND 
-    //     comment_index = ? AND 
-    //     comment_deleted = 0
+    //     p.board = ? AND 
+    //     p.post_no = ? AND 
+    //     p.idx = ? AND 
+    //     p.deleted = 0 AND 
+    //     p.usercode = u.usercode 
+    // ORDER BY p.idx
     try {
         const [rows] = await pool.query(getCommentQuery, [
             boardType, 
@@ -53,27 +82,24 @@ const insertComment = async (
     boardType: string,
     postNo: number,
     depth: number,
-    parentIdx: number,
-    memberCode: number,
-    memberNickname: number,
+    parentIdx: number | null,
+    usercode: number,
     comment: string
 ) => {
-    const insertCommentQuery='INSERT INTO post_comment (board, post_no, comment_index, depth, parent_idx, member_code, member_nickname, comment, comment_date) SELECT ?,?, COUNT(comment_index)+1, ?, ?, ?, ?, ?, now() FROM post_comment WHERE board = ?';
+    const insertCommentQuery="INSERT INTO post_comment (board, post_no, idx, depth, parent_idx, usercode, comment, date) SELECT ?,?, COUNT(idx)+1, ?, ?, ?, ?, now() FROM post_comment WHERE board = ?";
     // INSERT INTO post_comment (
     //     board, 
     //     post_no, 
-    //     comment_index, 
+    //     idx, 
     //     depth, 
     //     parent_idx, 
-    //     member_code, 
-    //     member_nickname, 
+    //     usercode, 
     //     comment, 
-    //     comment_date) 
+    //     date) 
     // SELECT 
     //     ?,
     //     ?, 
-    //     COUNT(comment_index)+1, 
-    //     ?, 
+    //     COUNT(idx)+1, 
     //     ?, 
     //     ?, 
     //     ?, 
@@ -87,8 +113,7 @@ const insertComment = async (
             postNo, 
             depth, 
             parentIdx, 
-            memberCode, 
-            memberNickname, 
+            usercode, 
             comment,
             boardType
         ]);
@@ -98,15 +123,18 @@ const insertComment = async (
     }
 }
 
-const updateParentComment = async (boardType: string, idx: number) => {
-    const updateParentCommentQuery='UPDATE post_comment SET `parent` = 1 WHERE board = ? AND comment_index = ?';
+const updateParentComment = async (
+    boardType: string,
+    idx: number
+) => {
+    const updateParentQuery="UPDATE post_comment SET `parent` = 1 WHERE board = ? AND idx = ?";
     // UPDATE post_comment 
     // SET `parent` = 1 
     // WHERE 
     //     board = ? AND 
-    //     comment_index = ?
+    //     idx = ?
     try {
-        await pool.query(updateParentCommentQuery, [
+        await pool.query(updateParentQuery, [
             boardType, 
             idx
         ]);
@@ -121,15 +149,15 @@ const deleteComment = async (
     postNo: number,
     idx: number
 ) => {
-    const deleteCommentQuery='UPDATE post_comment SET comment_deleted = 1 WHERE board = ? AND post_no = ? AND comment_index = ?';
+    const deleteQuery="UPDATE post_comment SET deleted = 1 WHERE board = ? AND post_no = ? AND idx = ?";
     // UPDATE post_comment 
-    // SET comment_deleted = 1 
+    // SET deleted = 1 
     // WHERE 
     //     board = ? AND 
     //     post_no = ? AND 
-    //     comment_index = ?
+    //     idx = ?
     try {
-        await pool.query(deleteCommentQuery, [
+        await pool.query(deleteQuery, [
             boardType, 
             postNo, 
             idx
