@@ -1,8 +1,11 @@
-const { NotFoundException, InternalServerException, UnAuthorizedException, BadRequestException } = require('../../util/exceptions');
-const emoticonRepository = require('./repository/emoticon.repository');
-const fs = require('fs');
+import { NotFoundException, InternalServerException, UnAuthorizedException, BadRequestException } from '../../util/exceptions';
+import * as emoticonRepository from './repository/emoticon.repository';
+import fs from 'fs';
+import { User } from '../account/User';
 
-const getemoticon = async (id) => {
+const getemoticon = async (
+    id: number
+) => {
     const emoticonInfo = await emoticonRepository.getEmoticonById(id);
     if (emoticonInfo === null) {
         throw new NotFoundException();
@@ -35,7 +38,14 @@ const getemoticons = async () => {
         throw new NotFoundException();
     }
     
-    let result = emoticonInfo.map(e => {
+    let result: {
+        id: number,
+        alt: string,
+        e: {
+            idx: number,
+            type: string
+        }[]
+    }[] = emoticonInfo.map(e => {
         return {
             id: e.id,
             alt: e.name,
@@ -63,12 +73,24 @@ const getemoticons = async () => {
     }
 }
 
-const uploadEmoticon = async (memberCode, name, description, emoticons, files) => {
-    if (memberCode === null) {
+const uploadEmoticon = async (
+    user: User,
+    name: string,
+    description: string,
+    emoticons: {
+        [index: string]: {
+            type: string,
+            idx: number
+        }
+    },
+    files: Express.Multer.File[],
+    file: Express.Multer.File
+) => {
+    if (!user.getIsLogin()) {
         throw new UnAuthorizedException();
     }
     // 업로드 데이터 체크
-    if (!name || !description || !files.file || !files.files || !emoticons) {
+    if (!name || !description || !file || !files || !emoticons) {
         throw new BadRequestException();
     }
     if (name.length < 2) {
@@ -77,26 +99,28 @@ const uploadEmoticon = async (memberCode, name, description, emoticons, files) =
     if (description.length < 2) {
         throw new BadRequestException();
     }
-    if (files.files.length < 4) {
+    if (files.length < 4) {
         throw new BadRequestException();
     }
     
-    if (files.files.length !== (Object.keys(emoticons).length)) {
+    if (files.length !== (Object.keys(emoticons).length)) {
         throw new BadRequestException();
     }
     let emoticonList = [];
-    for (let i=0; i<files.files.length; i++){
-        const e = files.files[i];
-        if (!emoticons[e.name]) {
+    for (let i=0; i<files.length; i++){
+        const e = files[i];
+        const name = e.originalname.split('.')[0];
+        const ext = e.originalname.split('.')[e.originalname.split('.').length-1];
+        if (!emoticons[name]) {
             throw new BadRequestException();
         }
-        // 같은 확장자인지, 번호가 숫자가 맞는지 체크
-        if (e.ext != emoticons[e.name].type || !(/^\d+$/.test(emoticons[e.name].idx))) {
+        // 같은 확장자인지, 숫자가 맞는지 체크
+        if (ext != emoticons[name].type || !(/^\d+$/.test(String(emoticons[name].idx)))) {
             throw new BadRequestException();
         }
         emoticonList.push({
-            idx:emoticons[e.name].idx,
-            type:emoticons[e.name].type
+            idx: emoticons[name].idx,
+            type: emoticons[name].type
         });
     }
 
@@ -109,7 +133,7 @@ const uploadEmoticon = async (memberCode, name, description, emoticons, files) =
     // 이모티콘 정보 저장 및 폴더 생성
     try {
         await Promise.all([
-            emoticonRepository.insertEmoticonInfo(emoticonId, name, description, memberCode),
+            emoticonRepository.insertEmoticonInfo(emoticonId, name, description, user.getUser().code),
             emoticonRepository.insertEmoticons(emoticonId, emoticonList),
             fs.promises.mkdir(`public/resource/board/emoticon/${emoticonId}`)
         ])
@@ -121,10 +145,11 @@ const uploadEmoticon = async (memberCode, name, description, emoticons, files) =
     try {
         // 복사할 파일 리스트 생성
         let copyList = [];
-        copyList = files.files.map(e => {
-            return fs.promises.copyFile(e.path, `public/resource/board/emoticon/${emoticonId}/${emoticons[e.name].idx}.${emoticons[e.name].type}`)
+        copyList = files.map(e => {
+            const name = e.originalname.split('.')[0];
+            return fs.promises.copyFile(e.path, `public/resource/board/emoticon/${emoticonId}/${emoticons[name].idx}.${emoticons[name].type}`)
         })
-        copyList.push(fs.promises.copyFile(files.file[0].path, `public/resource/board/emoticon/${emoticonId}.png`))
+        copyList.push(fs.promises.copyFile(files[0].path, `public/resource/board/emoticon/${emoticonId}.png`))
         // 파일 복사 프로미스
         await Promise.all(copyList);
     } catch(err) {
@@ -132,7 +157,7 @@ const uploadEmoticon = async (memberCode, name, description, emoticons, files) =
         throw new InternalServerException();
     }
 }
-module.exports = {
+export {
     getemoticon,
     getemoticons,
     uploadEmoticon

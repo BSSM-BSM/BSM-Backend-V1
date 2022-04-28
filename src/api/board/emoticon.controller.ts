@@ -1,21 +1,23 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const jwt = require('../../util/jwt');
-const loginCheck = require('../../util/loginCheck');
-const service = require('./emoticon.service');
-const multer = require('multer');
+import * as service from './emoticon.service';
+import * as jwt from '../../util/jwt';
+import { User } from '../account/User';
+import loginCheck from '../../util/loginCheck';
+import multer from 'multer';
+import { BadRequestException } from '../../util/exceptions';
 
-router.get('/emoticon/:id', async (req, res, next) => {
+router.get('/emoticon/:id', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {
         res.send(JSON.stringify(
-            await service.getemoticon(req.params.id)
+            await service.getemoticon(Number(req.params.id))
         ));
     } catch(err) {
         next(err);
     }
 })
 
-router.get('/emoticon', async (req, res, next) => {
+router.get('/emoticon', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.getemoticons()
@@ -26,7 +28,7 @@ router.get('/emoticon', async (req, res, next) => {
 })
 
 const uploadProcessing = multer({
-    fileFilter:(req, file, cb) => {
+    fileFilter:(req, file: Express.Multer.File, cb) => {
         // 파일 확장자 체크
         const allowExt = [
             'png',
@@ -50,8 +52,6 @@ const uploadProcessing = multer({
         filename:(req, file, cb) => {
             const name = file.originalname.split('.')[0];
             const ext = file.originalname.split('.')[file.originalname.split('.').length-1];
-            file.name = name;
-            file.ext = ext;
             if (file.fieldname=='file') {
                 return cb(null, `icons/${name}.${ext}`)
             }
@@ -60,16 +60,24 @@ const uploadProcessing = multer({
     })
 })
 
-const uploadEmoticon = async (req, res, next) => {
-    const jwtValue = jwt.check(req.cookies.token);
+const uploadEmoticon = async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+    const user = new User(jwt.verify(req.cookies.token));
     try {
+        if (req.files === undefined) {
+            throw new BadRequestException();
+        }
+        const files = req.files as {[fieldname: string]: Express.Multer.File[]};
+        if (files['files'].length < 4 || files['file'].length != 1) {
+            throw new BadRequestException();
+        }
         res.send(JSON.stringify(
             await service.uploadEmoticon(
-                jwtValue.isLogin? jwtValue.memberCode: null,
+                user,
                 req.body.name,
                 req.body.description,
                 JSON.parse(req.body.emoticons),
-                req.files
+                files['files'],
+                files['file'][0]
             )
         ));
     } catch(err) {
@@ -83,4 +91,4 @@ router.post('/emoticon',
     uploadEmoticon
 );
 
-module.exports = router
+export = router

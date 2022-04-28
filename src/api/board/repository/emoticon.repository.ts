@@ -1,10 +1,23 @@
 import { InternalServerException } from '../../../util/exceptions';
 const pool = require('../../../util/db');
 
-const getEmoticon = async () => {
-    const getEmoticonQuery="SELECT * FROM `emoticon`";
+const getEmoticon = async (): Promise<[{
+    id: number,
+    name: string,
+    description: string,
+    created: string,
+    usercode: number
+}] | null> => {
+    const getQuery="SELECT id, name, description, created, usercode FROM emoticon";
+    // SELECT 
+    //     id, 
+    //     name, 
+    //     description, 
+    //     created, 
+    //     usercode 
+    // FROM emoticon
     try {
-        const [rows] = await pool.query(getEmoticonQuery);
+        const [rows] = await pool.query(getQuery);
         if (rows.length)
             return rows;
         else
@@ -15,10 +28,24 @@ const getEmoticon = async () => {
     }
 }
 
-const getEmoticonById = async (id: number) => {
-    const getEmoticonQuery="SELECT * FROM `emoticon` WHERE `id`=?";
+const getEmoticonById = async (id: number): Promise<{
+    id: number,
+    name: string,
+    description: string,
+    created: string,
+    usercode: number
+} | null> => {
+    const getQuery="SELECT id, name, description, created, usercode FROM emoticon WHERE id = ?";
+    // SELECT 
+    //     id, 
+    //     name, 
+    //     description, 
+    //     created, 
+    //     usercode 
+    // FROM emoticon 
+    // WHERE id = ?
     try {
-        const [rows] = await pool.query(getEmoticonQuery, [id]);
+        const [rows] = await pool.query(getQuery, [id]);
         if (rows.length)
             return rows[0];
         else
@@ -29,10 +56,19 @@ const getEmoticonById = async (id: number) => {
     }
 }
 
-const getEmoticons = async () => {
-    const getEmoticonsQuery="SELECT * FROM `emoticons`";
+const getEmoticons = async (): Promise<[{
+    id: number,
+    idx: number,
+    type: string
+}] | null> => {
+    const getQuery="SELECT id, idx, `type` FROM emoticons";
+    // SELECT 
+    //     id, 
+    //     idx, 
+    //     `type` 
+    // FROM emoticons
     try {
-        const [rows] = await pool.query(getEmoticonsQuery);
+        const [rows] = await pool.query(getQuery);
         if (rows.length)
             return rows;
         else
@@ -43,10 +79,20 @@ const getEmoticons = async () => {
     }
 }
 
-const getEmoticonsById = async (id: number) => {
-    const getEmoticonsQuery="SELECT * FROM `emoticons` WHERE `id`=?";
+const getEmoticonsById = async (id: number): Promise<[{
+    id: number,
+    idx: number,
+    type: string
+}] | null> => {
+    const getQuery="SELECT id, idx, `type` FROM emoticons WHERE id = ?";
+    // SELECT 
+    //     id, 
+    //     idx, 
+    //     `type` 
+    // FROM emoticons 
+    // WHERE id = ?
     try {
-        const [rows] = await pool.query(getEmoticonsQuery, [id]);
+        const [rows] = await pool.query(getQuery, [id]);
         if (rows.length)
             return rows;
         else
@@ -57,7 +103,7 @@ const getEmoticonsById = async (id: number) => {
     }
 }
 
-const getAutoIncrement = async () => {
+const getAutoIncrement = async (): Promise<number | null> => {
     const getAutoIncrementQuery=`
     SELECT AUTO_INCREMENT 
     FROM information_schema.tables 
@@ -75,10 +121,27 @@ const getAutoIncrement = async () => {
     }
 }
 
-const insertEmoticonInfo = async (id: number, name: string, description: string, memberCode: number) => {
-    const insertInfoQuery="INSERT INTO emoticon values(?, ?, ?, now(), ?)";
+const insertEmoticonInfo = async (
+    id: number,
+    name: string,
+    description: string,
+    usercode: number
+) => {
+    const insertInfoQuery="INSERT INTO emoticon (id, name, description, created, usercode) VALUES(?, ?, ?, now(), ?)";
+    // INSERT INTO emoticon (
+    //     id, 
+    //     name, 
+    //     description, 
+    //     created, 
+    //     usercode) 
+    // VALUES(
+    //     ?, 
+    //     ?, 
+    //     ?, 
+    //     now(), 
+    //     ?)
     try {
-        await pool.query(insertInfoQuery, [id, name, description, memberCode]);
+        await pool.query(insertInfoQuery, [id, name, description, usercode]);
     } catch(err) {
         console.error(err);
         throw new InternalServerException();
