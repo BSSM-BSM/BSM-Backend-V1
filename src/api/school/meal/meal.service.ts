@@ -1,7 +1,7 @@
-const { NotFoundException } = require('../../../util/exceptions');
+import { NotFoundException } from '../../../util/exceptions';
 const repository = require('./meal.repository');
 
-const getMeal = async (mealDate) => {
+const getMeal = async (mealDate: string) => {
     const mealInfo = await repository.getMeal(mealDate);
     if (mealInfo === null) {
         throw new NotFoundException();
@@ -15,6 +15,6 @@ const getMeal = async (mealDate) => {
     }
 }
 
-module.exports = {
+export {
     getMeal
 }

@@ -6,7 +6,7 @@ import { User } from './User';
 import loginCheck from '../../util/loginCheck';
 
 const router = express.Router();
-const multer = require('multer');
+import multer from 'multer';
 
 router.post('/account/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {

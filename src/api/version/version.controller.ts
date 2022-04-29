@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-const service = require('./version.service');
+import * as service from './version.service';
 
 router.get('/version/:app/:os', (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {
