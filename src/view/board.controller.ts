@@ -1,17 +1,17 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-router.get('/write/:boardType', (req ,res) => {
+router.get('/write/:boardType', (req:express.Request, res:express.Response) => {
     res.render('post_write', {
-        boardType:req.params.boardType,
-        postNo:null,
+        boardType: req.params.boardType,
+        postNo: null,
     });
 });
 
 router.get('/write/:boardType/:postNo', (req ,res) => {
     res.render('post_write', {
-        boardType:req.params.boardType,
-        postNo:req.params.postNo,
+        boardType: req.params.boardType,
+        postNo: req.params.postNo,
     });
 });
 
@@ -23,4 +23,4 @@ router.get('/:boardType/:postNo', (req ,res) => {
     res.render('board');
 });
 
-module.exports = router;
+export = router;

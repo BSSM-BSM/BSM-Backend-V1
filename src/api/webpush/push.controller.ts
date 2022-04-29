@@ -1,16 +1,22 @@
 import express from "express";
-import loginCheck from "../../util/loginCheck";
 const router = express.Router();
-const service = require('./push.service');
-const jwt = require('../../util/jwt')
+import * as service from './push.service';
+import * as jwt from '../../util/jwt';
+import { User } from "../account/User";
+import loginCheck from "../../util/loginCheck";
 
 router.post('/meal/register',
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        const jwtValue = jwt.verify(req.cookies.token);
+        const user = new User(jwt.verify(req.cookies.token));
         try {
             res.send(JSON.stringify(
-                await service.register(req.body.endpoint, req.body.auth, req.body.p256dh, jwtValue.memberCode)
+                await service.register(
+                    req.body.endpoint,
+                    req.body.auth,
+                    req.body.p256dh,
+                    user
+                )
             ));
         } catch(err) {
             next(err);

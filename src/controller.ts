@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const apiRouter = require('./api/api.controller');
-const viewRouter = require('./view/view.controller');
+import apiRouter from './api/api.controller';
+import viewRouter from './view/view.controller';
 
 // 업데이트 확인 url 하위호환
 router.post('/database', (req, res) => {

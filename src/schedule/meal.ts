@@ -1,6 +1,6 @@
-const schedule = require('node-schedule');
-const webpush = require('../util/push');
-const mealRepository = require('../api/school/meal/meal.repository');
+import schedule from 'node-schedule';
+import * as webpush from '../util/push';
+import * as mealRepository from '../api/school/meal/meal.repository';
 
 const mealDate = {
     morning:schedule.scheduleJob('0 30 6 * * 1-5', async () => {
@@ -15,7 +15,7 @@ const mealDate = {
         }
         const payload = JSON.stringify({
             title:"오늘의 아침",
-            body:mealInfo.morning.replaceAll('<br/>', ' '),
+            body:mealInfo.morning.replaceAll('<br/>', ', '),
             link:"/meal"
         })
         webpush.push(payload, 'meal');
@@ -32,7 +32,7 @@ const mealDate = {
         }
         const payload = JSON.stringify({
             title:"오늘의 점심",
-            body:mealInfo.lunch.replaceAll('<br/>', ' '),
+            body:mealInfo.lunch.replaceAll('<br/>', ', '),
             link:"/meal"
         })
         webpush.push(payload, 'meal');
@@ -49,7 +49,7 @@ const mealDate = {
         }
         const payload = JSON.stringify({
             title:"오늘의 저녁",
-            body:mealInfo.dinner.replaceAll('<br/>', ' '),
+            body:mealInfo.dinner.replaceAll('<br/>', ', '),
             link:"/meal"
         })
         webpush.push(payload, 'meal');

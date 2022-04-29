@@ -1,16 +1,14 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const jwt = require('../util/jwt');
-const boardController = require('./board.controller');
+import * as jwt from '../util/jwt';
+import boardController from './board.controller';
 
-router.get('/', (req ,res) => {
+router.get('/', (req:express.Request, res:express.Response) => {
     res.render('index');
 })
 
-router.get('/user/:memberCode', (req ,res) => {
-    res.render('user', {
-        memberCode:req.params.memberCode
-    });
+router.get('/user/:viewUsercode', (req ,res) => {
+    res.render('user');
 })
 
 router.get('/meal', (req ,res) => {
@@ -26,18 +24,23 @@ router.get('/meister', (req ,res) => {
 })
 
 router.get('/pwReset', (req ,res) => {
-    const jwtValue = jwt.verify(req.query.token);
+    const {token} = req.query;
+    if (typeof token != 'string') {
+        return res.send("정상적인 접근이 아닙니다");
+    }
+    const jwtValue = jwt.verify(token);
     if (jwtValue=='EXPIRED') {
         return res.send("토큰 유효기간이 만료되었습니다");
     }
     if (!jwtValue.pwEdit) {
         return res.send("정상적인 접근이 아닙니다");
     }
+
     res.cookie('token', req.query.token, {
-        path:"/",
-        httpOnly:true,
-        secure:true,
-        maxAge:1000*60*5
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        maxAge: 1000*60*5
     });
     res.render('etc/pwReset');
 })
@@ -52,4 +55,4 @@ router.get('/login', (req ,res) => {
 
 router.use('/board', boardController);
 
-module.exports = router;
+export = router;

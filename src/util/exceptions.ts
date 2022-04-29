@@ -42,6 +42,7 @@ class ConflictException extends HttpError {}
 class InternalServerException extends HttpError {}
 
 export {
+    HttpError,
     BadRequestException,
     UnAuthorizedException,
     ForbiddenException,

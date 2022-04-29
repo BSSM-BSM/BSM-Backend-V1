@@ -1,9 +1,10 @@
-require("dotenv").config({ path: "./config/env/.env" });
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const helmet = require("helmet");
+import dotenv from 'dotenv';
+dotenv.config({path: "./config/env/.env"});
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import { HttpError } from './util/exceptions';
 const processName = process.env.name;
-
 const app = express();
 
 // 보안설정
@@ -32,22 +33,22 @@ app.use(express.static('public'));
 const controller = require('./controller');
 app.use('/', controller);
 
-app.use((err, req, res, next) => {
+app.use((err: HttpError, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (err.httpCode) {
         res.status(err.httpCode).send(JSON.stringify({
-            statusCode:err.httpCode,
-            message:err.message
+            statusCode: err.httpCode,
+            message: err.message
         }));
     } else {
         console.error(err);
         res.status(500).send(JSON.stringify({
-            statusCode:500,
-            message:'Internal Server Error'
+            statusCode: 500,
+            message: 'Internal Server Error'
         }));
     }
 });
 
-if (processName=="primary"){
+if (processName == 'primary') {
     const schedule = {
         meal: require('./schedule/meal')
     };

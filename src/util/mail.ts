@@ -1,16 +1,20 @@
-const { InternalServerException } = require('./exceptions');
-const nodemailer = require("nodemailer");
+import { InternalServerException } from './exceptions';
+import nodemailer from 'nodemailer';
 
-const send = (to, subject, html) => {
+const send = (
+    to: string,
+    subject: string,
+    html: string
+) => {
     const transport = nodemailer.createTransport({
-        host:"bssm.kro.kr",
-        secure:true,
+        host: 'bssm.kro.kr',
+        secure: true,
     })
     const mailOptions = {
-        from:"BSM@bssm.kro.kr",
-        to:to,
-        subject:subject,
-        html:html
+        from: "BSM@bssm.kro.kr",
+        to,
+        subject,
+        html
     }
     return new Promise(resolve => {
         transport.sendMail(mailOptions, (error, response) => {
@@ -22,6 +26,6 @@ const send = (to, subject, html) => {
         })
     })
 }
-module.exports = {
+export {
     send
 }

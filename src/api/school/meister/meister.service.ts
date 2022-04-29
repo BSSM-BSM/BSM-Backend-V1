@@ -1,6 +1,7 @@
 import { BadRequestException, NotFoundException, InternalServerException } from '../../../util/exceptions';
 import * as repository from './meister.repository';
 import request from 'request'
+const http = request.defaults({jar: true});
 import iconv from 'iconv-lite';
 
 const getPoint = async (
@@ -34,7 +35,7 @@ const getPoint = async (
         encoding: null,
         form:{
             caseBy: 'login',
-            pw: pw,
+            pw,
             lgtype: 'S',
             hakgwa: hakgwa,
             hak: grade,
@@ -88,7 +89,7 @@ const getScore = async (
 
 const getHttp = (options: any): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
-        request(options, (err: Error, res: request.Response, body: string) => {
+        http(options, (err: Error, res: request.Response, body: string) => {
             if (err) {
                 throw new InternalServerException();
             }
