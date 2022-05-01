@@ -76,7 +76,7 @@ const viewUser = async (
             viewUser.userType = "none";
         }
         return {
-            user
+            user: viewUser
         };
     }
     viewUser.userType = "active";
@@ -94,7 +94,7 @@ const viewUser = async (
         viewUser.permission = false;
     }
     return {
-        user
+        user: viewUser
     };
 }
 

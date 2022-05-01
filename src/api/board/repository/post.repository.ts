@@ -77,11 +77,11 @@ const insertPost = async (
     title :string,
     content: string
 ) => {
-    const insertQuery="INSERT INTO post (board,post_no, user_code, title, content, date) SELECT ?, COUNT(post_no)+1, ?, ?, ?, now() FROM post WHERE board = ?";
+    const insertQuery="INSERT INTO post (board,post_no, usercode, title, content, date) SELECT ?, COUNT(post_no)+1, ?, ?, ?, now() FROM post WHERE board = ?";
     // INSERT INTO post (
     //     board,
     //     post_no, 
-    //     user_code, 
+    //     usercode, 
     //     title, 
     //     content, 
     //     date) 

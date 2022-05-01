@@ -1,4 +1,4 @@
-import { NotFoundException, UnAuthorizedException, ForbiddenException } from '../../util/exceptions';
+import { NotFoundException, UnAuthorizedException, ForbiddenException, BadRequestException } from '../../util/exceptions';
 import { User } from '../account/User';
 import * as boardRepository from './repository/board.repository';
 import * as postRepository from './repository/post.repository';
@@ -120,6 +120,9 @@ const writePost = async (
     if (boardTypeList[boardType].level > user.getUser().level) {
         throw new ForbiddenException();
     }
+    if (!title || !content) {
+        throw new BadRequestException();
+    }
 
 	await postRepository.insertPost(boardType, user.getUser().code, title, xss.process(content));
     if (boardType == 'notice') {
@@ -148,6 +151,9 @@ const updatePost = async (
     }
     if (!(postUsercode == user.getUser().code || user.getUser().level >= 3)) {
         throw new ForbiddenException();
+    }
+    if (!title || !content) {
+        throw new BadRequestException();
     }
     
     await postRepository.updatePost(boardType, postNo, title, xss.process(content));

@@ -4,9 +4,9 @@ const pool = require('../../util/db');
 const getToken = async (
     token: string,
 ): Promise<{usercode: number, created: string} | null> => {
-    const getQuery="SELECT user_code usercode, created FROM tokens WHERE token = ? AND valid = 1";
+    const getQuery="SELECT usercode, created FROM tokens WHERE token = ? AND valid = 1";
     // SELECT 
-    //     user_code usercode, 
+    //     usercode, 
     //     created 
     // FROM tokens 
     // WHERE 
