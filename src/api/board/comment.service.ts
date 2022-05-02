@@ -74,14 +74,10 @@ const commentTree = (
             return [];
         }
         if (!e.deleted) {
-            if (isAnonymous) {// 익명 댓글인지 확인
-                e.usercode = -1;
-                e.nickname = 'ㅇㅇ';
-            }
             comment = {
                 idx: e.idx,
-                usercode: e.usercode,
-                nickname: e.nickname,
+                usercode: isAnonymous? -1: e.usercode,
+                nickname: isAnonymous? 'ㅇㅇ': e.nickname,
                 comment: e.comment,
                 date: e.date,
                 depth: depth,
