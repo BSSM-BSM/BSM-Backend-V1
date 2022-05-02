@@ -134,6 +134,21 @@ router.put('/account/pw', async (req: express.Request, res: express.Response, ne
     }
 })
 
+router.put('/account/nickname', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const user = new User(jwt.verify(req.cookies.token));
+    try {
+        res.send(JSON.stringify(
+            await service.nicknameEdit(
+                res,
+                user,
+                req.body.nickname
+            )
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
+
 router.post('/account/token', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(

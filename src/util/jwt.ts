@@ -12,12 +12,10 @@ const sign = (
     payload: object,
     expire: string
 ) => {
-    return {
-        token:jwt.sign(payload, secretKey, {
-            algorithm:'HS256',
-            expiresIn:expire
-        })
-    };
+    return jwt.sign(payload, secretKey, {
+        algorithm: 'HS256',
+        expiresIn: expire
+    });
 }
 
 const login = async (
@@ -31,12 +29,12 @@ const login = async (
     const token = crypto.randomBytes(64).toString('hex');
     const result = {
         token: jwt.sign(user.getUser(), secretKey, {
-            algorithm:'HS256',
-            expiresIn:expire
+            algorithm: 'HS256',
+            expiresIn: expire
         }),
         refreshToken: jwt.sign({token}, secretKey, {
-            algorithm:'HS256',
-            expiresIn:'60d'
+            algorithm: 'HS256',
+            expiresIn: '60d'
         }),
     };
     await tokenRepository.insertToken(token, user.getUser().code);

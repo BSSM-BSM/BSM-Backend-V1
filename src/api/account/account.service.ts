@@ -2,10 +2,10 @@ import { NotFoundException, BadRequestException, UnAuthorizedException, Conflict
 import express from 'express';
 import * as accountRepository from './account.repository';
 import * as tokenRepository from './token.repository';
-const jwt = require('../../util/jwt');
-const crypto = require('crypto');
-const sharp = require('sharp');
-const mail = require('../../util/mail');
+import * as jwt from '../../util/jwt';
+import crypto from 'crypto';
+import sharp from 'sharp';
+import * as mail from '../../util/mail';
 import { User } from './User';
 
 const login = async (
@@ -27,22 +27,22 @@ const login = async (
 
     const jwtToken = await jwt.login(user, '1h');
     res.cookie('token', jwtToken.token, {
-        domain:'.bssm.kro.kr',
-        path:'/',
-        httpOnly:true,
-        secure:true,
-        maxAge:1000*60*60// 1시간 동안 저장 1000ms*60초*60분
+        domain: '.bssm.kro.kr',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        maxAge: 1000*60*60// 1시간 동안 저장 1000ms*60초*60분
     });
     res.cookie('refreshToken', jwtToken.refreshToken, {
-        domain:'.bssm.kro.kr',
-        path:'/',
-        httpOnly:true,
-        secure:true,
-        maxAge:24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
+        domain: '.bssm.kro.kr',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        maxAge: 24*60*1000*60*60// 60일간 저장 24시간*60일*1000ms*60초*60분
     });
     return {
-        token:jwtToken.token,
-        refreshToken:jwtToken.refreshToken    
+        token: jwtToken.token,
+        refreshToken: jwtToken.refreshToken    
     }
 }
 
@@ -204,7 +204,7 @@ const pwResetMail = async (
         throw new NotFoundException('User not found');
     }
 
-    const jwtToken = jwt.sign({
+    const token = jwt.sign({
         isLogin: false,
         pwEdit: userInfo.code
     }, '300s');
@@ -222,7 +222,7 @@ const pwResetMail = async (
             <div style="padding:25px 0;text-align:center;margin:0 auto;border:solid 5px;border-radius:25px;font-family:-apple-system,BlinkMacSystemFont,\'Malgun Gothic\',\'맑은고딕\',helvetica,\'Apple SD Gothic Neo\',sans-serif;background-color:#202124; color:#e8eaed;">
                 <img src="https://bssm.kro.kr/icons/logo.png" alt="로고" style="height:35px; padding-top:12px;">
                 <h1 style="font-size:28px;margin-left:25px;margin-right:25px;">BSM 비밀번호 재설정 링크입니다.</h1>
-                <a href="https://bssm.kro.kr/pwReset?token=${jwtToken.token}" style="display:inline-block;font-size:20px;text-decoration:none;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">비밀번호 재설정</a>
+                <a href="https://bssm.kro.kr/pwReset?token=${token}" style="display:inline-block;font-size:20px;text-decoration:none;font-weight:bold;text-align:center;margin:0;color:#e8eaed;padding:15px;border-radius:7px;box-shadow:20px 20px 50px rgba(0, 0, 0, 0.5);background-color:rgba(192, 192, 192, 0.2);">비밀번호 재설정</a>
                 <br><br><br>
                 <div style="background-color:rgba(192, 192, 192, 0.2);padding:10px;text-align:left;font-size:14px;">
                     <p style="margin:0;">- 본 이메일은 발신전용 이메일입니다.</p>
@@ -292,7 +292,7 @@ const pwEdit = async (
     const jwtValue = jwt.verify(token);
     const user = new User(jwtValue);
 
-    if (jwtValue=='EXPIRED') {
+    if (jwtValue == 'EXPIRED') {
         throw new UnAuthorizedException('Token expired');
     }
     if (!(jwtValue.pwEdit || user.getIsLogin())) {
@@ -312,6 +312,45 @@ const pwEdit = async (
         domain:'.bssm.kro.kr',
         path:'/',
     });
+}
+
+const nicknameEdit = async (
+    res: express.Response,
+    user: User,
+    nickname: string
+) => {
+    if (!user.getIsLogin()) {
+        throw new BadRequestException();
+    }
+    if (await accountRepository.getByNickname(nickname)) {
+        throw new ConflictException('Existing nickname');
+    }
+
+    await accountRepository.updateNicknameByCode(user.getUser().code, nickname);
+
+    const userInfo = await accountRepository.getByUsercode(user.getUser().code);
+    if (userInfo === null) {
+        throw new InternalServerException('Failed to update user information');
+    }
+    const newUser = new User(userInfo);
+    if (!newUser.getIsLogin()) {
+        throw new InternalServerException('Failed to update user information');
+    }
+    const payload = newUser.getUser();
+
+    // 액세스 토큰 재발행
+    const token = jwt.sign(payload, '1h');
+    res.cookie('token', token, {
+        domain: '.bssm.kro.kr',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        maxAge: 1000*60*60// 1시간 동안 저장 1000ms*60초*60분
+    });
+    return {
+        token,
+        user: payload
+    }
 }
 
 const token = async (
@@ -347,10 +386,10 @@ const token = async (
     }
     const payload = user.getUser();
     // 액세스 토큰 재발행
-    const jwtToken = jwt.sign(payload, '1h');
+    const token = jwt.sign(payload, '1h');
     return {
-        token:jwtToken.token,
-        user:payload
+        token,
+        user: payload
     }
 }
 export {
@@ -362,5 +401,6 @@ export {
     pwResetMail,
     findIdMail,
     pwEdit,
+    nicknameEdit,
     token
 }

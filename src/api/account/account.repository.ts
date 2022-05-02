@@ -339,6 +339,19 @@ const updatePWByCode = async (
     return salt;
 }
 
+const updateNicknameByCode = async (
+    usercode: number, 
+    nickname: string
+) => {
+    const nicknameEditQuery="UPDATE user SET nickname = ? WHERE usercode = ?";
+    try {
+        await pool.query(nicknameEditQuery, [nickname, usercode]);
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 export {
     getById,
     getByUsercode,
@@ -350,4 +363,5 @@ export {
     signUp,
     updateCodeAvailable,
     updatePWByCode,
+    updateNicknameByCode
 }
