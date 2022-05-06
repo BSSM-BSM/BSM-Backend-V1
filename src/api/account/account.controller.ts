@@ -8,7 +8,7 @@ import loginCheck from '../../util/loginCheck';
 const router = express.Router();
 import multer from 'multer';
 
-router.post('/account/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.login(res, req.body.id, req.body.pw)
@@ -18,7 +18,7 @@ router.post('/account/login', async (req: express.Request, res: express.Response
     }
 })
 
-router.delete('/account/logout', (req: express.Request, res: express.Response) => {
+router.delete('/logout', (req: express.Request, res: express.Response) => {
     res.clearCookie('token', {
         domain:'bssm.kro.kr',
         path:'/',
@@ -38,7 +38,7 @@ router.delete('/account/logout', (req: express.Request, res: express.Response) =
     res.send();
 })
 
-router.get('/account/islogin', (req: express.Request, res: express.Response) => {
+router.get('/islogin', (req: express.Request, res: express.Response) => {
     const user = new User(jwt.verify(req.cookies.token));
     if (user.getIsLogin()) {
         res.send({islogin:true});
@@ -47,7 +47,7 @@ router.get('/account/islogin', (req: express.Request, res: express.Response) => 
     }
 })
 
-router.post('/account', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.signUp(
@@ -63,7 +63,7 @@ router.post('/account', async (req: express.Request, res: express.Response, next
     }
 })
 
-router.get('/account/:usercode',
+router.get('/:usercode',
     loginCheck,
     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));
@@ -77,7 +77,7 @@ router.get('/account/:usercode',
     }
 )
 
-router.post('/account/mail/authcode', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/mail/authcode', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.authcodeMail(
@@ -93,7 +93,7 @@ router.post('/account/mail/authcode', async (req: express.Request, res: express.
     }
 })
 
-router.post('/account/mail/pw', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/mail/pw', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.pwResetMail(req.body.id)
@@ -103,7 +103,7 @@ router.post('/account/mail/pw', async (req: express.Request, res: express.Respon
     }
 })
 
-router.post('/account/mail/id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/mail/id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.findIdMail(
@@ -119,7 +119,7 @@ router.post('/account/mail/id', async (req: express.Request, res: express.Respon
     }
 })
 
-router.put('/account/pw', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.put('/pw', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.pwEdit(
@@ -134,7 +134,7 @@ router.put('/account/pw', async (req: express.Request, res: express.Response, ne
     }
 })
 
-router.put('/account/nickname', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.put('/nickname', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const user = new User(jwt.verify(req.cookies.token));
     try {
         res.send(JSON.stringify(
@@ -149,7 +149,7 @@ router.put('/account/nickname', async (req: express.Request, res: express.Respon
     }
 })
 
-router.post('/account/token', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/token', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.token(req.body.refreshToken)
@@ -159,7 +159,7 @@ router.post('/account/token', async (req: express.Request, res: express.Response
     }
 })
 
-router.post('/account/profile',
+router.post('/profile',
     loginCheck,
     multer({
         storage:multer.diskStorage({

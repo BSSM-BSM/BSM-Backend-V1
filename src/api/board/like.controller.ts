@@ -4,7 +4,7 @@ import * as service from './like.service';
 import * as jwt from '../../util/jwt';
 import { User } from "../account/User";
 
-router.post('/like/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+router.post('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const user = new User(jwt.verify(req.cookies.token));
     try {
         res.send(JSON.stringify(

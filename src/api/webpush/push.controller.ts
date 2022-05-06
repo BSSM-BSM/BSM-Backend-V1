@@ -5,7 +5,7 @@ import * as jwt from '../../util/jwt';
 import { User } from "../account/User";
 import loginCheck from "../../util/loginCheck";
 
-router.post('/meal/register',
+router.post('/meal',
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));

@@ -7,7 +7,7 @@ import loginCheck from '../../util/loginCheck';
 import multer from 'multer';
 import { BadRequestException } from '../../util/exceptions';
 
-router.get('/emoticon/:id', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+router.get('/:id', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.getemoticon(Number(req.params.id))
@@ -17,7 +17,7 @@ router.get('/emoticon/:id', async (req:express.Request, res:express.Response, ne
     }
 })
 
-router.get('/emoticon', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+router.get('/', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {
         res.send(JSON.stringify(
             await service.getemoticons()
@@ -85,8 +85,7 @@ const uploadEmoticon = async (req:express.Request, res:express.Response, next:ex
     }
 }
 
-router.post('/emoticon',
-    loginCheck,
+router.post('/',
     uploadProcessing.fields([{name:'file'},{name:'files'}]),
     uploadEmoticon
 );

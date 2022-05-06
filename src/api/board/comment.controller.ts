@@ -5,7 +5,7 @@ import * as jwt from '../../util/jwt';
 import { User } from "../account/User";
 import loginCheck from "../../util/loginCheck";
 
-router.get('/comment/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+router.get('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const user = new User(jwt.verify(req.cookies.token));
     try {
         res.send(JSON.stringify(
@@ -20,7 +20,7 @@ router.get('/comment/:boardType/:postNo', async (req:express.Request, res:expres
     }
 })
 
-router.post('/comment/:boardType/:postNo/:depth?/:parentIdx?',
+router.post('/:boardType/:postNo/:depth?/:parentIdx?',
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));
@@ -41,7 +41,7 @@ router.post('/comment/:boardType/:postNo/:depth?/:parentIdx?',
     }
 )
 
-router.delete('/comment/:boardType/:postNo/:commentIdx',
+router.delete('/:boardType/:postNo/:commentIdx',
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));

@@ -20,16 +20,16 @@ import loginCheck from '../util/loginCheck';
 
 router.use(jwt.refreshToken);
 
-router.use(versionController);
-router.use(accountController);
-router.use(mealController);
-router.use(pushController);
-router.use(timetableController);
-router.use(loginCheck, meisterController);
-router.use(boardController);
-router.use(postController);
-router.use(commentController);
-router.use(likeController);
-router.use(loginCheck, emoticonController);
+router.use('/version', versionController);
+router.use('/account', accountController);
+router.use('/meal', mealController);
+router.use('/push', pushController);
+router.use('/timetable', timetableController);
+router.use('/board', boardController);
+router.use('/post', postController);
+router.use('/comment', commentController);
+router.use('/like', likeController);
+router.use('/meister', loginCheck, meisterController);
+router.use('/emoticon', loginCheck, emoticonController);
 
 export = router;

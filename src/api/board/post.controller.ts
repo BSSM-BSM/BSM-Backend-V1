@@ -6,7 +6,7 @@ import { User } from "../account/User";
 import multer from "multer";
 import loginCheck from "../../util/loginCheck";
 
-router.get('/post/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+router.get('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const user = new User(jwt.verify(req.cookies.token));
     try {
         res.send(JSON.stringify(
@@ -21,7 +21,7 @@ router.get('/post/:boardType/:postNo', async (req:express.Request, res:express.R
     }
 })
 
-router.post('/post/:boardType', 
+router.post('/:boardType', 
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));
@@ -40,7 +40,7 @@ router.post('/post/:boardType',
     }
 )
 
-router.put('/post/:boardType/:postNo', 
+router.put('/:boardType/:postNo', 
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));
@@ -60,7 +60,7 @@ router.put('/post/:boardType/:postNo',
     }
 )
 
-router.delete('/post/:boardType/:postNo', 
+router.delete('/:boardType/:postNo', 
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
         const user = new User(jwt.verify(req.cookies.token));
@@ -89,7 +89,7 @@ const uploadProcessing = multer({
     })
 })
 
-router.post('/imageUpload',
+router.post('/image',
     loginCheck,
     uploadProcessing.single('file'),
     (req:express.Request, res:express.Response, next:express.NextFunction) => {
