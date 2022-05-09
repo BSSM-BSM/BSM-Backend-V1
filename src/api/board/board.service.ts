@@ -1,6 +1,7 @@
 import { NotFoundException, UnAuthorizedException } from '../../util/exceptions';
 import { User } from '../account/User';
 import * as boardRepository from './repository/board.repository';
+import * as categoryRepository from './repository/category.repository';
 
 
 let boardTypeList: {
@@ -12,11 +13,18 @@ let boardTypeList: {
         },
         anonymous: boolean,
         public: boolean,
-        level: number
+        level: number,
+        category: {
+            [index: string] : {
+                name: string
+            }
+        }
     }
 } = {};
+
 const getBoardType = async () => {
     const boardTypeInfo = await boardRepository.getBoardType();
+    const categoryInfo = await categoryRepository.getCategorys();
     if (boardTypeInfo === null) {
         return;
     }
@@ -29,7 +37,17 @@ const getBoardType = async () => {
             },
             anonymous: Boolean(e.post_anonymous),
             public: Boolean(e.post_public),
-            level: Number(e.post_level)
+            level: Number(e.post_level),
+            category: {
+                'normal': {
+                    name: '일반'
+                }
+            }
+        }
+    });
+    categoryInfo?.forEach(e => {
+        boardTypeList[e.board].category[e.category] = {
+            name: e.name
         }
     });
 }
@@ -93,9 +111,13 @@ const viewBoard = async (
                 e.usercode = -1;
                 e.nickname = 'ㅇㅇ';
             }
+            if (e.category == null) {
+                e.category = 'normal';
+            }
             return e;
         }),
         pages: totalPage,
+        category: boardTypeList[boardType].category,
         boardName: boardTypeList[boardType].boardName,
         subBoard: {
             boardType: boardTypeList[boardType].subBoard.boardType,

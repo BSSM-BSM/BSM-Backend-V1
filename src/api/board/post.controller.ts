@@ -6,6 +6,29 @@ import { User } from "../account/User";
 import multer from "multer";
 import loginCheck from "../../util/loginCheck";
 
+const uploadProcessing = multer({
+    storage:multer.diskStorage({
+        destination:(req, file, cb) => {
+            cb(null, 'public/resource/board/upload/');
+        },
+        filename:(req, file, cb) => {
+            cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1]);
+        }
+    })
+})
+
+router.post('/image',
+    loginCheck,
+    uploadProcessing.single('file'),
+    (req:express.Request, res:express.Response, next:express.NextFunction) => {
+        try {
+            res.send(JSON.stringify({filePath: `/resource/board/upload/${req.file?.filename}`}));
+        } catch(err) {
+            next(err);
+        }
+    }
+)
+
 router.get('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     const user = new User(jwt.verify(req.cookies.token));
     try {
@@ -72,29 +95,6 @@ router.delete('/:boardType/:postNo',
                     Number(req.params.postNo)
                 )
             ));
-        } catch(err) {
-            next(err);
-        }
-    }
-)
-
-const uploadProcessing = multer({
-    storage:multer.diskStorage({
-        destination:(req, file, cb) => {
-            cb(null, 'public/resource/board/upload/');
-        },
-        filename:(req, file, cb) => {
-            cb(null, Date.now()+'.'+file.originalname.split('.')[file.originalname.split('.').length-1]);
-        }
-    })
-})
-
-router.post('/image',
-    loginCheck,
-    uploadProcessing.single('file'),
-    (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        try {
-            res.send(JSON.stringify({filePath: `/resource/board/upload/${req.file?.filename}`}));
         } catch(err) {
             next(err);
         }

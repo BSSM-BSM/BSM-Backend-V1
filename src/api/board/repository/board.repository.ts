@@ -71,9 +71,10 @@ const getPostsByPage = async (
     nickname: string,
     date: string,
     hit: number,
-    totalLike: number
+    totalLike: number,
+    category: string
 }] | null> => {
-    const getBoardQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
+    const getBoardQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike, p.category FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
     // SELECT 
     //     p.post_no postNo, 
     //     p.title, 
@@ -82,7 +83,8 @@ const getPostsByPage = async (
     //     u.nickname, 
     //     p.date, 
     //     p.hit, 
-    //     p.total_like totalLike 
+    //     p.total_like totalLike, 
+    //     p.category 
     // FROM post p, user u 
     // WHERE 
     //     p.deleted = 0 AND 

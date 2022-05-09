@@ -2,8 +2,8 @@ import express from 'express';
 const router = express.Router();
 import * as jwt from '../util/jwt';
 
-router.use(express.json());
-router.use(express.urlencoded({extended:true}));
+router.use(express.json({limit:'1mb'}));
+router.use(express.urlencoded({extended:true,limit:'1mb'}));
 
 import versionController from './version/version.controller';
 import accountController from './account/account.controller';
