@@ -57,7 +57,8 @@ const viewBoard = async (
     user: User,
     boardType: string,
     page: number,
-    limitPost: number
+    limitPost: number,
+    category: string
 ) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException();
@@ -73,9 +74,12 @@ const viewBoard = async (
     if (limitPost < 5) {
         limitPost = 15;
     }
+    if (!boardTypeList[boardType].category[category]) {
+        category = 'all';
+    }
 
     // 총 게시물 갯수
-    const totalPosts = await boardRepository.getTotalPosts(boardType);
+    const totalPosts = await boardRepository.getTotalPosts(boardType, category);
     if (totalPosts === null) {
         return {
             board: [],
@@ -92,11 +96,12 @@ const viewBoard = async (
     const startPost = (page-1)*limitPost;
     const totalPage = Math.ceil(totalPosts/limitPost);
 
-    const postInfo = await boardRepository.getPostsByPage(boardType, startPost, limitPost);
+    const postInfo = await boardRepository.getPostsByPage(boardType, startPost, limitPost, category);
     if (postInfo === null) {
         return {
             board: [],
             pages: totalPage,
+            category: boardTypeList[boardType].category,
             boardName: boardTypeList[boardType].boardName,
             subBoard: {
                 boardType: boardTypeList[boardType].subBoard.boardType,

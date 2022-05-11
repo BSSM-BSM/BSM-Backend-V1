@@ -75,23 +75,26 @@ const insertPost = async (
     boardType: string,
     usercode: number,
     title :string,
-    content: string
+    content: string,
+    category: string | null
 ) => {
-    const insertQuery="INSERT INTO post (board,post_no, usercode, title, content, date) SELECT ?, COUNT(post_no)+1, ?, ?, ?, now() FROM post WHERE board = ?";
+    const insertQuery="INSERT INTO post (board, post_no, usercode, title, content, date, category)SELECT ?, COUNT(post_no)+1, ?, ?, ?, now(), ? FROM post WHERE board = ?";
     // INSERT INTO post (
-    //     board,
+    //     board, 
     //     post_no, 
     //     usercode, 
     //     title, 
     //     content, 
-    //     date) 
+    //     date, 
+    //     category) 
     // SELECT 
     //     ?, 
     //     COUNT(post_no)+1, 
     //     ?, 
     //     ?, 
     //     ?, 
-    //     now() 
+    //     now(), 
+    //     ? 
     // FROM post 
     // WHERE board = ?
     try {
@@ -100,6 +103,7 @@ const insertPost = async (
             usercode,
             title,
             content,
+            category,
             boardType
         ]);
     } catch(err) {
@@ -112,13 +116,15 @@ const updatePost = async (
     boardType: string,
     postNo: number,
     title :string,
-    content: string
+    content: string,
+    category: string | null
 ) => {
-    const updateQuery="UPDATE post SET title = ?, content = ? WHERE post_no = ? AND board = ?";
+    const updateQuery="UPDATE post SET title = ?, content = ?, category = ? WHERE post_no = ? AND board = ?";
     // UPDATE post 
     // SET 
     //     title = ?, 
-    //     content = ? 
+    //     content = ?, 
+    //     category = ? 
     // WHERE 
     //     post_no = ? AND 
     //     board = ?
@@ -126,6 +132,7 @@ const updatePost = async (
         await pool.query(updateQuery, [
             title,
             content,
+            category,
             postNo,
             boardType
         ]);

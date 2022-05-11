@@ -54,7 +54,8 @@ router.post('/:boardType',
                     user,
                     req.params.boardType,
                     req.body.title,
-                    req.body.content
+                    req.body.content,
+                    req.body.category
                 )
             ));
         } catch(err) {
@@ -74,7 +75,8 @@ router.put('/:boardType/:postNo',
                     req.params.boardType,
                     Number(req.params.postNo),
                     req.body.title,
-                    req.body.content
+                    req.body.content,
+                    req.body.category
                 )
             ));
         } catch(err) {

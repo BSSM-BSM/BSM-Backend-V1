@@ -3,6 +3,7 @@ import { User } from '../account/User';
 import * as boardRepository from './repository/board.repository';
 import * as postRepository from './repository/post.repository';
 import * as likeRepository from './repository/like.repository';
+import * as categoryRepository from './repository/category.repository';
 
 const webpush = require('../../util/push');
 import { escapeAttrValue, FilterXSS } from 'xss';
@@ -34,11 +35,18 @@ let boardTypeList: {
     [index: string]: {
         anonymous: boolean,
         public: boolean,
-        level: number
+        level: number,
+        category: {
+            [index: string] : {
+                name: string
+            }
+        }
     }
 } = {};
+
 const getBoardType = async () => {
     const boardTypeInfo = await boardRepository.getBoardType();
+    const categoryInfo = await categoryRepository.getCategorys();
     if (boardTypeInfo === null) {
         return;
     }
@@ -46,7 +54,17 @@ const getBoardType = async () => {
         boardTypeList[e.id] = {
             anonymous: Boolean(e.post_anonymous),
             public: Boolean(e.post_public),
-            level: Number(e.post_level)
+            level: Number(e.post_level),
+            category: {
+                'normal': {
+                    name: '일반'
+                }
+            }
+        }
+    });
+    categoryInfo?.forEach(e => {
+        boardTypeList[e.board].category[e.category] = {
+            name: e.name
         }
     });
 }
@@ -112,7 +130,8 @@ const writePost = async (
     user: User,
     boardType: string,
     title: string,
-    content: string
+    content: string,
+    category: string
 ) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
@@ -120,11 +139,11 @@ const writePost = async (
     if (boardTypeList[boardType].level > user.getUser().level) {
         throw new ForbiddenException();
     }
-    if (!title || !content) {
+    if (!title || !content || !boardTypeList[boardType].category[category]) {
         throw new BadRequestException();
     }
 
-	await postRepository.insertPost(boardType, user.getUser().code, title, xss.process(content));
+	await postRepository.insertPost(boardType, user.getUser().code, title, xss.process(content), category=='normal'? null: category);
     if (boardType == 'notice') {
         const payload = JSON.stringify({
             title: '새로운 공지사항이 있습니다',
@@ -140,7 +159,8 @@ const updatePost = async (
     boardType: string,
     postNo: number,
     title: string,
-    content: string
+    content: string,
+    category: string
 ) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
@@ -152,11 +172,11 @@ const updatePost = async (
     if (!(postUsercode == user.getUser().code || user.getUser().level >= 3)) {
         throw new ForbiddenException();
     }
-    if (!title || !content) {
+    if (!title || !content || !boardTypeList[boardType].category[category]) {
         throw new BadRequestException();
     }
     
-    await postRepository.updatePost(boardType, postNo, title, xss.process(content));
+    await postRepository.updatePost(boardType, postNo, title, xss.process(content), category=='normal'? null: category);
 }
 
 const deletePost = async (

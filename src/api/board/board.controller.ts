@@ -12,7 +12,8 @@ router.get('/:boardType', async (req:express.Request, res:express.Response, next
                 user,
                 req.params.boardType,
                 Number(req.query.page),
-                Number(req.query.limit)
+                Number(req.query.limit),
+                String(req.query.category)
             )
         ));
     } catch(err) {

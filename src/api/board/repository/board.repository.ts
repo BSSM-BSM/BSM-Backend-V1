@@ -40,15 +40,37 @@ const getBoardType = async (): Promise<[{
     }
 }
 
-const getTotalPosts = async (boardType: string): Promise<number | null> => {
-    const totalPostQuery='SELECT COUNT(post_no) FROM post WHERE deleted = 0 AND board = ?';
-    // SELECT COUNT(post_no) 
-    // FROM post 
-    // WHERE 
-    //     deleted = 0 AND
-    //     board = ?
+const getTotalPosts = async (
+    boardType: string,
+    category: string
+): Promise<number | null> => {
+    let getQuery;
+    if (category == 'all') {
+        getQuery='SELECT COUNT(post_no) FROM post WHERE deleted = 0 AND board = ?';
+        // SELECT COUNT(post_no) 
+        // FROM post 
+        // WHERE 
+        //     deleted = 0 AND 
+        //     board = ?
+    } else if (category == 'normal') {
+        getQuery='SELECT COUNT(post_no) FROM post WHERE deleted = 0 AND board = ? AND category IS NULL';
+        // SELECT COUNT(post_no) 
+        // FROM post 
+        // WHERE 
+        //     deleted = 0 AND 
+        //     board = ? AND
+        //     category IS NULL
+    } else {
+        getQuery='SELECT COUNT(post_no) FROM post WHERE deleted = 0 AND board = ? AND category = ?';
+        // SELECT COUNT(post_no) 
+        // FROM post 
+        // WHERE 
+        //     deleted = 0 AND 
+        //     board = ? AND 
+        //     category = ?
+    }
     try {
-        const [rows] = await pool.query(totalPostQuery, [boardType]);
+        const [rows] = await pool.query(getQuery, [boardType, category]);
         if (rows.length)
             return rows[0]['COUNT(post_no)'];
         else
@@ -62,7 +84,8 @@ const getTotalPosts = async (boardType: string): Promise<number | null> => {
 const getPostsByPage = async (
     boardType: string,
     startPage: number,
-    limitPage: number
+    limitPage: number,
+    category: string
 ): Promise<[{
     postNo: number,
     title: string,
@@ -74,29 +97,84 @@ const getPostsByPage = async (
     totalLike: number,
     category: string
 }] | null> => {
-    const getBoardQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike, p.category FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
-    // SELECT 
-    //     p.post_no postNo, 
-    //     p.title, 
-    //     p.comments, 
-    //     p.usercode, 
-    //     u.nickname, 
-    //     p.date, 
-    //     p.hit, 
-    //     p.total_like totalLike, 
-    //     p.category 
-    // FROM post p, user u 
-    // WHERE 
-    //     p.deleted = 0 AND 
-    //     p.board = ? AND 
-    //     p.usercode = u.usercode 
-    // ORDER BY post_no DESC LIMIT ?, ?
-    try {
-        const [rows] = await pool.query(getBoardQuery, [
+    let getQuery;
+    let params = [];
+    if (category == 'all') {
+        getQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike, p.category FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
+        // SELECT 
+        //     p.post_no postNo, 
+        //     p.title, 
+        //     p.comments, 
+        //     p.usercode, 
+        //     u.nickname, 
+        //     p.date, 
+        //     p.hit, 
+        //     p.total_like totalLike, 
+        //     p.category 
+        // FROM post p, user u 
+        // WHERE 
+        //     p.deleted = 0 AND 
+        //     p.board = ? AND 
+        //     p.usercode = u.usercode 
+        // ORDER BY post_no DESC LIMIT ?, ?
+        params = [
             boardType, 
             startPage, 
             limitPage
-        ]);
+        ]
+    } else if (category == 'normal') {
+        getQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike, p.category FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.category IS NULL AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
+        // SELECT 
+        //     p.post_no postNo, 
+        //     p.title, 
+        //     p.comments, 
+        //     p.usercode, 
+        //     u.nickname, 
+        //     p.date, 
+        //     p.hit, 
+        //     p.total_like totalLike, 
+        //     p.category 
+        // FROM post p, user u 
+        // WHERE 
+        //     p.deleted = 0 AND 
+        //     p.board = ? AND 
+        //     p.category IS NULL AND 
+        //     p.usercode = u.usercode 
+        // ORDER BY post_no DESC LIMIT ?, ?
+        params = [
+            boardType, 
+            startPage, 
+            limitPage
+        ]
+    } else {
+        getQuery="SELECT p.post_no postNo, p.title, p.comments, p.usercode, u.nickname, p.date, p.hit, p.total_like totalLike, p.category FROM post p, user u WHERE p.deleted = 0 AND p.board = ? AND p.category = ? AND p.usercode = u.usercode ORDER BY post_no DESC LIMIT ?, ?";
+        // SELECT 
+        //     p.post_no postNo, 
+        //     p.title, 
+        //     p.comments, 
+        //     p.usercode, 
+        //     u.nickname, 
+        //     p.date, 
+        //     p.hit, 
+        //     p.total_like totalLike, 
+        //     p.category 
+        // FROM post p, user u 
+        // WHERE 
+        //     p.deleted = 0 AND 
+        //     p.board = ? AND 
+        //     p.category = ? AND 
+        //     p.usercode = u.usercode 
+        // ORDER BY post_no DESC LIMIT ?, ?
+        params = [
+            boardType, 
+            category,
+            startPage, 
+            limitPage
+        ]
+    }
+    
+    try {
+        const [rows] = await pool.query(getQuery, params);
         if (rows.length)
             return rows;
         else
