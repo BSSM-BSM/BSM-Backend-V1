@@ -6,6 +6,7 @@ router.use(express.json({limit:'1mb'}));
 router.use(express.urlencoded({extended:true,limit:'1mb'}));
 
 import versionController from './version/version.controller';
+import oauthController from './oauth/oauth.controller';
 import accountController from './account/account.controller';
 import mealController from './school/meal/meal.controller';
 import pushController from './webpush/push.controller';
@@ -20,6 +21,7 @@ import loginCheck from '../util/loginCheck';
 
 router.use(jwt.refreshToken);
 
+router.use('/oauth', loginCheck, oauthController);
 router.use('/version', versionController);
 router.use('/account', accountController);
 router.use('/meal', mealController);
