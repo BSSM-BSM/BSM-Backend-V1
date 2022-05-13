@@ -1,10 +1,10 @@
 import express from "express";
-import { User } from "../api/account/User";
-import { InternalServerException, UnAuthorizedException } from "./exceptions";
+import { User } from "@src/api/account/User";
+import { InternalServerException, UnAuthorizedException } from "@src/util/exceptions";
+import * as accountRepository from '@src/api/account/account.repository';
+import * as tokenRepository from '@src/api/account/token.repository';
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-import * as accountRepository from '../api/account/account.repository';
-import * as tokenRepository from '../api/account/token.repository';
 
 const secretKey = process.env.SECRET_KEY;
 

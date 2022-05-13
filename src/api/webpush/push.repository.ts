@@ -1,5 +1,5 @@
-import { BadRequestException, InternalServerException } from '../../util/exceptions';
-const pool = require('../../util/db');
+import { BadRequestException, InternalServerException } from '@src/util/exceptions';
+const pool = require('@src/util/db');
 
 const register = async (
     endpoint: string,

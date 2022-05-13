@@ -1,9 +1,9 @@
-import { NotFoundException, UnAuthorizedException, ForbiddenException, BadRequestException } from '../../util/exceptions';
-import { User } from '../account/User';
-import * as boardRepository from './repository/board.repository';
-import * as postRepository from './repository/post.repository';
-import * as likeRepository from './repository/like.repository';
-import * as categoryRepository from './repository/category.repository';
+import { NotFoundException, UnAuthorizedException, ForbiddenException, BadRequestException } from '@src/util/exceptions';
+import { User } from '@src/api/account/User';
+import * as boardRepository from '@src/api/board/repository/board.repository';
+import * as postRepository from '@src/api/board/repository/post.repository';
+import * as likeRepository from '@src/api/board/repository/like.repository';
+import * as categoryRepository from '@src/api/board/repository/category.repository';
 
 const webpush = require('../../util/push');
 import { escapeAttrValue, FilterXSS } from 'xss';

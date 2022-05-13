@@ -1,5 +1,5 @@
-import { BadRequestException, NotFoundException, InternalServerException } from '../../../util/exceptions';
-import * as repository from './meister.repository';
+import { BadRequestException, NotFoundException, InternalServerException } from '@src/util/exceptions';
+import * as repository from '@src/api/school/meister/meister.repository';
 import request from 'request'
 const http = request.defaults({jar: true});
 import iconv from 'iconv-lite';

@@ -1,5 +1,5 @@
-import { InternalServerException } from '../../../util/exceptions';
-const pool = require('../../../util/db');
+import { InternalServerException } from '@src/util/exceptions';
+const pool = require('@src/util/db');
 
 const getBoardType = async (): Promise<[{
     id: string,

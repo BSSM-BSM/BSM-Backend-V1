@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import * as service from './meister.service';
+import * as service from '@src/api/school/meister/meister.service';
 
 router.post('/point/:grade/:classNo/:studentNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {

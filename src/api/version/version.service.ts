@@ -1,4 +1,4 @@
-import { NotFoundException } from '../../util/exceptions';
+import { NotFoundException } from '@src/util/exceptions';
 
 const getVersion = (
     isApp: string,

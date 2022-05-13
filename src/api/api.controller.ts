@@ -4,20 +4,20 @@ import * as jwt from '../util/jwt';
 
 router.use(express.json({limit:'1mb'}));
 router.use(express.urlencoded({extended:true,limit:'1mb'}));
+import loginCheck from '@src/util/loginCheck';
 
-import versionController from './version/version.controller';
-import oauthController from './oauth/oauth.controller';
-import accountController from './account/account.controller';
-import mealController from './school/meal/meal.controller';
-import pushController from './webpush/push.controller';
-import timetableController from './school/timetable/timetable.controller';
-import meisterController from './school/meister/meister.controller';
-import boardController from './board/board.controller';
-import postController from './board/post.controller';
-import commentController from './board/comment.controller';
-import likeController from './board/like.controller';
-import emoticonController from './board/emoticon.controller';
-import loginCheck from '../util/loginCheck';
+import versionController from '@src/api/version/version.controller';
+import oauthController from '@src/api/oauth/oauth.controller';
+import accountController from '@src/api/account/account.controller';
+import mealController from '@src/api/school/meal/meal.controller';
+import pushController from '@src/api/webpush/push.controller';
+import timetableController from '@src/api/school/timetable/timetable.controller';
+import meisterController from '@src/api/school/meister/meister.controller';
+import boardController from '@src/api/board/board.controller';
+import postController from '@src/api/board/post.controller';
+import commentController from '@src/api/board/comment.controller';
+import likeController from '@src/api/board/like.controller';
+import emoticonController from '@src/api/board/emoticon.controller';
 
 router.use(jwt.refreshToken);
 

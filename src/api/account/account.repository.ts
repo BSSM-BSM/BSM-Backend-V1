@@ -1,8 +1,8 @@
-import { InternalServerException } from '../../util/exceptions';
-const pool = require('../../util/db');
+import { InternalServerException } from '@src/util/exceptions';
+const pool = require('@src/util/db');
 import crypto from 'crypto';
-import { UserEntity } from './entity/user.entity';
-import { StudentEntity } from './entity/student.entity';
+import { UserEntity } from '@src/api/account/entity/user.entity';
+import { StudentEntity } from '@src/api/account/entity/student.entity';
 
 
 const getById = async (

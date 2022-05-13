@@ -1,6 +1,6 @@
-import { InternalServerException } from '../../../util/exceptions';
-import { CommentEntity } from '../entity/comment.entity';
-const pool = require('../../../util/db');
+import { InternalServerException } from '@src/util/exceptions';
+const pool = require('@src/util/db');
+import { CommentEntity } from '@src/api/board/entity/comment.entity';
 
 const getComments = async (
     boardType: string,

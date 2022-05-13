@@ -1,11 +1,10 @@
 import express from 'express';
 const router = express.Router();
-import * as service from './emoticon.service';
-import * as jwt from '../../util/jwt';
-import { User } from '../account/User';
-import loginCheck from '../../util/loginCheck';
+import { BadRequestException } from '@src/util/exceptions';
+import * as service from '@src/api/board/emoticon.service';
+import * as jwt from '@src/util/jwt';
+import { User } from '@src/api/account/User';
 import multer from 'multer';
-import { BadRequestException } from '../../util/exceptions';
 
 router.get('/:id', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {

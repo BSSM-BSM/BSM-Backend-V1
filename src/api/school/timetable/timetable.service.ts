@@ -1,5 +1,5 @@
-import { NotFoundException } from '../../../util/exceptions';
-import * as repository from './timetable.repository';
+import { NotFoundException } from '@src/util/exceptions';
+import * as repository from '@src/api/school/timetable/timetable.repository';
 
 const getTimetable = async (
     grade: number,

@@ -1,5 +1,5 @@
 import webpush from 'web-push';
-import * as pushRepository from '../api/webpush/push.repository';
+import * as pushRepository from '@src/api/webpush/push.repository';
 
 const PUSH_PUBLIC_KEY = process.env?.PUSH_PUBLIC_KEY;
 const PUSH_PRIVATE_KEY = process.env?.PUSH_PRIVATE_KEY;

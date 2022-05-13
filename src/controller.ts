@@ -1,8 +1,7 @@
 import express from 'express';
 const router = express.Router();
-
-import apiRouter from './api/api.controller';
-import viewRouter from './view/view.controller';
+import apiRouter from '@src/api/api.controller';
+import viewRouter from '@src/view/view.controller';
 
 // 업데이트 확인 url 하위호환
 router.post('/database', (req, res) => {
@@ -21,4 +20,4 @@ router.use((req, res) => {
     res.status(404).render('404');
 })
 
-module.exports = router;
+export = router;

@@ -1,9 +1,9 @@
 import express from "express";
 const router = express.Router();
-import * as service from './push.service';
-import * as jwt from '../../util/jwt';
-import { User } from "../account/User";
-import loginCheck from "../../util/loginCheck";
+import * as service from '@src/api/webpush/push.service';
+import * as jwt from '@src/util/jwt';
+import { User } from "@src/api/account/User";
+import loginCheck from "@src/util/loginCheck";
 
 router.post('/meal',
     loginCheck,

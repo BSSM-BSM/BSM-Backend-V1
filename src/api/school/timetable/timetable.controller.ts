@@ -1,6 +1,6 @@
 import express from "express"
 const router = express.Router();
-import * as service from './timetable.service';
+import * as service from '@src/api/school/timetable/timetable.service';
 
 router.get('/:grade/:classNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {

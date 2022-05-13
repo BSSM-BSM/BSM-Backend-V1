@@ -1,9 +1,9 @@
 import express from 'express';
-import { InternalServerException } from '../../util/exceptions';
-import * as jwt from '../../util/jwt';
-import * as service from './account.service';
-import { User } from './User';
-import loginCheck from '../../util/loginCheck';
+import { InternalServerException } from '@src/util/exceptions';
+import * as jwt from '@src/util/jwt';
+import * as service from '@src/api/account/account.service';
+import { User } from '@src/api/account/User';
+import loginCheck from '@src/util/loginCheck';
 
 const router = express.Router();
 import multer from 'multer';

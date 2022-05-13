@@ -1,7 +1,7 @@
-import { NotFoundException, InternalServerException, UnAuthorizedException, BadRequestException } from '../../util/exceptions';
-import * as emoticonRepository from './repository/emoticon.repository';
+import { NotFoundException, InternalServerException, UnAuthorizedException, BadRequestException } from '@src/util/exceptions';
+import * as emoticonRepository from '@src/api/board/repository/emoticon.repository';
 import fs from 'fs';
-import { User } from '../account/User';
+import { User } from '@src/api/account/User';
 
 const getemoticon = async (
     id: number

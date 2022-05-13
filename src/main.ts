@@ -3,7 +3,9 @@ dotenv.config({path: "./config/env/.env"});
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { HttpError } from './util/exceptions';
+import { HttpError } from '@src/util/exceptions';
+
+const rootDir = process.env.ROOT_DIR;
 const processName = process.env.name;
 const app = express();
 
@@ -27,10 +29,10 @@ app.set('trust proxy', 1);
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
-app.set('views', './views/pages');
-app.use(express.static('public'));
+app.set('views', `${rootDir}/views/pages`);
+app.use(express.static(`${rootDir}/public`));
 
-const controller = require('./controller');
+import controller from '@src/controller';
 app.use('/', controller);
 
 app.use((err: HttpError, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -50,7 +52,7 @@ app.use((err: HttpError, req: express.Request, res: express.Response, next: expr
 
 if (processName == 'primary') {
     const schedule = {
-        meal: require('./schedule/meal')
+        meal: require('@src/schedule/meal')
     };
 }
 

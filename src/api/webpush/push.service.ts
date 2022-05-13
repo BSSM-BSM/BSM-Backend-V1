@@ -1,6 +1,6 @@
-import { BadRequestException } from '../../util/exceptions';
-import * as repository from './push.repository';
-import { User } from "../account/User";
+import { BadRequestException } from '@src/util/exceptions';
+import * as repository from '@src/api/webpush/push.repository';
+import { User } from "@src/api/account/User";
 
 const register = async (
     endpoint: string,

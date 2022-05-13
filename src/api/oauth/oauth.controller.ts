@@ -1,8 +1,8 @@
 import express from 'express';
 const router = express.Router();
-import * as service from './oauth.service';
-import { User } from '../account/User';
-import * as jwt from '../../util/jwt';
+import * as service from '@src/api/oauth/oauth.service';
+import { User } from '@src/api/account/User';
+import * as jwt from '@src/util/jwt';
 
 
 router.get('/authentication', async (req: express.Request, res: express.Response, next: express.NextFunction) => {

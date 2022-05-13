@@ -1,8 +1,8 @@
-import { NotFoundException, UnAuthorizedException, ForbiddenException } from '../../util/exceptions';
-import { User } from '../account/User';
-import * as boardRepository from './repository/board.repository';
-import * as likeRepository from './repository/like.repository';
-import * as postRepository from './repository/post.repository';
+import { NotFoundException, UnAuthorizedException, ForbiddenException } from '@src/util/exceptions';
+import { User } from '@src/api/account/User';
+import * as boardRepository from '@src/api/board/repository/board.repository';
+import * as likeRepository from '@src/api/board/repository/like.repository';
+import * as postRepository from '@src/api/board/repository/post.repository';
 
 let boardTypeList: {
     [index: string]: {

@@ -1,9 +1,9 @@
 import express from 'express';
-import { BadRequestException, UnAuthorizedException } from '../../util/exceptions';
-import * as oauthClientReposiroty from './repository/client.repository';
-import * as oauthAuthcodeReposiroty from './repository/authcode.repository';
+import { BadRequestException, UnAuthorizedException } from '@src/util/exceptions';
+import * as oauthClientReposiroty from '@src/api/oauth/repository/client.repository';
+import * as oauthAuthcodeReposiroty from '@src/api/oauth/repository/authcode.repository';
 import crypto from 'crypto';
-import { User } from '../account/User';
+import { User } from '@src/api/account/User';
 
 const authentication = async (
     clientId: string,

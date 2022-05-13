@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
-import * as jwt from '../util/jwt';
-import boardController from './board.controller';
+import * as jwt from '@src/util/jwt';
+import boardController from '@src/view/board.controller';
 
 router.get('/', (req:express.Request, res:express.Response) => {
     res.render('index');

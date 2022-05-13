@@ -1,4 +1,4 @@
-import { InternalServerException } from './exceptions';
+import { InternalServerException } from '@src/util/exceptions';
 import nodemailer from 'nodemailer';
 
 const send = (

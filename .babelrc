@@ -1,0 +1,13 @@
+{
+    "ignore": [
+        "./views",
+        "./public"
+    ],
+    "plugins": [
+        ["module-resolver", {
+            "alias": {
+                "@src": "./dist"
+            }
+        }]
+    ]
+}

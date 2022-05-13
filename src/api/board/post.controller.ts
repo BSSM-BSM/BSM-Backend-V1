@@ -1,10 +1,10 @@
 import express from "express";
 const router = express.Router();
-import * as service from './post.service';
-import * as jwt from '../../util/jwt';
-import { User } from "../account/User";
+import * as service from '@src/api/board/post.service';
+import * as jwt from '@src/util/jwt';
+import loginCheck from "@src/util/loginCheck";
+import { User } from "@src/api/account/User";
 import multer from "multer";
-import loginCheck from "../../util/loginCheck";
 
 const uploadProcessing = multer({
     storage:multer.diskStorage({

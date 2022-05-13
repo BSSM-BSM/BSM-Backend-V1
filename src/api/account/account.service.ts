@@ -1,12 +1,12 @@
-import { NotFoundException, BadRequestException, UnAuthorizedException, ConflictException, InternalServerException } from '../../util/exceptions';
+import { NotFoundException, BadRequestException, UnAuthorizedException, ConflictException, InternalServerException } from '@src/util/exceptions';
 import express from 'express';
-import * as accountRepository from './account.repository';
-import * as tokenRepository from './token.repository';
-import * as jwt from '../../util/jwt';
+import * as accountRepository from '@src/api/account/account.repository';
+import * as tokenRepository from '@src/api/account/token.repository';
+import * as jwt from '@src/util/jwt';
+import * as mail from '@src/util/mail';
+import { User } from '@src/api/account/User';
 import crypto from 'crypto';
 import sharp from 'sharp';
-import * as mail from '../../util/mail';
-import { User } from './User';
 
 const login = async (
     res: express.Response,

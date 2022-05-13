@@ -1,7 +1,7 @@
-import { NotFoundException, UnAuthorizedException } from '../../util/exceptions';
-import { User } from '../account/User';
-import * as boardRepository from './repository/board.repository';
-import * as categoryRepository from './repository/category.repository';
+import { NotFoundException, UnAuthorizedException } from '@src/util/exceptions';
+import { User } from '@src/api/account/User';
+import * as boardRepository from '@src/api/board/repository/board.repository';
+import * as categoryRepository from '@src/api/board/repository/category.repository';
 
 
 let boardTypeList: {

@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import * as service from './version.service';
+import * as service from '@src/api/version/version.service';
 
 router.get('/:app/:os', (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {

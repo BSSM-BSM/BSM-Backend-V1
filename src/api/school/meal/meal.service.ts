@@ -1,5 +1,5 @@
-import { NotFoundException } from '../../../util/exceptions';
-const repository = require('./meal.repository');
+import { NotFoundException } from '@src/util/exceptions';
+import * as repository from '@src/api/school/meal/meal.repository';
 
 const getMeal = async (mealDate: string) => {
     const mealInfo = await repository.getMeal(mealDate);

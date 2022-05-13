@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-const service = require('./meal.service');
+import * as service from '@src/api/school/meal/meal.service';
 
 router.get('/:mealDate', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
     try {

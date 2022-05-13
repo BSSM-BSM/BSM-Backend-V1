@@ -1,10 +1,10 @@
-import { NotFoundException, UnAuthorizedException, BadRequestException, ForbiddenException } from '../../util/exceptions';
-import { User } from '../account/User';
-import boardRepository = require('./repository/board.repository');
-import commentRepository = require('./repository/comment.repository');
-import postRepository = require('./repository/post.repository');
-import { CommentEntity } from './entity/comment.entity';
-import { CommentDTO } from './entity/comment.dto';
+import { NotFoundException, UnAuthorizedException, BadRequestException, ForbiddenException } from '@src/util/exceptions';
+import { User } from '@src/api/account/User';
+import boardRepository = require('@src/api/board/repository/board.repository');
+import commentRepository = require('@src/api/board/repository/comment.repository');
+import postRepository = require('@src/api/board/repository/post.repository');
+import { CommentEntity } from '@src/api/board/entity/comment.entity';
+import { CommentDTO } from '@src/api/board/entity/comment.dto';
 
 import { FilterXSS } from 'xss';
 const xss = new FilterXSS({
