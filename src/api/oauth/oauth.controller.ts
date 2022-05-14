@@ -34,4 +34,32 @@ router.post('/authorization', async (req: express.Request, res: express.Response
     }
 })
 
+router.post('/token', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+        res.send(JSON.stringify(
+            await service.getToken(
+                req.body.clientId,
+                req.body.clientSecret,
+                req.body.authcode
+            )
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
+
+router.post('/resource', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+        res.send(JSON.stringify(
+            await service.getResource(
+                req.body.clientId,
+                req.body.clientSecret,
+                req.body.token
+            )
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
+
 export = router;
