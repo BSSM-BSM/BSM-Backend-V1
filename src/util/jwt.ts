@@ -3,10 +3,14 @@ import { User } from "@src/api/account/User";
 import { InternalServerException, UnAuthorizedException } from "@src/util/exceptions";
 import * as accountRepository from '@src/api/account/account.repository';
 import * as tokenRepository from '@src/api/account/token.repository';
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
+const cookieHostName = process.env.COOKIE_HOST;
 const secretKey = process.env.SECRET_KEY;
+if (!cookieHostName || !secretKey) {
+    throw new Error('Failed to load env config');
+}
 
 const sign = (
     payload: object,
@@ -44,19 +48,22 @@ const login = async (
 const verify = (
     token: string
 ) => {
-    let decoded;
+    let result: {
+        value: any,
+        message: string
+    } = {value:{},message:'INVALID'};
+
     try {
-        decoded = jwt.verify(token, secretKey);
+        result.value = jwt.verify(token, secretKey);
+        result.message = 'VALID';
     } catch (err: {message:string} | any) {
         if (err.message === 'jwt expired') {
-            return 'EXPIRED';
-        } else if (err.message === 'invalid token') {
-            return 'INVALID';
-        } else {
-            return 'INVALID';
+            result.message = 'EXPIRED';
         }
+        result.value = {};
+    } finally {
+        return result;
     }
-    return decoded;
 }
 
 const refreshToken = async (req:express.Request, res:express.Response, next:express.NextFunction) => {
@@ -67,73 +74,49 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     if (req.cookies.token) {
         const result = verify(req.cookies.token);
         // 액세스 토큰이 사용가능하면 무시하고 넘어감
-        if (!(result == 'EXPIRED' || result == 'INVALID')) {
+        if (!(result.message == 'EXPIRED' || result.message == 'INVALID')) {
             return next();
         }
     }
 
     const result = verify(req.cookies.refreshToken);
     // 리프레시 토큰이 유효하지 않으면 무시하고 넘어감
-    if (result == 'INVALID') {
+    if (result.message == 'INVALID') {
         res.clearCookie('refreshToken', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('refreshToken', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         res.clearCookie('token', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('token', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         return next();
     }
 
     // 리프레시 토큰이 만료되었으면 로그인을 요청
-    if (result == 'EXPIRED') {
+    if (result.message == 'EXPIRED') {
         res.clearCookie('refreshToken', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('refreshToken', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         res.clearCookie('token', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('token', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         return next(new UnAuthorizedException('Need to relogin'));
     }
 
     // db에서 리프레시 토큰 사용이 가능한지 확인
-    const tokenInfo = await tokenRepository.getToken(result.token);
+    const tokenInfo = await tokenRepository.getToken(result.value.token);
     // 리프레시 토큰이 db에서 사용불가 되었으면 로그인을 요청
     if (tokenInfo === null) {
         res.clearCookie('refreshToken', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('refreshToken', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         res.clearCookie('token', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('token', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         return next(new UnAuthorizedException('Need to relogin'));
     }
@@ -142,20 +125,12 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
     const userInfo = await accountRepository.getByUsercode(tokenInfo.usercode);
     if (userInfo === null) {
         res.clearCookie('refreshToken', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('refreshToken', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         res.clearCookie('token', {
-            domain:'.bssm.kro.kr',
-            path:'/',
-        });
-        res.clearCookie('token', {
-            domain:'bssm.kro.kr',
-            path:'/',
+            domain: cookieHostName,
+            path: '/'
         });
         return next(new UnAuthorizedException('Need to relogin'));
     }
@@ -172,8 +147,8 @@ const refreshToken = async (req:express.Request, res:express.Response, next:expr
         expiresIn:'1h'
     })
     res.cookie('token', token, {
-        domain:'.bssm.kro.kr',
-        path:'/',
+        domain: cookieHostName,
+        path: '/',
         httpOnly:true,
         secure:true,
         maxAge:1000*60*60// 1시간 동안 저장 1000ms*60초*60분

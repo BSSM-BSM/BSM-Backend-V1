@@ -30,7 +30,7 @@ router.post('/image',
 )
 
 router.get('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     try {
         res.send(JSON.stringify(
             await service.viewPost(
@@ -47,7 +47,7 @@ router.get('/:boardType/:postNo', async (req:express.Request, res:express.Respon
 router.post('/:boardType', 
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        const user = new User(jwt.verify(req.cookies.token));
+        const user = new User(jwt.verify(req.cookies.token).value);
         try {
             res.send(JSON.stringify(
                 await service.writePost(
@@ -67,7 +67,7 @@ router.post('/:boardType',
 router.put('/:boardType/:postNo', 
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        const user = new User(jwt.verify(req.cookies.token));
+        const user = new User(jwt.verify(req.cookies.token).value);
         try {
             res.send(JSON.stringify(
                 await service.updatePost(
@@ -88,7 +88,7 @@ router.put('/:boardType/:postNo',
 router.delete('/:boardType/:postNo', 
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        const user = new User(jwt.verify(req.cookies.token));
+        const user = new User(jwt.verify(req.cookies.token).value);
         try {
             res.send(JSON.stringify(
                 await service.deletePost(

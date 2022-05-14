@@ -19,7 +19,7 @@ router.get('/authentication', async (req: express.Request, res: express.Response
 })
 
 router.post('/authorization', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     try {
         res.send(JSON.stringify(
             await service.authorization(

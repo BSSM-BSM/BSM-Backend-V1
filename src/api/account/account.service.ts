@@ -8,6 +8,8 @@ import { User } from '@src/api/account/User';
 import crypto from 'crypto';
 import sharp from 'sharp';
 
+const cookieHostName = process.env.COOKIE_HOST;
+
 const login = async (
     res: express.Response,
     userId: string,
@@ -27,14 +29,14 @@ const login = async (
 
     const jwtToken = await jwt.login(user, '1h');
     res.cookie('token', jwtToken.token, {
-        domain: '.bssm.kro.kr',
+        domain: cookieHostName,
         path: '/',
         httpOnly: true,
         secure: true,
         maxAge: 1000*60*60// 1시간 동안 저장 1000ms*60초*60분
     });
     res.cookie('refreshToken', jwtToken.refreshToken, {
-        domain: '.bssm.kro.kr',
+        domain: cookieHostName,
         path: '/',
         httpOnly: true,
         secure: true,
@@ -290,26 +292,26 @@ const pwEdit = async (
     userPwCheck: string
 ) => {
     const jwtValue = jwt.verify(token);
-    const user = new User(jwtValue);
+    const user = new User(jwtValue.value);
 
-    if (jwtValue == 'EXPIRED') {
+    if (jwtValue.message == 'EXPIRED') {
         throw new UnAuthorizedException('Token expired');
     }
-    if (!(jwtValue.pwEdit || user.getIsLogin())) {
+    if (!(jwtValue.value.pwEdit || user.getIsLogin())) {
         throw new BadRequestException();
     }
-    const usercode = user.getIsLogin()? user.getUser().code: jwtValue.pwEdit;
+    const usercode = user.getIsLogin()? user.getUser().code: jwtValue.value.pwEdit;
 
     if (userPw != userPwCheck) {
         throw new BadRequestException('Password not match');
     }
     await accountRepository.updatePWByCode(usercode, userPw);
     res.clearCookie('token', {
-        domain:'.bssm.kro.kr',
+        domain:cookieHostName,
         path:'/',
     });
     res.clearCookie('refreshToken', {
-        domain:'.bssm.kro.kr',
+        domain:cookieHostName,
         path:'/',
     });
 }
@@ -341,7 +343,7 @@ const nicknameEdit = async (
     // 액세스 토큰 재발행
     const token = jwt.sign(payload, '1h');
     res.cookie('token', token, {
-        domain: '.bssm.kro.kr',
+        domain: cookieHostName,
         path: '/',
         httpOnly: true,
         secure: true,
@@ -362,15 +364,15 @@ const token = async (
     }
     const result = jwt.verify(refreshToken);
     // 리프레시 토큰이 유효하지 않으면
-    if (result=='INVALID') {
+    if (result.message=='INVALID') {
         throw new BadRequestException();
     }
     // 리프레시 토큰이 만료되었으면
-    if (result=='EXPIRED') {
+    if (result.message=='EXPIRED') {
         throw new UnAuthorizedException();
     }
     // db에서 리프레시 토큰 사용이 가능한지 확인
-    const tokenInfo = await tokenRepository.getToken(result.token);
+    const tokenInfo = await tokenRepository.getToken(result.value.token);
     // 리프레시 토큰이 db에서 사용불가 되었으면
     if (tokenInfo === null) {
         throw new UnAuthorizedException();

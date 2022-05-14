@@ -20,26 +20,16 @@ router.post('/login', async (req: express.Request, res: express.Response, next: 
 
 router.delete('/logout', (req: express.Request, res: express.Response) => {
     res.clearCookie('token', {
-        domain:'bssm.kro.kr',
         path:'/',
     });
     res.clearCookie('refreshToken', {
-        domain:'bssm.kro.kr',
-        path:'/',
-    });
-    res.clearCookie('token', {
-        domain:'.bssm.kro.kr',
-        path:'/',
-    });
-    res.clearCookie('refreshToken', {
-        domain:'.bssm.kro.kr',
         path:'/',
     });
     res.send();
 })
 
 router.get('/islogin', (req: express.Request, res: express.Response) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     if (user.getIsLogin()) {
         res.send({islogin:true});
     } else {
@@ -66,7 +56,7 @@ router.post('/', async (req: express.Request, res: express.Response, next: expre
 router.get('/:usercode',
     loginCheck,
     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const user = new User(jwt.verify(req.cookies.token));
+        const user = new User(jwt.verify(req.cookies.token).value);
         try {
             res.send(JSON.stringify(
                 await service.viewUser(user, Number(req.params.usercode))
@@ -135,7 +125,7 @@ router.put('/pw', async (req: express.Request, res: express.Response, next: expr
 })
 
 router.put('/nickname', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     try {
         res.send(JSON.stringify(
             await service.nicknameEdit(
@@ -167,7 +157,7 @@ router.post('/profile',
                 cb(null, 'public/resource/user/profile_images/');
             },
             filename:(req: express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-                const user = new User(jwt.verify(req.cookies.token));
+                const user = new User(jwt.verify(req.cookies.token).value);
                 cb(null, 'temp-profile_'+user.getUser().code+'.'+file.originalname.split('.')[file.originalname.split('.').length-1]);
             }
         })

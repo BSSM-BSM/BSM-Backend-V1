@@ -5,7 +5,7 @@ import * as jwt from '@src/util/jwt';
 import { User } from "@src/api/account/User";
 
 router.post('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     try {
         res.send(JSON.stringify(
             await service.like(

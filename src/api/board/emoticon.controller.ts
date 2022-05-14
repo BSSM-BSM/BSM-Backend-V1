@@ -60,7 +60,7 @@ const uploadProcessing = multer({
 })
 
 const uploadEmoticon = async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     try {
         if (req.files === undefined) {
             throw new BadRequestException();

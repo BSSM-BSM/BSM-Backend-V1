@@ -6,7 +6,7 @@ import { User } from "@src/api/account/User";
 import loginCheck from "@src/util/loginCheck";
 
 router.get('/:boardType/:postNo', async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-    const user = new User(jwt.verify(req.cookies.token));
+    const user = new User(jwt.verify(req.cookies.token).value);
     try {
         res.send(JSON.stringify(
             await service.viewComment(
@@ -23,7 +23,7 @@ router.get('/:boardType/:postNo', async (req:express.Request, res:express.Respon
 router.post('/:boardType/:postNo/:depth?/:parentIdx?',
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        const user = new User(jwt.verify(req.cookies.token));
+        const user = new User(jwt.verify(req.cookies.token).value);
         try {
             res.send(JSON.stringify(
                 await service.writeComment(
@@ -44,7 +44,7 @@ router.post('/:boardType/:postNo/:depth?/:parentIdx?',
 router.delete('/:boardType/:postNo/:commentIdx',
     loginCheck,
     async (req:express.Request, res:express.Response, next:express.NextFunction) => {
-        const user = new User(jwt.verify(req.cookies.token));
+        const user = new User(jwt.verify(req.cookies.token).value);
         try {
             res.send(JSON.stringify(
                 await service.deleteComment(
