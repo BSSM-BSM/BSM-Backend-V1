@@ -24,7 +24,6 @@ router.post('/authorization', loginCheck, async (req: express.Request, res: expr
     try {
         res.send(JSON.stringify(
             await service.authorization(
-                res,
                 user,
                 req.body.clientId,
                 req.body.redirectUri

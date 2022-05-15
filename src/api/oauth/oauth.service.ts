@@ -50,7 +50,6 @@ const authentication = async (
 }
 
 const authorization = async (
-    res: express.Response,
     user: User,
     clientId: string,
     redirectUri: string
@@ -68,7 +67,9 @@ const authorization = async (
 
     const newAuthcode = crypto.randomBytes(16).toString('hex');
     await oauthAuthcodeReposiroty.createAuthcode(newAuthcode, clientId, user.getUser().code);
-    res.redirect(`${clientInfo.redirectUri}?code=${newAuthcode}`);
+    return {
+        redirect: `${clientInfo.redirectUri}?code=${newAuthcode}`
+    }
 }
 
 const getToken = async (
@@ -198,7 +199,7 @@ const domainCheck = (str: string): boolean => {
 }
 
 const uriCheck = (str: string): boolean => {
-    const pattern = /^(((http(s?))\:\/\/)?)(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6})(:([1-6][0-5]{2}[0-3][0-5]|[1-9][0-9]{0,3}))?\/.*/
+    const pattern = /((http(s?))\:\/\/)(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6})(:([1-6][0-5]{2}[0-3][0-5]|[1-9][0-9]{0,3}))?\/.*/
     return pattern.test(str);
 }
 

@@ -53,6 +53,14 @@ router.get('/login', (req ,res) => {
     res.render('etc/login');
 })
 
+router.get('/oauth', (req, res) => {
+    res.render('oauth/home');
+})
+
+router.get('/oauth/login', (req, res) => {
+    res.render('oauth/login');
+})
+
 router.use('/board', boardController);
 
 export = router;
