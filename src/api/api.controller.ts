@@ -21,7 +21,7 @@ import emoticonController from '@src/api/board/emoticon.controller';
 
 router.use(jwt.refreshToken);
 
-router.use('/oauth', loginCheck, oauthController);
+router.use('/oauth', oauthController);
 router.use('/version', versionController);
 router.use('/account', accountController);
 router.use('/meal', mealController);

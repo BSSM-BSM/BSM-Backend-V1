@@ -23,6 +23,27 @@ const getById = async (
     }
 }
 
+const insertScope = async (
+    clientId: string,
+    scopeList: string[]
+) => {
+    let temp: string[] = [];
+    let params: string[] = [];
+    // 한 번에 insert 하기 위해
+    scopeList.forEach(e => {
+        params.push(clientId, e);
+        temp.push('(?, ?)');
+    });
+    const insertQuery = `INSERT INTO oauth_scope VALUES ${temp.join(',')}`;
+    try {
+        await pool.query(insertQuery, params);
+    }catch(err) {
+        console.error(err)
+        throw new InternalServerException();
+    }
+}
+
 export {
-    getById
+    getById,
+    insertScope
 }

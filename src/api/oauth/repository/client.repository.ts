@@ -8,13 +8,15 @@ const getById = async (
     domain: string,
     serviceName: string,
     redirectUri: string,
+    usercode: number
 } | null> => {
-    const getQuery='SELECT client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectUri FROM oauth_client WHERE client_id=?';
+    const getQuery='SELECT client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectUri, usercode FROM oauth_client WHERE client_id=?';
     // SELECT 
     //     client_secret clientSecret, 
     //     domain, 
     //     service_name serviceName, 
-    //     redirect_uri redirectUri 
+    //     redirect_uri redirectUri, 
+    //     usercode 
     // FROM oauth_client 
     // WHERE client_id=?
     try {
@@ -29,6 +31,32 @@ const getById = async (
     }
 }
 
+const createClient = async (
+    clientId: string,
+    clientSecret: string,
+    domain: string,
+    serviceName: string,
+    redirectUri: string,
+    usercode: number
+): Promise<void> => {
+    const insertQuery='INSERT INTO oauth_client (client_id, client_secret, `domain`, service_name, redirect_uri, usercode) VALUES(?, ?, ?, ?, ?, ?)';
+    // INSERT INTO oauth_client (
+    //     client_id, 
+    //     client_secret, 
+    //     `domain`, 
+    //     service_name, 
+    //     redirect_uri, 
+    //     usercode) 
+    // VALUES(?, ?, ?, ?, ?, ?)
+    try {
+        await pool.query(insertQuery, [clientId, clientSecret, domain, serviceName, redirectUri, usercode]);
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 export {
-    getById
+    getById,
+    createClient
 }

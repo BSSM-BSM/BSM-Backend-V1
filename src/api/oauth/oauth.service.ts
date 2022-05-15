@@ -149,9 +149,63 @@ const getResource = async (
     }
 }
 
+const createClient = async (
+    user: User,
+    domain: string,
+    serviceName: string,
+    redirectUri: string,
+    scope: string
+) => {
+    if (!domain || domain.length > 63 || !domainCheck(domain)) {
+        throw new BadRequestException('Domain is invalid');
+    }
+    if (!redirectUri || redirectUri.length > 100 || !uriCheck(redirectUri)) {
+        throw new BadRequestException('Redirect uri is invalid');
+    }
+    if (!serviceName || serviceName.length < 2 || serviceName.length > 24) {
+        throw new BadRequestException('Service name is invalid');
+    }
+
+    let scopeList;
+    try {
+        scopeList = JSON.parse(scope);
+        if (typeof scopeList != 'object' || !scopeList.length) {
+            throw new BadRequestException('Scope is invalid');
+        }
+    } catch (err) {
+        throw new BadRequestException('Scope is invalid');
+    }
+
+    const scopeListCheck = scopeList.filter((e: string) => scopeInfoList.some(scopeInfo => e == scopeInfo.info));
+    if (scopeListCheck.length != scopeList.length) {
+        throw new BadRequestException('Scope is invalid');
+    }
+
+    const newClientId = crypto.randomBytes(4).toString('hex');
+    const newClientSecret = crypto.randomBytes(16).toString('hex');
+    await oauthClientReposiroty.createClient(newClientId, newClientSecret, domain, serviceName, redirectUri, user.getUser().code);
+    await oauthScopeReposiroty.insertScope(newClientId, scopeListCheck);
+
+    return {
+        clientId: newClientId,
+        clientSecret: newClientSecret
+    }
+}
+
+const domainCheck = (str: string): boolean => {
+    const pattern = /^((([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6})?)$/;
+    return pattern.test(str);
+}
+
+const uriCheck = (str: string): boolean => {
+    const pattern = /^(((http(s?))\:\/\/)?)(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6})(:([1-6][0-5]{2}[0-3][0-5]|[1-9][0-9]{0,3}))?\/.*/
+    return pattern.test(str);
+}
+
 export {
     authentication,
     authorization,
     getToken,
-    getResource
+    getResource,
+    createClient
 }
