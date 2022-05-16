@@ -160,10 +160,10 @@ const createClient = async (
     if (!domain || domain.length > 63 || !domainCheck(domain)) {
         throw new BadRequestException('Domain is invalid');
     }
-    if (!redirectUri || redirectUri.length > 100 || !uriCheck(redirectUri)) {
+    if (!redirectUri || redirectUri.length > 100 || !uriCheck(domain, redirectUri)) {
         throw new BadRequestException('Redirect uri is invalid');
     }
-    if (!serviceName || serviceName.length < 2 || serviceName.length > 24) {
+    if (!serviceName || serviceName.length < 2 || serviceName.length > 32) {
         throw new BadRequestException('Service name is invalid');
     }
 
@@ -198,8 +198,8 @@ const domainCheck = (str: string): boolean => {
     return pattern.test(str);
 }
 
-const uriCheck = (str: string): boolean => {
-    const pattern = /((http(s?))\:\/\/)(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6})(:([1-6][0-5]{2}[0-3][0-5]|[1-9][0-9]{0,3}))?\/.*/
+const uriCheck = (domain: string, str: string): boolean => {
+    const pattern = new RegExp(`((http(s?))\\:\\/\\/)(${domain})(:([1-6][0-5]{2}[0-3][0-5]|[1-9][0-9]{0,3}))?\\/.*`);
     return pattern.test(str);
 }
 

@@ -61,6 +61,10 @@ router.get('/oauth/login', (req, res) => {
     res.render('oauth/login');
 })
 
+router.get('/oauth/manage', (req, res) => {
+    res.render('oauth/manage');
+})
+
 router.use('/board', boardController);
 
 export = router;
