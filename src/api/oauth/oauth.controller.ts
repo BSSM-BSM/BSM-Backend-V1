@@ -79,4 +79,14 @@ router.post('/client', loginCheck, async (req: express.Request, res: express.Res
     }
 })
 
+router.get('/client', loginCheck, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const user = new User(jwt.verify(req.cookies.token).value);
+    try {
+        res.send(JSON.stringify(
+            await service.getClientList(user)
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
 export = router;

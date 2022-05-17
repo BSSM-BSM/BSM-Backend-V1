@@ -23,16 +23,41 @@ const getById = async (
     }
 }
 
+const getByUsercode = async (
+    usercode: number
+): Promise<[{
+    clientId: string,
+    info: string
+}] | null> => {
+    const getQuery='SELECT client_id clientId, info FROM oauth_scope WHERE usercode=?';
+    // SELECT 
+    //     client_id clientId, 
+    //     info 
+    // FROM oauth_scope 
+    // WHERE usercode=?
+    try {
+        const [rows] = await pool.query(getQuery, [usercode]);
+        if (rows.length)
+            return rows;
+        else
+            return null;
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const insertScope = async (
     clientId: string,
-    scopeList: string[]
+    scopeList: string[],
+    usercode: number
 ) => {
     let temp: string[] = [];
-    let params: string[] = [];
+    let params: (string | number)[] = [];
     // 한 번에 insert 하기 위해
     scopeList.forEach(e => {
-        params.push(clientId, e);
-        temp.push('(?, ?)');
+        params.push(clientId, e, usercode);
+        temp.push('(?, ?, ?)');
     });
     const insertQuery = `INSERT INTO oauth_scope VALUES ${temp.join(',')}`;
     try {
@@ -45,5 +70,6 @@ const insertScope = async (
 
 export {
     getById,
+    getByUsercode,
     insertScope
 }

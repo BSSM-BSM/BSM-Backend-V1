@@ -31,6 +31,36 @@ const getById = async (
     }
 }
 
+const getByUsercode = async (
+    usercode: number
+): Promise<[{
+    clientId: string,
+    clientSecret: string,
+    domain: string,
+    serviceName: string,
+    redirectUri: string,
+}] | null> => {
+    const getQuery='SELECT client_id clientId, client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectUri FROM oauth_client WHERE usercode=?';
+    // SELECT 
+    //     client_id clientId, 
+    //     client_secret clientSecret, 
+    //     domain, 
+    //     service_name serviceName, 
+    //     redirect_uri redirectUri 
+    // FROM oauth_client 
+    // WHERE usercode=?
+    try {
+        const [rows] = await pool.query(getQuery, [usercode]);
+        if (rows.length)
+            return rows;
+        else
+            return null;
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const createClient = async (
     clientId: string,
     clientSecret: string,
@@ -58,5 +88,6 @@ const createClient = async (
 
 export {
     getById,
+    getByUsercode,
     createClient
 }

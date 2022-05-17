@@ -185,7 +185,7 @@ const createClient = async (
     const newClientId = crypto.randomBytes(4).toString('hex');
     const newClientSecret = crypto.randomBytes(16).toString('hex');
     await oauthClientReposiroty.createClient(newClientId, newClientSecret, domain, serviceName, redirectUri, user.getUser().code);
-    await oauthScopeReposiroty.insertScope(newClientId, scopeListCheck);
+    await oauthScopeReposiroty.insertScope(newClientId, scopeListCheck, user.getUser().code);
 
     return {
         clientId: newClientId,
@@ -203,10 +203,50 @@ const uriCheck = (domain: string, str: string): boolean => {
     return pattern.test(str);
 }
 
+const getClientList = async (
+    user: User
+) => {
+    const clientList: [{
+        clientId: string;
+        clientSecret: string;
+        domain: string;
+        serviceName: string;
+        redirectUri: string;
+        scope?: {
+            info: string;
+            name: string;
+            description: string;
+        }[]
+    }] | null = await oauthClientReposiroty.getByUsercode(user.getUser().code);
+    if (clientList === null) {
+        return {
+            clientList: []
+        }
+    }
+
+    const scopeList = await oauthScopeReposiroty.getByUsercode(user.getUser().code);
+    if (scopeList === null) {
+        throw new NotFoundException('Failed to load scope list');
+    }
+    clientList.forEach((client, i) => {
+        const clientScopeList =  scopeList.filter(scope => client.clientId == scope.clientId);
+        clientList[i].scope = scopeInfoList.filter(e => clientScopeList.some(scope => scope.info == e.info));
+    })
+    
+    return {
+        clientList: clientList.map(client => {
+            return {
+                ...client
+            }
+        })
+    }
+}
+
 export {
     authentication,
     authorization,
     getToken,
     getResource,
-    createClient
+    createClient,
+    getClientList
 }
