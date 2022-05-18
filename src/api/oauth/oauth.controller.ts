@@ -11,7 +11,7 @@ router.get('/authentication', loginCheck, async (req: express.Request, res: expr
         res.send(JSON.stringify(
             await service.authentication(
                 String(req.query.clientId),
-                String(req.query.redirectUri)
+                String(req.query.redirectURI)
             )
         ));
     } catch(err) {
@@ -26,7 +26,7 @@ router.post('/authorization', loginCheck, async (req: express.Request, res: expr
             await service.authorization(
                 user,
                 req.body.clientId,
-                req.body.redirectUri
+                req.body.redirectURI
             )
         ));
     } catch(err) {
@@ -70,7 +70,7 @@ router.post('/client', loginCheck, async (req: express.Request, res: express.Res
                 user,
                 req.body.domain,
                 req.body.serviceName,
-                req.body.redirectUri,
+                req.body.redirectURI,
                 req.body.scope
             )
         ));
@@ -89,4 +89,15 @@ router.get('/client', loginCheck, async (req: express.Request, res: express.Resp
         next(err);
     }
 })
+
+router.get('/scopeInfo', loginCheck, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+        res.send(JSON.stringify(
+            service.getScopeInfo()
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
+
 export = router;

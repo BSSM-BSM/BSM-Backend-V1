@@ -7,15 +7,15 @@ const getById = async (
     clientSecret: string,
     domain: string,
     serviceName: string,
-    redirectUri: string,
+    redirectURI: string,
     usercode: number
 } | null> => {
-    const getQuery='SELECT client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectUri, usercode FROM oauth_client WHERE client_id=?';
+    const getQuery='SELECT client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectURI, usercode FROM oauth_client WHERE client_id=?';
     // SELECT 
     //     client_secret clientSecret, 
     //     domain, 
     //     service_name serviceName, 
-    //     redirect_uri redirectUri, 
+    //     redirect_uri redirectURI, 
     //     usercode 
     // FROM oauth_client 
     // WHERE client_id=?
@@ -38,15 +38,15 @@ const getByUsercode = async (
     clientSecret: string,
     domain: string,
     serviceName: string,
-    redirectUri: string,
+    redirectURI: string,
 }] | null> => {
-    const getQuery='SELECT client_id clientId, client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectUri FROM oauth_client WHERE usercode=?';
+    const getQuery='SELECT client_id clientId, client_secret clientSecret, domain, service_name serviceName, redirect_uri redirectURI FROM oauth_client WHERE usercode=?';
     // SELECT 
     //     client_id clientId, 
     //     client_secret clientSecret, 
     //     domain, 
     //     service_name serviceName, 
-    //     redirect_uri redirectUri 
+    //     redirect_uri redirectURI 
     // FROM oauth_client 
     // WHERE usercode=?
     try {
@@ -66,7 +66,7 @@ const createClient = async (
     clientSecret: string,
     domain: string,
     serviceName: string,
-    redirectUri: string,
+    redirectURI: string,
     usercode: number
 ): Promise<void> => {
     const insertQuery='INSERT INTO oauth_client (client_id, client_secret, `domain`, service_name, redirect_uri, usercode) VALUES(?, ?, ?, ?, ?, ?)';
@@ -79,7 +79,7 @@ const createClient = async (
     //     usercode) 
     // VALUES(?, ?, ?, ?, ?, ?)
     try {
-        await pool.query(insertQuery, [clientId, clientSecret, domain, serviceName, redirectUri, usercode]);
+        await pool.query(insertQuery, [clientId, clientSecret, domain, serviceName, redirectURI, usercode]);
     } catch(err) {
         console.error(err);
         throw new InternalServerException();

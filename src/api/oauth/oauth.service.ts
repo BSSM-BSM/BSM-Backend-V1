@@ -26,13 +26,13 @@ getScopeInfoList();
 
 const authentication = async (
     clientId: string,
-    redirectUri: string
+    redirectURI: string
 ) => {
     const clientInfo = await oauthClientReposiroty.getById(clientId);
     if (clientInfo === null) {
         throw new BadRequestException('Oauth Authentication Failed');
     }
-    if (clientInfo.redirectUri != redirectUri) {
+    if (clientInfo.redirectURI != redirectURI) {
         throw new BadRequestException('Oauth Authentication Failed');
     }
     const { domain, serviceName } = clientInfo;
@@ -52,7 +52,7 @@ const authentication = async (
 const authorization = async (
     user: User,
     clientId: string,
-    redirectUri: string
+    redirectURI: string
 ) => {
     if (!user.getIsLogin()) {
         throw new UnAuthorizedException();
@@ -61,14 +61,14 @@ const authorization = async (
     if (clientInfo === null) {
         throw new BadRequestException('Oauth Authentication Failed');
     }
-    if (clientInfo.redirectUri != redirectUri) {
+    if (clientInfo.redirectURI != redirectURI) {
         throw new BadRequestException('Oauth Authentication Failed');
     }
 
     const newAuthcode = crypto.randomBytes(16).toString('hex');
     await oauthAuthcodeReposiroty.createAuthcode(newAuthcode, clientId, user.getUser().code);
     return {
-        redirect: `${clientInfo.redirectUri}?code=${newAuthcode}`
+        redirect: `${clientInfo.redirectURI}?code=${newAuthcode}`
     }
 }
 
@@ -154,13 +154,13 @@ const createClient = async (
     user: User,
     domain: string,
     serviceName: string,
-    redirectUri: string,
-    scope: string
+    redirectURI: string,
+    scope: string | string[]
 ) => {
     if (!domain || domain.length > 63 || !domainCheck(domain)) {
         throw new BadRequestException('Domain is invalid');
     }
-    if (!redirectUri || redirectUri.length > 100 || !uriCheck(domain, redirectUri)) {
+    if (!redirectURI || redirectURI.length > 100 || !uriCheck(domain, redirectURI)) {
         throw new BadRequestException('Redirect uri is invalid');
     }
     if (!serviceName || serviceName.length < 2 || serviceName.length > 32) {
@@ -169,22 +169,22 @@ const createClient = async (
 
     let scopeList;
     try {
-        scopeList = JSON.parse(scope);
+        scopeList = (typeof scope == 'string')? JSON.parse(scope): scope;
         if (typeof scopeList != 'object' || !scopeList.length) {
-            throw new BadRequestException('Scope is invalid');
+            throw new BadRequestException('Scope is invalid1');
         }
     } catch (err) {
-        throw new BadRequestException('Scope is invalid');
+        throw new BadRequestException('Scope is invalid2');
     }
 
     const scopeListCheck = scopeList.filter((e: string) => scopeInfoList.some(scopeInfo => e == scopeInfo.info));
     if (scopeListCheck.length != scopeList.length) {
-        throw new BadRequestException('Scope is invalid');
+        throw new BadRequestException('Scope is invalid3');
     }
 
     const newClientId = crypto.randomBytes(4).toString('hex');
     const newClientSecret = crypto.randomBytes(16).toString('hex');
-    await oauthClientReposiroty.createClient(newClientId, newClientSecret, domain, serviceName, redirectUri, user.getUser().code);
+    await oauthClientReposiroty.createClient(newClientId, newClientSecret, domain, serviceName, redirectURI, user.getUser().code);
     await oauthScopeReposiroty.insertScope(newClientId, scopeListCheck, user.getUser().code);
 
     return {
@@ -194,12 +194,15 @@ const createClient = async (
 }
 
 const domainCheck = (str: string): boolean => {
-    const pattern = /^((([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6})?)$/;
+    if (str == 'localhost') {
+        return true;
+    }
+    const pattern = /^([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6}?$/;
     return pattern.test(str);
 }
 
 const uriCheck = (domain: string, str: string): boolean => {
-    const pattern = new RegExp(`((http(s?))\\:\\/\\/)(${domain})(:([1-6][0-5]{2}[0-3][0-5]|[1-9][0-9]{0,3}))?\\/.*`);
+    const pattern = new RegExp(`(https?\\:\\/\\/)(${domain})(\\:(6[0-5]{2}[0-3][0-5]|[1-5][0-9]{4}|[1-9][0-9]{0,3}))?\\/.*`);
     return pattern.test(str);
 }
 
@@ -211,7 +214,7 @@ const getClientList = async (
         clientSecret: string;
         domain: string;
         serviceName: string;
-        redirectUri: string;
+        redirectURI: string;
         scope?: {
             info: string;
             name: string;
@@ -242,11 +245,18 @@ const getClientList = async (
     }
 }
 
+const getScopeInfo = () => {
+    return {
+        scopeInfoList
+    }
+}
+
 export {
     authentication,
     authorization,
     getToken,
     getResource,
     createClient,
-    getClientList
+    getClientList,
+    getScopeInfo
 }
