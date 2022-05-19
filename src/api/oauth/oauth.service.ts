@@ -1,5 +1,5 @@
 import express from 'express';
-import { BadRequestException, InternalServerException, NotFoundException, UnAuthorizedException } from '@src/util/exceptions';
+import { BadRequestException, NotFoundException, UnAuthorizedException } from '@src/util/exceptions';
 import * as oauthClientReposiroty from '@src/api/oauth/repository/client.repository';
 import * as oauthScopeReposiroty from '@src/api/oauth/repository/scope.repository';
 import * as oauthScopeInfoReposiroty from '@src/api/oauth/repository/scopeInfo.repository';
@@ -25,6 +25,7 @@ const getScopeInfoList = async () => {
 getScopeInfoList();
 
 const authentication = async (
+    user: User,
     clientId: string,
     redirectURI: string
 ) => {
@@ -41,8 +42,14 @@ const authentication = async (
     if (scopeInfo === null) {
         throw new NotFoundException('Failed to load scope info');
     }
+    if (await oauthTokenReposiroty.getByUsercodeAndClientId(user.getUser().code, clientId)) {
+        return {
+            authorized: true
+        }
+    }
     
     return {
+        authorized: false,
         domain,
         serviceName,
         scope: scopeInfoList.filter(e => scopeInfo.some(scope => scope.info == e.info))
@@ -91,6 +98,14 @@ const getToken = async (
     }
 
     await oauthAuthcodeReposiroty.expireCode(authcode);
+
+    const authorizedInfo = await oauthTokenReposiroty.getByUsercodeAndClientId(authcodeInfo.usercode, clientId);
+    if (authorizedInfo !== null) {
+        return {
+            token: authorizedInfo.token
+        }
+    }
+    
     const newToken = crypto.randomBytes(16).toString('hex');
     await oauthTokenReposiroty.createToken(newToken, clientId, authcodeInfo.usercode);
 
@@ -171,15 +186,15 @@ const createClient = async (
     try {
         scopeList = (typeof scope == 'string')? JSON.parse(scope): scope;
         if (typeof scopeList != 'object' || !scopeList.length) {
-            throw new BadRequestException('Scope is invalid1');
+            throw new BadRequestException('Scope is invalid');
         }
     } catch (err) {
-        throw new BadRequestException('Scope is invalid2');
+        throw new BadRequestException('Scope is invalid');
     }
 
     const scopeListCheck = scopeList.filter((e: string) => scopeInfoList.some(scopeInfo => e == scopeInfo.info));
     if (scopeListCheck.length != scopeList.length) {
-        throw new BadRequestException('Scope is invalid3');
+        throw new BadRequestException('Scope is invalid');
     }
 
     const newClientId = crypto.randomBytes(4).toString('hex');

@@ -25,6 +25,31 @@ const getByToken = async (
     }
 }
 
+const getByUsercodeAndClientId = async (
+    usercode: number,
+    clientId: string
+): Promise<{
+    token: string
+} | null> => {
+    const getQuery='SELECT token FROM oauth_token WHERE usercode=? AND client_id=?';
+    // SELECT 
+    //     token 
+    // FROM oauth_token 
+    // WHERE 
+    //     usercode=? AND 
+    //     client_id=?
+    try {
+        const [rows] = await pool.query(getQuery, [usercode, clientId]);
+        if (rows.length)
+            return rows[0];
+        else
+            return null;
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 const createToken = async (
     token: string,
     clientId: string,
@@ -62,6 +87,7 @@ const expireCode = async (
 
 export {
     getByToken,
+    getByUsercodeAndClientId,
     createToken,
     expireCode
 }
