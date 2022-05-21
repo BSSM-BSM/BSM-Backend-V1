@@ -81,6 +81,20 @@ router.post('/client', loginCheck, async (req: express.Request, res: express.Res
     }
 })
 
+router.delete('/client/:clientId', loginCheck, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const user = new User(jwt.verify(req.cookies.token).value);
+    try {
+        res.send(JSON.stringify(
+            await service.deleteClient(
+                req.params.clientId,
+                user
+            )
+        ));
+    } catch(err) {
+        next(err);
+    }
+})
+
 router.get('/client', loginCheck, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const user = new User(jwt.verify(req.cookies.token).value);
     try {

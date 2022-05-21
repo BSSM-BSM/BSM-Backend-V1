@@ -221,6 +221,17 @@ const uriCheck = (domain: string, str: string): boolean => {
     return pattern.test(str);
 }
 
+const deleteClient = async (
+    clientId: string,
+    user: User
+) => {
+    const clientInfo = await oauthClientReposiroty.getById(clientId);
+    if (clientInfo === null || clientInfo.usercode != user.getUser().code) {
+        throw new BadRequestException();
+    }
+    await oauthClientReposiroty.deleteClient(clientId);
+}
+
 const getClientList = async (
     user: User
 ) => {
@@ -272,6 +283,7 @@ export {
     getToken,
     getResource,
     createClient,
+    deleteClient,
     getClientList,
     getScopeInfo
 }

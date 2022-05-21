@@ -86,8 +86,23 @@ const createClient = async (
     }
 }
 
+const deleteClient = async (
+    clientId: string
+): Promise<void> => {
+    const deleteQuery='DELETE FROM oauth_client WHERE client_id=?';
+    // DELETE FROM oauth_client 
+    // WHERE client_id=?
+    try {
+        await pool.query(deleteQuery, [clientId]);
+    } catch(err) {
+        console.error(err);
+        throw new InternalServerException();
+    }
+}
+
 export {
     getById,
     getByUsercode,
-    createClient
+    createClient,
+    deleteClient
 }

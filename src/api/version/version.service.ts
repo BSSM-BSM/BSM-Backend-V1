@@ -7,8 +7,8 @@ const getVersion = (
     switch (isApp) {
         case 'web':
             return {
-                versionCode: 5,
-                versionName: '1.4.1'
+                versionCode: 6,
+                versionName: '1.5.0'
             }
         case 'app':
             switch (os) {
