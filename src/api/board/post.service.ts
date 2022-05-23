@@ -4,9 +4,10 @@ import * as boardRepository from '@src/api/board/repository/board.repository';
 import * as postRepository from '@src/api/board/repository/post.repository';
 import * as likeRepository from '@src/api/board/repository/like.repository';
 import * as categoryRepository from '@src/api/board/repository/category.repository';
-
-const webpush = require('../../util/push');
+import * as webpush from '../../util/push';
 import { escapeAttrValue, FilterXSS } from 'xss';
+
+const codeblockRegexp = /^(language\-.*)/;
 const xss = new FilterXSS({
     onIgnoreTagAttr:(tag, name, value, isWhiteAttr) => {
         if (name.substr(0, 5) === "style") {
@@ -20,6 +21,11 @@ const xss = new FilterXSS({
                 return name + '="' + escapeAttrValue(value) + '"';
             }
             if (name.substr(0, 6) === "e_type") {
+                return name + '="' + escapeAttrValue(value) + '"';
+            }
+        }
+        if (tag.substring(0, 3) === 'pre') {
+            if (codeblockRegexp.test(value)) {
                 return name + '="' + escapeAttrValue(value) + '"';
             }
         }

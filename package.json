@@ -1,6 +1,6 @@
 {
   "name": "BSM",
-  "version": "1.5.0",
+  "version": "1.5.0.2",
   "scripts": {
     "start": "node dist/main.js",
     "prestart": "tsc && babel dist -d dist"
