@@ -1,4 +1,4 @@
-import { NotFoundException, UnAuthorizedException, ForbiddenException } from '@src/util/exceptions';
+import { NotFoundException, UnAuthorizedException, ForbiddenException, BadRequestException } from '@src/util/exceptions';
 import { User } from '@src/api/account/User';
 import * as boardRepository from '@src/api/board/repository/board.repository';
 import * as likeRepository from '@src/api/board/repository/like.repository';
@@ -28,6 +28,7 @@ const like = async (
     postNo: number,
     like: number
 ) => {
+    if (like % 1 !== 0) throw new BadRequestException();
     if (!user.getIsLogin()) {
         throw new UnAuthorizedException();
     }
@@ -39,11 +40,11 @@ const like = async (
     }
 
     if (like > 0) {
-        like = 1
+        like = 1;
     } else if (like < 0) {
-        like =- 1
+        like = -1;
     } else {
-        like = 0
+        like = 0;
     }
 
     const [likeCheck, postTotalLike] = await Promise.all([
@@ -56,6 +57,8 @@ const like = async (
 
     // 좋아요 또는 싫어요를 누른 적이 없으면
     if (likeCheck === null) {
+        // 좋아요 또는 싫어요가 아니면 취소
+        if (like == 0) throw new BadRequestException();
         likeRepository.insertPostLike(boardType, postNo, like, user.getUser().code);
         postRepository.updatePostTotalLike(boardType, postNo, like);
         return {
@@ -77,13 +80,13 @@ const like = async (
     // 좋아요 또는 싫어요를 한번 더
     if (likeCheck == like) {
         likeRepository.updatePostLike(boardType, postNo, 0, user.getUser().code);
-        if (like>0) {// 좋아요를 취소
+        if (like > 0) {// 좋아요를 취소
             postRepository.updatePostTotalLike(boardType, postNo, -1);
             return {
                 like: 0,
                 totalLike: postTotalLike-1
             }
-        } else {// 싫어요를 취소
+        } else if (like < 0) {// 싫어요를 취소
             postRepository.updatePostTotalLike(boardType, postNo, 1);
             return {
                 like: 0,
@@ -93,20 +96,22 @@ const like = async (
     }
 
     // 좋아요에서 싫어요 또는 싫어요에서 좋아요
-    if (likeCheck > 0) {// 좋아요에서 싫어요
+    if (likeCheck > 0 && like < 0) {// 좋아요에서 싫어요
         likeRepository.updatePostLike(boardType, postNo, like, user.getUser().code);
         postRepository.updatePostTotalLike(boardType, postNo, -2);
         return {
             like: -1,
             totalLike: postTotalLike-2
         }
-    } else {// 싫어요에서 좋야요
+    } else if (likeCheck < 0 && like > 0) {// 싫어요에서 좋야요
         likeRepository.updatePostLike(boardType, postNo, like, user.getUser().code);
         postRepository.updatePostTotalLike(boardType, postNo, 2);
         return {
             like: 1,
             totalLike: postTotalLike+2
         }
+    } else {
+        throw new BadRequestException();
     }
 }
 
