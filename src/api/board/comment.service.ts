@@ -4,7 +4,7 @@ import boardRepository = require('@src/api/board/repository/board.repository');
 import commentRepository = require('@src/api/board/repository/comment.repository');
 import postRepository = require('@src/api/board/repository/post.repository');
 import { CommentEntity } from '@src/api/board/entity/comment.entity';
-import { CommentDTO } from '@src/api/board/entity/comment.dto';
+import { CommentDTO } from '@src/api/board/dto/comment.dto';
 
 import { FilterXSS } from 'xss';
 const xss = new FilterXSS({
@@ -73,16 +73,31 @@ const commentTree = (
         if (e.depth != depth) {
             return [];
         }
-        if (!e.deleted) {
-            comment = {
-                idx: e.idx,
-                usercode: isAnonymous? -1: e.usercode,
-                nickname: isAnonymous? 'ㅇㅇ': e.nickname,
-                comment: e.comment,
-                date: e.date,
-                depth: depth,
-                permission: usercode>0 && e.usercode==usercode || userLevel>=3? true: false,
-                deleted: false
+        if (!e.is_delete) {
+            if ((e.is_secret && e.usercode != usercode) && userLevel < 3) {
+                comment = {
+                    idx: e.idx,
+                    usercode: -1,
+                    nickname: '',
+                    comment: '',
+                    date: e.date,
+                    depth: depth,
+                    permission: false,
+                    is_delete: false,
+                    is_secret: true
+                }
+            } else {
+                comment = {
+                    idx: e.idx,
+                    usercode: isAnonymous? -1: e.usercode,
+                    nickname: isAnonymous? 'ㅇㅇ': e.nickname,
+                    comment: e.comment,
+                    date: e.date,
+                    depth: depth,
+                    permission: usercode>0 && e.usercode==usercode || userLevel>=3? true: false,
+                    is_delete: false,
+                    is_secret: false
+                }
             }
         } else {
             comment = {
@@ -93,7 +108,8 @@ const commentTree = (
                 date: e.date,
                 depth: depth,
                 permission: false,
-                deleted: true,
+                is_delete: true,
+                is_secret: false
             }
         }
         if (e.parent) {// 만약 대댓글이 더 있다면
@@ -127,7 +143,8 @@ const writeComment = async (
     postNo: number,
     comment: string,
     depth: number,
-    parentIdx: number | null
+    parentIdx: number | null,
+    isSecret: boolean
 ) => {
     if (typeof boardTypeList[boardType] === 'undefined') {
         throw new NotFoundException('Board not Found');
@@ -174,7 +191,8 @@ const writeComment = async (
             depth,
             parentIdx,
             user.getUser().code,
-            newComment
+            newComment,
+            isSecret
         ),
         postRepository.updatePostComments(boardType, postNo, 1)
     ]);

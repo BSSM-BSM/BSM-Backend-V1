@@ -32,7 +32,8 @@ router.post('/:boardType/:postNo/:depth?/:parentIdx?',
                     Number(req.params.postNo),
                     req.body.comment,
                     Number(req.params.depth),
-                    req.params.parentIdx == 'null'? null: Number(req.params.parentIdx)
+                    req.params.parentIdx == 'null'? null: Number(req.params.parentIdx),
+                    Boolean(req.body.is_secret)
                 )
             ));
         } catch(err) {

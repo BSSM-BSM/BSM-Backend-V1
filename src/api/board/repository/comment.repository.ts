@@ -6,7 +6,7 @@ const getComments = async (
     boardType: string,
     postNo: number
 ): Promise<CommentEntity[] | null> => {
-    const getQuery="SELECT p.idx, p.usercode, u.nickname, p.`depth`, p.parent, p.parent_idx, p.deleted, p.comment, p.`date` FROM post_comment p, user u WHERE p.board = ? AND p.post_no = ? AND p.usercode = u.usercode ORDER BY p.idx";
+    const getQuery="SELECT p.idx, p.usercode, u.nickname, p.`depth`, p.parent, p.parent_idx, p.is_delete, p.is_secret, p.comment, p.`date` FROM post_comment p, user u WHERE p.board = ? AND p.post_no = ? AND p.usercode = u.usercode ORDER BY p.idx";
     // SELECT 
     //     p.idx, 
     //     p.usercode, 
@@ -14,7 +14,8 @@ const getComments = async (
     //     p.`depth`, 
     //     p.parent, 
     //     p.parent_idx, 
-    //     p.deleted, 
+    //     p.is_delete, 
+    //     p.is_secret, 
     //     p.comment, 
     //     p.`date` 
     // FROM post_comment p, user u 
@@ -43,25 +44,26 @@ const getComment = async (
     postNo: number,
     idx: number
 ): Promise<CommentEntity | null> => {
-    const getCommentQuery="SELECT p.idx, p.usercode, u.nickname, p.`depth`, p.parent, p.parent_idx, p.deleted, p.comment, p.`date` FROM post_comment p, user u WHERE p.board = ? AND p.post_no = ? AND p.idx = ? AND p.deleted = 0 AND p.usercode = u.usercode ORDER BY p.idx";
+    const getCommentQuery="SELECT c.idx, c.usercode, u.nickname, c.`depth`, c.parent, c.parent_idx, c.is_delete, c.is_secret, c.comment, c.`date` FROM post_comment c, user u WHERE c.board = ? AND c.post_no = ? AND c.idx = ? AND c.is_delete = 0 AND c.usercode = u.usercode ORDER BY c.idx";
     // SELECT 
-    //     p.idx, 
-    //     p.usercode, 
+    //     c.idx, 
+    //     c.usercode, 
     //     u.nickname, 
-    //     p.`depth`, 
-    //     p.parent, 
-    //     p.parent_idx, 
-    //     p.deleted, 
-    //     p.comment, 
-    //     p.`date` 
-    // FROM post_comment p, user u 
+    //     c.`depth`, 
+    //     c.parent, 
+    //     c.parent_idx, 
+    //     c.is_delete, 
+    //     c.is_secret, 
+    //     c.comment, 
+    //     c.`date` 
+    // FROM post_comment c, user u 
     // WHERE 
-    //     p.board = ? AND 
-    //     p.post_no = ? AND 
-    //     p.idx = ? AND 
-    //     p.deleted = 0 AND 
-    //     p.usercode = u.usercode 
-    // ORDER BY p.idx
+    //     c.board = ? AND 
+    //     c.post_no = ? AND 
+    //     c.idx = ? AND 
+    //     c.is_delete = 0 AND 
+    //     c.usercode = u.usercode 
+    // ORDER BY c.idx
     try {
         const [rows] = await pool.query(getCommentQuery, [
             boardType, 
@@ -84,9 +86,10 @@ const insertComment = async (
     depth: number,
     parentIdx: number | null,
     usercode: number,
-    comment: string
+    comment: string,
+    isSecret: boolean
 ) => {
-    const insertCommentQuery="INSERT INTO post_comment (board, post_no, idx, depth, parent_idx, usercode, comment, date) SELECT ?,?, COUNT(idx)+1, ?, ?, ?, ?, now() FROM post_comment WHERE board = ?";
+    const insertCommentQuery="INSERT INTO post_comment (board, post_no, idx, depth, parent_idx, usercode, comment, is_secret, date) SELECT ?,?, COUNT(idx)+1, ?, ?, ?, ?, ?, now() FROM post_comment WHERE board = ?";
     // INSERT INTO post_comment (
     //     board, 
     //     post_no, 
@@ -95,11 +98,13 @@ const insertComment = async (
     //     parent_idx, 
     //     usercode, 
     //     comment, 
+    //     is_secret, 
     //     date) 
     // SELECT 
     //     ?,
     //     ?, 
     //     COUNT(idx)+1, 
+    //     ?, 
     //     ?, 
     //     ?, 
     //     ?, 
@@ -115,6 +120,7 @@ const insertComment = async (
             parentIdx, 
             usercode, 
             comment,
+            isSecret,
             boardType
         ]);
     } catch(err) {
@@ -149,9 +155,9 @@ const deleteComment = async (
     postNo: number,
     idx: number
 ) => {
-    const deleteQuery="UPDATE post_comment SET deleted = 1 WHERE board = ? AND post_no = ? AND idx = ?";
+    const deleteQuery="UPDATE post_comment SET is_delete = 1 WHERE board = ? AND post_no = ? AND idx = ?";
     // UPDATE post_comment 
-    // SET deleted = 1 
+    // SET is_delete = 1 
     // WHERE 
     //     board = ? AND 
     //     post_no = ? AND 
