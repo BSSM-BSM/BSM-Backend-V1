@@ -8,6 +8,8 @@ import loginCheck from '@src/util/loginCheck';
 const router = express.Router();
 import multer from 'multer';
 
+const cookieHostName = process.env.COOKIE_HOST;
+
 router.post('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         res.send(JSON.stringify(
@@ -21,9 +23,11 @@ router.post('/login', async (req: express.Request, res: express.Response, next: 
 router.delete('/logout', (req: express.Request, res: express.Response) => {
     res.clearCookie('token', {
         path:'/',
+        domain: cookieHostName,
     });
     res.clearCookie('refreshToken', {
         path:'/',
+        domain: cookieHostName,
     });
     res.send();
 })
